@@ -1005,12 +1005,19 @@ i &lt;3 to work with u</p>
     lab:        document.getElementById('page-lab'),
   };
 
+  // leaving Lab resets its instruments completely (they listen for 'lab:reset')
+  function leaving(next) {
+    if (pages.lab.classList.contains('active') && next !== 'lab') dispatchEvent(new Event('lab:reset'));
+  }
+
   function showHome() {
+    leaving(null);
     home.style.display = 'grid';
     Object.values(pages).forEach(p => p.classList.remove('active'));
   }
 
   function showSection(name) {
+    leaving(name);
     home.style.display = 'none';
     Object.values(pages).forEach(p => p.classList.remove('active'));
     pages[name].classList.add('active');
@@ -1206,6 +1213,12 @@ i &lt;3 to work with u</p>
     });
     pad.addEventListener('contextmenu', e => e.preventDefault());
     document.querySelector('.pad-clear').addEventListener('click', () => { loops.length = 0; kick(); });
+    addEventListener('lab:reset', () => {
+      loops.length = 0;
+      pad.classList.remove('used');
+      if (ac) { ac.close(); ac = null; }   // also cuts the delay tails
+      kick();
+    });
 
     // ── drawing: just the loops, nothing else
     function resize() {
@@ -1387,6 +1400,15 @@ i &lt;3 to work with u</p>
       if (act === 'out') notes.forEach(n => { n.o = (n.o + 1) % count; });
       if (act === 'scatter') notes.forEach(n => { n.o = Math.floor(Math.random() * count); });
       if (act === 'clear') notes.length = 0;
+    });
+    addEventListener('lab:reset', () => {
+      notes.length = 0;
+      count = 4; bpm = 90; quant = true;
+      show('orbits', '4 orbits'); show('bpm', '90 bpm');
+      const q = ctrl.querySelector('[data-act="quant"]');
+      q.textContent = 'quantize on'; q.setAttribute('aria-pressed', 'true');
+      if (ac) { ac.close(); ac = null; }
+      t0 = performance.now() / 1000; schedUntil = 0;
     });
 
     // ── draw
