@@ -660,6 +660,48 @@
       transition: color 0.2s;
     }
     .social-links a:hover { color: var(--white); }
+    /* ══════════════════════════════════════════
+       TRANSITIONS
+    ══════════════════════════════════════════ */
+    ::view-transition-old(root) {
+      animation: page-out 0.45s cubic-bezier(0.4, 0, 0.2, 1) both;
+    }
+    ::view-transition-new(root) {
+      animation: page-in 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    }
+    @keyframes page-out { to { opacity: 0; transform: scale(0.985); filter: blur(6px); } }
+    @keyframes page-in { from { opacity: 0; transform: translateY(14px); } }
+
+    /* home: cards come in one after another (also on first load) */
+    .card-content { animation: rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+    .card:nth-child(1) .card-content { animation-delay: 0.05s; }
+    .card:nth-child(2) .card-content { animation-delay: 0.12s; }
+    .card:nth-child(3) .card-content { animation-delay: 0.19s; }
+    .card:nth-child(4) .card-content { animation-delay: 0.26s; }
+    .card:nth-child(5) .card-content { animation-delay: 0.33s; }
+    .about-text { animation: fade 1.2s ease 0.2s both; }
+
+    /* sections: the big title is revealed upwards, the rest follows */
+    .section-page.active .section-label h1 { animation: title-in 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) 0.08s backwards; }
+    .section-page.active .section-label-sub { animation: rise 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) 0.3s both; }
+    .section-page.active .section-label ~ * { animation: rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) 0.4s both; }
+    .section-page.active .label-bg { animation: fade 1.2s ease both; }
+
+    @keyframes rise { from { opacity: 0; translate: 0 18px; } }
+    @keyframes fade { from { opacity: 0; } }
+    @keyframes title-in {
+      from { opacity: 0; translate: 0 40px; clip-path: inset(0 0 100% 0); }
+      to { clip-path: inset(-30% -10% -30% -10%); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+      .card-content, .about-text,
+      .section-page.active .section-label h1,
+      .section-page.active .section-label-sub,
+      .section-page.active .section-label ~ *,
+      .section-page.active .label-bg { animation: none; }
+    }
   </style>
 </head>
 <body>
@@ -1009,18 +1051,33 @@ i &lt;3 to work with u</p>
     if (pages.lab.classList.contains('active') && next !== 'lab') dispatchEvent(new Event('lab:reset'));
   }
 
+  // page changes cross-fade through the View Transitions API where the browser has it;
+  // the entrance animations in CSS (cards, section titles) run either way
+  const still = matchMedia('(prefers-reduced-motion: reduce)');
+  let current = 'home';
+  function transition(to, swap) {
+    if (to === current) return;
+    current = to;
+    if (still.matches || !document.startViewTransition) { swap(); return; }
+    document.startViewTransition(swap);
+  }
+
   function showHome() {
     leaving(null);
-    home.style.display = 'grid';
-    Object.values(pages).forEach(p => p.classList.remove('active'));
+    transition('home', () => {
+      home.style.display = 'grid';
+      Object.values(pages).forEach(p => p.classList.remove('active'));
+    });
   }
 
   function showSection(name) {
     leaving(name);
-    home.style.display = 'none';
-    Object.values(pages).forEach(p => p.classList.remove('active'));
-    pages[name].classList.add('active');
-    pages[name].querySelector('.section-body').scrollTop = 0;
+    transition(name, () => {
+      home.style.display = 'none';
+      Object.values(pages).forEach(p => p.classList.remove('active'));
+      pages[name].classList.add('active');
+      pages[name].querySelector('.section-body').scrollTop = 0;
+    });
   }
 
   document.addEventListener('keydown', e => {
