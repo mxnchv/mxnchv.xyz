@@ -134,7 +134,7 @@
     /* ── RIGHT: CARDS ── */
     .cards-panel {
       display: grid;
-      grid-template-rows: repeat(4, 1fr);
+      grid-template-rows: repeat(5, 1fr);
       height: 100vh;
     }
 
@@ -242,6 +242,7 @@
     .card:nth-child(2) .card-title { animation-delay: 3.2s; }
     .card:nth-child(3) .card-title { animation-delay: 6.1s; }
     .card:nth-child(4) .card-title { animation-delay: 8.7s; }
+    .card:nth-child(5) .card-title { animation-delay: 5.0s; }
 
     @media (prefers-reduced-motion: reduce) {
       .card-title { animation: none; }
@@ -570,6 +571,15 @@ i &lt;3 to work with u</p>
       <span class="card-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
     </a>
 
+    <a class="card" href="#" onclick="showSection('content');return false;">
+      <video class="card-bg" src="media/card_branding.mp4" poster="media/card_branding.jpg" autoplay muted loop playsinline preload="auto"></video>
+      <div class="card-content">
+        <h2 class="card-title">Content</h2>
+        <p class="card-desc">sound for content &amp; social.</p>
+      </div>
+      <span class="card-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
+    </a>
+
     <a class="card" href="#" onclick="showSection('collabs');return false;">
       <video class="card-bg" src="media/card_collabs.mp4" poster="media/card_collabs.jpg" autoplay muted loop playsinline preload="auto"></video>
       <div class="card-content">
@@ -601,6 +611,7 @@ i &lt;3 to work with u</p>
     <nav class="section-nav">
       <a class="active" onclick="showSection('branding')">Branding</a>
       <a onclick="showSection('videogames')">Videogames</a>
+      <a onclick="showSection('content')">Content</a>
       <a onclick="showSection('collabs')">Collabs</a>
       <a onclick="showSection('lab')">Lab</a>
     </nav>
@@ -645,6 +656,7 @@ i &lt;3 to work with u</p>
     <nav class="section-nav">
       <a onclick="showSection('branding')">Branding</a>
       <a class="active" onclick="showSection('videogames')">Videogames</a>
+      <a onclick="showSection('content')">Content</a>
       <a onclick="showSection('collabs')">Collabs</a>
       <a onclick="showSection('lab')">Lab</a>
     </nav>
@@ -678,6 +690,40 @@ i &lt;3 to work with u</p>
 </div>
 
 
+<!-- ══════════════════ CONTENT ══════════════════ -->
+<div class="section-page" id="page-content">
+  <header class="section-header">
+    <a class="section-logo" onclick="showHome();return false;" aria-label="mxnchv">m <span class="lg" data-a="x" data-b="o">x</span> n c h <span class="lg" data-a="v" data-b="u">v</span></a>
+    <nav class="section-nav">
+      <a onclick="showSection('branding')">Branding</a>
+      <a onclick="showSection('videogames')">Videogames</a>
+      <a class="active" onclick="showSection('content')">Content</a>
+      <a onclick="showSection('collabs')">Collabs</a>
+      <a onclick="showSection('lab')">Lab</a>
+    </nav>
+  </header>
+
+  <div class="section-body">
+    <div class="section-label">
+      <video class="label-bg" src="media/card_branding.mp4" poster="media/card_branding.jpg" autoplay muted loop playsinline preload="metadata"></video>
+      <h1>Content</h1>
+      <span class="section-label-sub">sound for content &amp; social.</span>
+    </div>
+    <div class="lab-body">
+      <p class="lab-intro">coming soon.</p>
+    </div>
+  </div>
+
+  <footer class="section-footer">
+    <a href="mailto:mxnchv@gmail.com" class="contact-link">mxnchv@gmail.com</a>
+    <div class="social-links">
+      <a href="https://www.linkedin.com/in/ramon-sirvent-d/" target="_blank">LinkedIn</a>
+      <a href="https://www.instagram.com/mxnchv/" target="_blank">Instagram</a>
+    </div>
+  </footer>
+</div>
+
+
 <!-- ══════════════════ COLLABS ══════════════════ -->
 <div class="section-page" id="page-collabs">
   <header class="section-header">
@@ -685,6 +731,7 @@ i &lt;3 to work with u</p>
     <nav class="section-nav">
       <a onclick="showSection('branding')">Branding</a>
       <a onclick="showSection('videogames')">Videogames</a>
+      <a onclick="showSection('content')">Content</a>
       <a class="active" onclick="showSection('collabs')">Collabs</a>
       <a onclick="showSection('lab')">Lab</a>
     </nav>
@@ -729,6 +776,7 @@ i &lt;3 to work with u</p>
     <nav class="section-nav">
       <a onclick="showSection('branding')">Branding</a>
       <a onclick="showSection('videogames')">Videogames</a>
+      <a onclick="showSection('content')">Content</a>
       <a onclick="showSection('collabs')">Collabs</a>
       <a class="active" onclick="showSection('lab')">Lab</a>
     </nav>
@@ -794,6 +842,7 @@ i &lt;3 to work with u</p>
   const pages = {
     branding:   document.getElementById('page-branding'),
     videogames: document.getElementById('page-videogames'),
+    content:    document.getElementById('page-content'),
     collabs:    document.getElementById('page-collabs'),
     lab:        document.getElementById('page-lab'),
   };
