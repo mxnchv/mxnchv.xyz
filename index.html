@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>mxnchv — audio design</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* ─── TOKENS ─── */
+    :root {
+      --black: #000000;
+      --white: #ffffff;
+      --grey-1: #0a0a0a;
+      --grey-2: #141414;
+      --grey-3: #1e1e1e;
+      --grey-text: #555;
+      --grey-dim: rgba(255,255,255,0.35);
+      --font-display: 'EVA Tall Serif', Georgia, serif;
+      --font-ui: 'Space Mono', 'Courier New', monospace;
+      color-scheme: dark;
+    }
+
+    /* EVA Tall Serif — embedded */
+    @font-face {
+      font-family: 'EVA Tall Serif';
+      src: url('data:font/woff2;base64,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') format('woff2');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: var(--black);
+      color: var(--white);
+      overflow: hidden;
+    }
+
+    /* ══════════════════════════════════════════
+       HOME
+    ══════════════════════════════════════════ */
+    #home {
+      display: grid;
+      grid-template-columns: 44fr 56fr;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* ── LEFT: ABOUT ── */
+    .about-panel {
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 2rem;
+      border-right: 1px solid #1c1c1c;
+    }
+
+    .about-video {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: grayscale(100%) brightness(0.5);
+      z-index: 0;
+    }
+
+    /* scanlines */
+    .about-panel::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(0,0,0,0.07) 3px,
+        rgba(0,0,0,0.07) 4px
+      );
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .about-logo {
+      position: absolute;
+      top: 1.75rem; left: 2rem;
+      font-family: var(--font-ui);
+      font-size: 0.78rem;
+      letter-spacing: 0.2em;
+      color: var(--white);
+      z-index: 3;
+      text-decoration: none;
+      opacity: 0.9;
+    }
+
+    .about-text {
+      position: relative;
+      z-index: 2;
+    }
+
+    .about-text p {
+      font-family: var(--font-ui);
+      font-size: 0.72rem;
+      line-height: 2;
+      color: rgba(255,255,255,0.75);
+      white-space: pre-line;
+    }
+
+    .about-footer {
+      position: absolute;
+      bottom: 1.75rem; left: 2rem;
+      z-index: 2;
+      font-family: var(--font-ui);
+      font-size: 0.6rem;
+      color: rgba(255,255,255,0.28);
+      letter-spacing: 0.1em;
+    }
+
+    /* ── RIGHT: CARDS ── */
+    .cards-panel {
+      display: grid;
+      grid-template-rows: repeat(4, 1fr);
+      height: 100vh;
+    }
+
+    .card {
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      border-bottom: 1px solid #181818;
+      text-decoration: none;
+      display: block;
+    }
+    .card:last-child { border-bottom: none; }
+
+    .card-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: grayscale(100%) brightness(0.38);
+      transition: filter 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      will-change: filter, transform;
+    }
+    .card:hover .card-bg {
+      filter: grayscale(0%) brightness(0.55);
+      transform: scale(1.04);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        100deg,
+        rgba(0,0,0,0.82) 0%,
+        rgba(0,0,0,0.3) 55%,
+        rgba(0,0,0,0.05) 100%
+      );
+      z-index: 1;
+      transition: opacity 0.6s ease;
+    }
+    .card:hover::before { opacity: 0.75; }
+
+    .card-content {
+      position: relative;
+      z-index: 2;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 2.5rem;
+    }
+
+    .card-title {
+      font-family: var(--font-display);
+      font-size: clamp(4.8rem, 9vw, 7.6rem);
+      font-weight: normal;
+      line-height: 1;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--white);
+      margin-bottom: 0.45rem;
+    }
+
+    .card-desc {
+      font-family: var(--font-ui);
+      font-size: 0.62rem;
+      color: rgba(255,255,255,0.38);
+      letter-spacing: 0.06em;
+      transition: color 0.4s ease;
+    }
+    .card:hover .card-desc { color: rgba(255,255,255,0.7); }
+
+    .card-arrow {
+      position: absolute;
+      right: 2rem; top: 50%;
+      transform: translateY(-50%) translateX(10px);
+      opacity: 0;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      z-index: 2;
+    }
+    .card:hover .card-arrow {
+      opacity: 1;
+      transform: translateY(-50%) translateX(0);
+    }
+    .card-arrow svg {
+      width: 22px; height: 22px;
+      fill: none; stroke: white; stroke-width: 1.2;
+    }
+
+    /* glitch — occasional, subtle */
+    @keyframes glitch {
+      0%, 92%, 100% { clip-path: none; transform: none; opacity: 1; }
+      93% { clip-path: inset(18% 0 65% 0); transform: translateX(-3px); opacity: 0.9; }
+      94% { clip-path: inset(55% 0 15% 0); transform: translateX(3px); opacity: 0.9; }
+      95% { clip-path: none; transform: none; opacity: 1; }
+    }
+    .card-title { animation: glitch 10s infinite; }
+    .card:nth-child(2) .card-title { animation-delay: 3.2s; }
+    .card:nth-child(3) .card-title { animation-delay: 6.1s; }
+    .card:nth-child(4) .card-title { animation-delay: 8.7s; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .card-title { animation: none; }
+      .card-bg { transition: none; }
+    }
+
+    .home-tagline {
+      position: fixed;
+      bottom: 1.75rem; right: 2rem;
+      font-family: var(--font-ui);
+      font-size: 0.58rem;
+      color: rgba(255,255,255,0.22);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      z-index: 10;
+    }
+
+    /* ══════════════════════════════════════════
+       SECTION PAGES
+    ══════════════════════════════════════════ */
+    .section-page {
+      display: none;
+      flex-direction: column;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      background: var(--black);
+    }
+    .section-page.active { display: flex; }
+
+    /* header */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2.5rem;
+      height: 52px;
+      border-bottom: 1px solid #181818;
+      flex-shrink: 0;
+    }
+
+    .section-logo {
+      font-family: var(--font-ui);
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .section-logo:hover { color: var(--white); }
+
+    .section-nav {
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+    }
+    .section-nav a {
+      font-family: var(--font-ui);
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      color: var(--grey-text);
+      text-decoration: none;
+      transition: color 0.2s;
+      cursor: pointer;
+      padding-bottom: 2px;
+      border-bottom: 1px solid transparent;
+    }
+    .section-nav a:hover { color: rgba(255,255,255,0.7); }
+    .section-nav a.active {
+      color: var(--white);
+      border-bottom-color: rgba(255,255,255,0.4);
+    }
+
+    /* body — scroll container */
+    .section-body {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: none;
+    }
+    .section-body::-webkit-scrollbar { display: none; }
+
+    /* section label — full width strip at top of scroll */
+    .section-label {
+      display: flex;
+      align-items: flex-end;
+      padding: 3rem 2.5rem 1.5rem;
+      border-bottom: 1px solid #141414;
+    }
+    .section-label h1 {
+      font-family: var(--font-display);
+      font-size: clamp(3.5rem, 8vw, 7rem);
+      font-weight: normal;
+      line-height: 0.9;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .section-label-sub {
+      font-family: var(--font-ui);
+      font-size: 0.6rem;
+      color: var(--grey-text);
+      letter-spacing: 0.08em;
+      margin-left: 2rem;
+      padding-bottom: 0.6rem;
+    }
+
+    /* ── VIDEO ITEMS: full-width, scroll libre ── */
+    .video-stack {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .video-item {
+      position: relative;
+      width: 100%;
+      /* each video is almost full viewport height */
+      height: calc(100vh - 52px - 110px);
+      min-height: 400px;
+      background: var(--grey-1);
+      border-bottom: 1px solid #141414;
+      overflow: hidden;
+    }
+    .video-item:last-child { border-bottom: none; }
+
+    .video-item iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      border: none;
+    }
+
+    /* video label */
+    .video-label {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 1.5rem 2.5rem;
+      background: linear-gradient(transparent, rgba(0,0,0,0.7));
+      font-family: var(--font-ui);
+      font-size: 0.6rem;
+      color: rgba(255,255,255,0.3);
+      letter-spacing: 0.08em;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* ══════════════════════════════════════════
+       LAB
+    ══════════════════════════════════════════ */
+    .lab-body {
+      padding: 0 2.5rem 3rem;
+    }
+
+    .lab-intro {
+      font-family: var(--font-ui);
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.4);
+      line-height: 1.9;
+      max-width: 480px;
+      margin: 2.5rem 0 3rem;
+    }
+
+    .samples-list {
+      max-width: 640px;
+    }
+
+    .sample-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 0;
+      border-bottom: 1px solid #141414;
+      text-decoration: none;
+      color: var(--white);
+      transition: padding 0.2s ease;
+      cursor: pointer;
+      gap: 1rem;
+    }
+    .sample-row:first-child { border-top: 1px solid #141414; }
+    .sample-row:hover { padding-left: 0.75rem; }
+
+    .sample-name {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: normal;
+      line-height: 1;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .sample-by {
+      font-family: var(--font-ui);
+      font-size: 0.58rem;
+      color: var(--grey-text);
+      letter-spacing: 0.06em;
+      margin-top: 0.3rem;
+    }
+
+    .sample-dl {
+      font-family: var(--font-ui);
+      font-size: 0.58rem;
+      color: var(--grey-text);
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: color 0.2s;
+    }
+    .sample-row:hover .sample-dl { color: var(--white); }
+
+    .lab-more {
+      margin-top: 4rem;
+      font-family: var(--font-ui);
+      font-size: 0.6rem;
+      color: rgba(255,255,255,0.15);
+      letter-spacing: 0.1em;
+    }
+
+    /* ══════════════════════════════════════════
+       FOOTER
+    ══════════════════════════════════════════ */
+    .section-footer {
+      padding: 0 2.5rem;
+      height: 44px;
+      border-top: 1px solid #141414;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .contact-link {
+      font-family: var(--font-ui);
+      font-size: 0.6rem;
+      color: rgba(255,255,255,0.28);
+      text-decoration: none;
+      letter-spacing: 0.08em;
+      transition: color 0.2s;
+    }
+    .contact-link:hover { color: var(--white); }
+
+    .social-links { display: flex; gap: 1.5rem; }
+    .social-links a {
+      font-family: var(--font-ui);
+      font-size: 0.58rem;
+      color: rgba(255,255,255,0.25);
+      text-decoration: none;
+      letter-spacing: 0.08em;
+      transition: color 0.2s;
+    }
+    .social-links a:hover { color: var(--white); }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════ HOME ══════════════════ -->
+<div id="home">
+
+  <div class="about-panel">
+    <a href="#" class="about-logo" onclick="showHome();return false;">m x n c h v</a>
+
+    <video class="about-video" autoplay muted loop playsinline>
+      <source src="about_me.mp4" type="video/mp4">
+    </video>
+
+    <div class="about-text">
+      <p>yeah so
+this is me
+and yes
+i make sounds
+
+i &lt;3 my zoom h5
+i &lt;3 glitches
+i &lt;3 to work with u  ☺</p>
+    </div>
+
+    <div class="about-footer">Madrid, Spain</div>
+  </div>
+
+  <div class="cards-panel">
+
+    <a class="card" href="#" onclick="showSection('branding');return false;">
+      <video class="card-bg" src="media/card_branding.mp4" poster="media/card_branding.jpg" autoplay muted loop playsinline preload="auto"></video>
+      <div class="card-content">
+        <h2 class="card-title">Branding</h2>
+        <p class="card-desc">sound for brands &amp; motion.</p>
+      </div>
+      <span class="card-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
+    </a>
+
+    <a class="card" href="#" onclick="showSection('videogames');return false;">
+      <video class="card-bg" src="media/card_videogames.mp4" poster="media/card_videogames.jpg" autoplay muted loop playsinline preload="auto"></video>
+      <div class="card-content">
+        <h2 class="card-title">Videogames</h2>
+        <p class="card-desc">game audio &amp; implementation.</p>
+      </div>
+      <span class="card-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
+    </a>
+
+    <a class="card" href="#" onclick="showSection('collabs');return false;">
+      <video class="card-bg" src="media/card_collabs.mp4" poster="media/card_collabs.jpg" autoplay muted loop playsinline preload="auto"></video>
+      <div class="card-content">
+        <h2 class="card-title">Collabs</h2>
+        <p class="card-desc">audio / visual work with others.</p>
+      </div>
+      <span class="card-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
+    </a>
+
+    <a class="card" href="#" onclick="showSection('lab');return false;">
+      <video class="card-bg" src="media/card_lab.mp4" poster="media/card_lab.jpg" autoplay muted loop playsinline preload="auto"></video>
+      <div class="card-content">
+        <h2 class="card-title">Lab</h2>
+        <p class="card-desc">plugins, samples &amp; experiments.</p>
+      </div>
+      <span class="card-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
+    </a>
+
+  </div>
+
+  <div class="home-tagline">sound for interactive &amp; visual worlds</div>
+</div>
+
+
+<!-- ══════════════════ BRANDING ══════════════════ -->
+<div class="section-page" id="page-branding">
+  <header class="section-header">
+    <a class="section-logo" onclick="showHome();return false;">m x n c h v</a>
+    <nav class="section-nav">
+      <a class="active" onclick="showSection('branding')">Branding</a>
+      <a onclick="showSection('videogames')">Videogames</a>
+      <a onclick="showSection('collabs')">Collabs</a>
+      <a onclick="showSection('lab')">Lab</a>
+    </nav>
+  </header>
+
+  <div class="section-body">
+    <div class="section-label">
+      <h1>Branding</h1>
+      <span class="section-label-sub">sound for brands &amp; motion.</span>
+    </div>
+    <div class="video-stack">
+      <div class="video-item">
+        <iframe src="https://www.youtube.com/embed/YpHJGhSClsI?rel=0&modestbranding=1&color=white" allowfullscreen loading="lazy"></iframe>
+        <div class="video-label">SERIE ECLIPSE</div>
+      </div>
+      <div class="video-item">
+        <iframe src="https://www.youtube.com/embed/Dy0RP1FaTws?rel=0&modestbranding=1&color=white" allowfullscreen loading="lazy"></iframe>
+        <div class="video-label">Vinos Alicante DOP — Un Vino Sobre Vivir</div>
+      </div>
+      <div class="video-item">
+        <iframe src="https://www.youtube.com/embed/SifP1mIsMtw?rel=0&modestbranding=1&color=white" allowfullscreen loading="lazy"></iframe>
+        <div class="video-label">Vega Baja del Segura</div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="section-footer">
+    <a href="mailto:mxnchv@gmail.com" class="contact-link">mxnchv@gmail.com</a>
+    <div class="social-links">
+      <a href="https://www.linkedin.com/in/ramon-sirvent-d/" target="_blank">LinkedIn</a>
+      <a href="https://www.instagram.com/mxnchv/" target="_blank">Instagram</a>
+    </div>
+  </footer>
+</div>
+
+
+<!-- ══════════════════ VIDEOGAMES ══════════════════ -->
+<div class="section-page" id="page-videogames">
+  <header class="section-header">
+    <a class="section-logo" onclick="showHome();return false;">m x n c h v</a>
+    <nav class="section-nav">
+      <a onclick="showSection('branding')">Branding</a>
+      <a class="active" onclick="showSection('videogames')">Videogames</a>
+      <a onclick="showSection('collabs')">Collabs</a>
+      <a onclick="showSection('lab')">Lab</a>
+    </nav>
+  </header>
+
+  <div class="section-body">
+    <div class="section-label">
+      <h1>Videogames</h1>
+      <span class="section-label-sub">game audio &amp; implementation.</span>
+    </div>
+    <div class="video-stack">
+      <div class="video-item">
+        <iframe src="https://www.youtube.com/embed/eCaP8nuaS4Q?rel=0&modestbranding=1&color=white" allowfullscreen loading="lazy"></iframe>
+        <div class="video-label">FMOD Implementation Showreel</div>
+      </div>
+      <div class="video-item">
+        <iframe src="https://www.youtube.com/embed/gEJOrzsea0k?rel=0&modestbranding=1&color=white" allowfullscreen loading="lazy"></iframe>
+        <div class="video-label">Unity Implementation Showreel</div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="section-footer">
+    <a href="mailto:mxnchv@gmail.com" class="contact-link">mxnchv@gmail.com</a>
+    <div class="social-links">
+      <a href="https://www.linkedin.com/in/ramon-sirvent-d/" target="_blank">LinkedIn</a>
+      <a href="https://www.instagram.com/mxnchv/" target="_blank">Instagram</a>
+    </div>
+  </footer>
+</div>
+
+
+<!-- ══════════════════ COLLABS ══════════════════ -->
+<div class="section-page" id="page-collabs">
+  <header class="section-header">
+    <a class="section-logo" onclick="showHome();return false;">m x n c h v</a>
+    <nav class="section-nav">
+      <a onclick="showSection('branding')">Branding</a>
+      <a onclick="showSection('videogames')">Videogames</a>
+      <a class="active" onclick="showSection('collabs')">Collabs</a>
+      <a onclick="showSection('lab')">Lab</a>
+    </nav>
+  </header>
+
+  <div class="section-body">
+    <div class="section-label">
+      <h1>Collabs</h1>
+      <span class="section-label-sub">audio / visual work with others.</span>
+    </div>
+    <div class="video-stack">
+      <div class="video-item">
+        <iframe src="https://www.youtube.com/embed/DgLnYpMpUbs?rel=0&modestbranding=1&color=white&start=8" allowfullscreen loading="lazy"></iframe>
+        <div class="video-label">The Wood Wide Web</div>
+      </div>
+      <div class="video-item">
+        <iframe src="https://www.youtube.com/embed/mOuyEFRMTz0?rel=0&modestbranding=1&color=white" allowfullscreen loading="lazy"></iframe>
+        <div class="video-label">Paula Carvajal — 3D compilation</div>
+      </div>
+      <div class="video-item">
+        <iframe src="https://www.youtube.com/embed/WebUUpmoUsY?rel=0&modestbranding=1&color=white" allowfullscreen loading="lazy"></iframe>
+        <div class="video-label">Techviu × mxnchv</div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="section-footer">
+    <a href="mailto:mxnchv@gmail.com" class="contact-link">mxnchv@gmail.com</a>
+    <div class="social-links">
+      <a href="https://www.linkedin.com/in/ramon-sirvent-d/" target="_blank">LinkedIn</a>
+      <a href="https://www.instagram.com/mxnchv/" target="_blank">Instagram</a>
+    </div>
+  </footer>
+</div>
+
+
+<!-- ══════════════════ LAB ══════════════════ -->
+<div class="section-page" id="page-lab">
+  <header class="section-header">
+    <a class="section-logo" onclick="showHome();return false;">m x n c h v</a>
+    <nav class="section-nav">
+      <a onclick="showSection('branding')">Branding</a>
+      <a onclick="showSection('videogames')">Videogames</a>
+      <a onclick="showSection('collabs')">Collabs</a>
+      <a class="active" onclick="showSection('lab')">Lab</a>
+    </nav>
+  </header>
+
+  <div class="section-body">
+    <div class="section-label">
+      <h1>Lab</h1>
+      <span class="section-label-sub">plugins, samples &amp; experiments.</span>
+    </div>
+
+    <div class="lab-body">
+      <p class="lab-intro">Free sample packs. Use them, mangle them, don't ask permission.</p>
+
+      <div class="samples-list">
+        <a class="sample-row" href="https://www.dropbox.com/scl/fi/oaw7pe9r425esq694jvw5/mxnchv_sxvnds_vol_1.zip?rlkey=vzggapmdfi6rkescrfvf27ndf&dl=1" target="_blank">
+          <div>
+            <div class="sample-name">sxvnds vol.1</div>
+            <div class="sample-by">mxnchv</div>
+          </div>
+          <div class="sample-dl">↓ download</div>
+        </a>
+        <a class="sample-row" href="https://www.dropbox.com/scl/fi/vldfmxav7b0k9bfwgvaam/mxnchv_sxvnds_ambiences_01.zip?rlkey=rwgjxnwqw34546gjfkk3caq5l&dl=1" target="_blank">
+          <div>
+            <div class="sample-name">sxvnds ambiences 01</div>
+            <div class="sample-by">mxnchv</div>
+          </div>
+          <div class="sample-dl">↓ download</div>
+        </a>
+        <a class="sample-row" href="https://www.dropbox.com/scl/fi/z32tppnovg0qx0rk3ep4x/mxnchv_sxvnds_cnsem_samples.zip?rlkey=or9u8gchm84faqlgbynfkmtao&dl=1" target="_blank">
+          <div>
+            <div class="sample-name">sxvnds cnsem samples</div>
+            <div class="sample-by">mxnchv</div>
+          </div>
+          <div class="sample-dl">↓ download</div>
+        </a>
+        <a class="sample-row" href="https://www.dropbox.com/scl/fi/sirhs7cp8qprmlcu03738/mxnchv-x-Paranoid-Realm_sxvnds-vol.-2.zip?rlkey=fr9thgykzio2w8x3quoeehw7a&dl=1" target="_blank">
+          <div>
+            <div class="sample-name">sxvnds vol.2</div>
+            <div class="sample-by">mxnchv × Paranoid Realm</div>
+          </div>
+          <div class="sample-dl">↓ download</div>
+        </a>
+      </div>
+
+      <p class="lab-more">more coming — this section is always changing.</p>
+    </div>
+  </div>
+
+  <footer class="section-footer">
+    <a href="mailto:mxnchv@gmail.com" class="contact-link">mxnchv@gmail.com</a>
+    <div class="social-links">
+      <a href="https://www.linkedin.com/in/ramon-sirvent-d/" target="_blank">LinkedIn</a>
+      <a href="https://www.instagram.com/mxnchv/" target="_blank">Instagram</a>
+    </div>
+  </footer>
+</div>
+
+
+<script>
+  const home = document.getElementById('home');
+  const pages = {
+    branding:   document.getElementById('page-branding'),
+    videogames: document.getElementById('page-videogames'),
+    collabs:    document.getElementById('page-collabs'),
+    lab:        document.getElementById('page-lab'),
+  };
+
+  function showHome() {
+    home.style.display = 'grid';
+    Object.values(pages).forEach(p => p.classList.remove('active'));
+  }
+
+  function showSection(name) {
+    home.style.display = 'none';
+    Object.values(pages).forEach(p => p.classList.remove('active'));
+    pages[name].classList.add('active');
+    pages[name].querySelector('.section-body').scrollTop = 0;
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') showHome();
+  });
+</script>
+</body>
+</html>
