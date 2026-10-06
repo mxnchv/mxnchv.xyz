@@ -114,15 +114,11 @@
       text-shadow: 0 1px 8px rgba(0,0,0,0.9);
     }
 
-    /* about text: letters scatter on hover */
+    /* about text: letters near the cursor get blown away */
     .about-text .ch {
       display: inline-block;
-      transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1),
-                  opacity 0.9s ease;
-    }
-    .about-text.scattered .ch {
-      transform: translate(var(--dx), var(--dy)) rotate(var(--rot));
-      opacity: var(--op);
+      transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+                  opacity 0.7s ease;
     }
 
     .about-footer {
@@ -835,7 +831,7 @@ i &lt;3 to work with u</p>
     }
     tick();
   })();
-  // about text: split into letters that scatter on hover and come back on leave
+  // about text: split into letters; the ones near the cursor get blown away
   (() => {
     const box = document.querySelector('.about-text');
     const p = box.querySelector('p');
@@ -856,21 +852,51 @@ i &lt;3 to work with u</p>
     chars.forEach(ch => ch.setAttribute('aria-hidden', 'true'));
 
     const rnd = (a, b) => a + Math.random() * (b - a);
-    p.addEventListener('mouseenter', () => {
-      chars.forEach(ch => {
-        const angle = rnd(0, Math.PI * 2), dist = rnd(30, 160);
-        ch.style.setProperty('--dx', (Math.cos(angle) * dist).toFixed(0) + 'px');
-        ch.style.setProperty('--dy', (Math.sin(angle) * dist).toFixed(0) + 'px');
-        ch.style.setProperty('--rot', rnd(-180, 180).toFixed(0) + 'deg');
-        ch.style.setProperty('--op', rnd(0.15, 0.7).toFixed(2));
-        ch.style.transitionDelay = rnd(0, 120).toFixed(0) + 'ms';
+    const RADIUS = 70;   // px around the cursor that gets hit
+    const FORCE = 140;   // how far a letter right under the cursor flies
+
+    // each letter keeps its own spin and jitter so the blast looks messy
+    chars.forEach(ch => { ch._spin = rnd(-1, 1); ch._jit = rnd(0.6, 1.4); });
+
+    // resting centers (measured without transforms)
+    let centers = [];
+    function measure() {
+      chars.forEach(ch => { ch.style.transform = 'none'; });
+      centers = chars.map(ch => {
+        const r = ch.getBoundingClientRect();
+        return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
       });
-      box.classList.add('scattered');
-    });
-    p.addEventListener('mouseleave', () => {
-      chars.forEach(ch => { ch.style.transitionDelay = rnd(0, 200).toFixed(0) + 'ms'; });
-      box.classList.remove('scattered');
-    });
+      chars.forEach(ch => { ch.style.transform = ''; ch.style.opacity = ''; });
+    }
+    requestAnimationFrame(measure);
+    addEventListener('resize', measure);
+    document.fonts && document.fonts.ready.then(measure);
+
+    let mouse = null, queued = false;
+    function update() {
+      queued = false;
+      chars.forEach((ch, i) => {
+        const c = centers[i];
+        const dx = mouse ? c.x - mouse.x : 0, dy = mouse ? c.y - mouse.y : 0;
+        const d = Math.hypot(dx, dy);
+        if (!mouse || d > RADIUS) {
+          ch.style.transform = '';
+          ch.style.opacity = '';
+          return;
+        }
+        const k = (1 - d / RADIUS) * ch._jit;
+        const ux = d ? dx / d : rnd(-1, 1), uy = d ? dy / d : rnd(-1, 1);
+        ch.style.transform =
+          `translate(${(ux * FORCE * k).toFixed(0)}px, ${(uy * FORCE * k).toFixed(0)}px) ` +
+          `rotate(${(ch._spin * 220 * k).toFixed(0)}deg)`;
+        ch.style.opacity = (1 - k * 0.7).toFixed(2);
+      });
+    }
+    function schedule() { if (!queued) { queued = true; requestAnimationFrame(update); } }
+
+    const panel = box.closest('.about-panel');
+    panel.addEventListener('mousemove', e => { mouse = { x: e.clientX, y: e.clientY }; schedule(); });
+    panel.addEventListener('mouseleave', () => { mouse = null; schedule(); });
   })();
 </script>
 </body>
