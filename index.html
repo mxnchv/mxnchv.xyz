@@ -312,6 +312,9 @@
       text-decoration: none;
       cursor: pointer;
       transition: color 0.2s;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-right: 2rem;
     }
     .section-logo:hover { color: var(--white); }
 
@@ -349,7 +352,9 @@
 
     /* section label — full width strip at top of scroll */
     .section-label {
-      position: relative;
+      position: sticky;   /* stays at the top while the section scrolls */
+      top: 0;
+      z-index: 5;
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -357,7 +362,13 @@
       align-items: flex-start;
       padding: 3rem 2.5rem 1.1rem;
       border-bottom: 1px solid #141414;
+      background: var(--black);
+      transition: padding 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
     }
+    /* once you scroll, the strip shrinks and drops the description */
+    .section-label.compact { padding: 1.6rem 2.5rem 0.7rem; }
+    .section-label.compact h1 { font-size: clamp(2.6rem, 4.6vw, 4.2rem); }
+    .section-label.compact .section-label-sub { opacity: 0; max-height: 0; margin-top: 0; }
     .section-label > :not(.label-bg) { position: relative; z-index: 2; }
     .section-label::before {
       content: '';
@@ -390,6 +401,7 @@
       transform-origin: left bottom;
       text-transform: uppercase;
       text-shadow: 0 2px 28px rgba(0,0,0,0.45);
+      transition: font-size 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
     }
     .section-label-sub {
       font-family: var(--font-ui);
@@ -398,6 +410,9 @@
       text-shadow: 0 1px 8px rgba(0,0,0,0.9);
       letter-spacing: 0.08em;
       margin-top: 1rem;
+      max-height: 2em;
+      overflow: hidden;
+      transition: opacity 0.3s ease, max-height 0.45s ease, margin-top 0.45s ease;
     }
 
     /* ── VIDEO ITEMS: full-width, scroll libre ── */
@@ -756,7 +771,7 @@ i &lt;3 to work with u</p>
       <video class="card-bg" src="media/card_branding.mp4" poster="media/card_branding.jpg" autoplay muted loop playsinline preload="auto"></video>
       <div class="card-content">
         <h2 class="card-title">Content</h2>
-        <p class="card-desc">sound for content &amp; social.</p>
+        <p class="card-desc">social media &amp; content creation.</p>
       </div>
       <span class="card-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
     </a>
@@ -774,7 +789,7 @@ i &lt;3 to work with u</p>
       <video class="card-bg" src="media/card_lab.mp4" poster="media/card_lab.jpg" autoplay muted loop playsinline preload="auto"></video>
       <div class="card-content">
         <h2 class="card-title">Lab</h2>
-        <p class="card-desc">plugins, samples &amp; experiments.</p>
+        <p class="card-desc">have fun, experiment.</p>
       </div>
       <span class="card-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
     </a>
@@ -888,7 +903,7 @@ i &lt;3 to work with u</p>
     <div class="section-label">
       <video class="label-bg" src="media/card_branding.mp4" poster="media/card_branding.jpg" autoplay muted loop playsinline preload="metadata"></video>
       <h1>Content</h1>
-      <span class="section-label-sub">sound for content &amp; social.</span>
+      <span class="section-label-sub">social media &amp; content creation.</span>
     </div>
     <div class="lab-body">
       <p class="lab-intro">coming soon.</p>
@@ -967,7 +982,7 @@ i &lt;3 to work with u</p>
     <div class="section-label">
       <video class="label-bg" src="media/card_lab.mp4" poster="media/card_lab.jpg" autoplay muted loop playsinline preload="metadata"></video>
       <h1>Lab</h1>
-      <span class="section-label-sub">plugins, samples &amp; experiments.</span>
+      <span class="section-label-sub">have fun, experiment.</span>
     </div>
 
     <div class="lab-body">
@@ -1573,6 +1588,15 @@ i &lt;3 to work with u</p>
     });
     document.addEventListener('mouseleave', () => dot.classList.remove('on'));
   })();
+  // section header strip: compact once the section is scrolled
+  document.querySelectorAll('.section-body').forEach(body => {
+    const label = body.querySelector('.section-label');
+    body.addEventListener('scroll', () => {
+      const y = body.scrollTop;
+      if (y > 80) label.classList.add('compact');
+      else if (y < 10) label.classList.remove('compact');
+    }, { passive: true });
+  });
 </script>
 </body>
 </html>
