@@ -1412,22 +1412,37 @@ i &lt;3 to work with u</p>
     });
 
     // ── draw
-    function draw() {
+    // rings ease to their place when orbits are added or removed: a new ring slides
+    // in from just outside and fades up, a removed one drifts out and fades away
+    const rings = Array.from({ length: MAX }, () => null);   // {r, a} as drawn
+    let lastFrame = performance.now();
+    function draw(tf) {
       requestAnimationFrame(draw);
+      const dt = Math.max(0, Math.min(0.05, (tf - lastFrame) / 1000)); lastFrame = tf;
       if (!visible() || !W) return;
       const now = clock(), ph = phaseAt(now), c = centre();
+      const ease = calm ? 1 : 1 - Math.exp(-dt * 6);
+      const outside = R() * 1.1;
+      for (let i = 0; i < MAX; i++) {
+        const on = i < count;
+        if (!rings[i]) rings[i] = { r: on ? radius(i) : outside, a: on ? 1 : 0 };
+        const ring = rings[i];
+        ring.r += ((on ? radius(i) : outside) - ring.r) * ease;
+        ring.a += ((on ? 1 : 0) - ring.a) * ease;
+      }
       g.setTransform(dpr, 0, 0, dpr, 0, 0);
       g.clearRect(0, 0, W, H);
 
       // rings, with the grid ticks when quantize is on (they turn with the ring)
-      for (let i = 0; i < count; i++) {
-        const r = radius(i);
+      for (let i = 0; i < MAX; i++) {
+        const { r, a } = rings[i];
+        if (a < 0.01) continue;
         const lit = notes.some(n => n.o === i && n.hits.some(t => now - t >= 0 && now - t < 0.25));
-        g.strokeStyle = `rgba(255,255,255,${lit ? 0.45 : 0.16})`;
+        g.strokeStyle = `rgba(255,255,255,${((lit ? 0.45 : 0.16) * a).toFixed(3)})`;
         g.lineWidth = 1;
         g.beginPath(); g.arc(c.x, c.y, r, 0, TAU); g.stroke();
         if (quant) {
-          g.fillStyle = 'rgba(255,255,255,0.22)';
+          g.fillStyle = `rgba(255,255,255,${(0.22 * a).toFixed(3)})`;
           for (let s = 0; s < GRID; s++) {
             const ang = (s / GRID + ph) * TAU - Math.PI / 2;
             g.beginPath(); g.arc(c.x + Math.cos(ang) * r, c.y + Math.sin(ang) * r, 1, 0, TAU); g.fill();
@@ -1437,13 +1452,13 @@ i &lt;3 to work with u</p>
       // needle
       g.strokeStyle = 'rgba(255,255,255,0.7)';
       g.lineWidth = 1;
-      g.beginPath(); g.moveTo(c.x, c.y - radius(0) + 14); g.lineTo(c.x, c.y - radius(count - 1) - 18); g.stroke();
+      g.beginPath(); g.moveTo(c.x, c.y - rings[0].r + 14); g.lineTo(c.x, c.y - rings[count - 1].r - 18); g.stroke();
       g.fillStyle = '#fff';
       g.beginPath(); g.arc(c.x, c.y, 2, 0, TAU); g.fill();
 
       // notes
       for (const n of notes) {
-        n.r = n.r == null ? radius(n.o) : n.r + (radius(n.o) - n.r) * (calm ? 1 : 0.18);   // glide between rings
+        n.r = n.r == null ? rings[n.o].r : n.r + (rings[n.o].r - n.r) * (calm ? 1 : 1 - Math.exp(-dt * 10));   // glide with / between rings
         n.hits = n.hits.filter(t => now - t < 1.2);
         const q = noteXY(n, ph);
         let glow = 0;
