@@ -340,16 +340,14 @@
       z-index: 1;
       transition: opacity 0.6s ease;
     }
-    .section-label:hover::before { opacity: 0.75; }
     .label-bg {
       position: absolute;
       inset: 0;
       width: 100%; height: 100%;
       object-fit: cover;
-      filter: grayscale(100%) brightness(0.38);
-      transition: filter 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      /* section headers: black & white negative (home cards stay as they are) */
+      filter: grayscale(100%) invert(100%) brightness(0.45);
     }
-    .section-label:hover .label-bg { filter: grayscale(0%) brightness(0.55); }
     .section-label h1 {
       font-family: var(--font-eva);
       font-size: clamp(5rem, 11vw, 10rem);
