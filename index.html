@@ -435,6 +435,63 @@
       margin: 2.5rem 0 3rem;
     }
 
+    /* ── LAB: browser instrument ── */
+    .lab-heading {
+      font-family: var(--font-eva);
+      font-weight: 800;
+      font-size: clamp(2.4rem, 4.5vw, 3.6rem);
+      line-height: 0.9;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      scale: 1 1.25;
+      transform-origin: left bottom;
+      margin: 3.5rem 0 0;
+    }
+    .lab-heading + .lab-intro { margin-top: 1.25rem; }
+
+    .pad {
+      position: relative;
+      height: min(56vh, 520px);
+      min-height: 300px;
+      border: 1px solid #1e1e1e;
+      background: var(--grey-1);
+      overflow: hidden;
+      cursor: crosshair;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .pad canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      display: block;
+    }
+    .pad-hint {
+      position: absolute;
+      left: 50%; top: 50%;
+      translate: -50% -50%;
+      font-family: var(--font-ui);
+      font-size: 0.66rem;
+      letter-spacing: 0.12em;
+      color: rgba(255,255,255,0.45);
+      text-align: center;
+      line-height: 2;
+      pointer-events: none;
+      transition: opacity 0.6s ease;
+    }
+    .pad.used .pad-hint { opacity: 0; }
+    .pad-legend {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 0.7rem;
+      font-family: var(--font-ui);
+      font-size: 0.58rem;
+      letter-spacing: 0.08em;
+      color: var(--grey-text);
+    }
+
     .samples-list {
       max-width: 640px;
     }
@@ -791,6 +848,16 @@ i &lt;3 to work with u</p>
     </div>
 
     <div class="lab-body">
+      <h2 class="lab-heading">Play</h2>
+      <p class="lab-intro">make some noise right here. click for a note, hold for an arpeggio, drag to move it around.</p>
+
+      <div class="pad" id="pad">
+        <canvas></canvas>
+        <div class="pad-hint">click · hold · drag</div>
+      </div>
+      <div class="pad-legend"><span>← low · pitch · high →</span><span>↑ bright · tone · dark ↓</span></div>
+
+      <h2 class="lab-heading">Samples</h2>
       <p class="lab-intro">Free sample packs. Use them, mangle them, don't ask permission.</p>
 
       <div class="samples-list">
@@ -947,6 +1014,163 @@ i &lt;3 to work with u</p>
     const panel = box.closest('.about-panel');
     panel.addEventListener('mousemove', e => { mouse = { x: e.clientX, y: e.clientY }; schedule(); });
     panel.addEventListener('mouseleave', () => { mouse = null; schedule(); });
+  })();
+  // Lab instrument: click = note, hold = arpeggio, drag = move it.
+  // x picks the note on a minor pentatonic scale, y opens/closes the filter.
+  (() => {
+    const pad = document.getElementById('pad');
+    const cv = pad.querySelector('canvas'), g = cv.getContext('2d');
+    const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const SCALE = [0, 3, 5, 7, 10];          // A minor pentatonic
+    const STEPS = SCALE.length * 3;          // three octaves across the pad
+    const ROOT = 45;                         // A2 (midi)
+    const HOLD_MS = 180, ARP_MS = 115;
+    const ARP = [0, 2, 4, 5, 7, 5, 4, 2];    // scale steps above the root: up and back down
+    const NAMES = ['A', 'C', 'D', 'E', 'G'];
+
+    const midiOf = step => ROOT + 12 * Math.floor(step / SCALE.length) + SCALE[step % SCALE.length];
+    const hz = m => 440 * Math.pow(2, (m - 69) / 12);
+
+    // ── audio
+    let ac = null, out = null;
+    function initAudio() {
+      if (ac) { if (ac.state === 'suspended') ac.resume(); return; }
+      ac = new (window.AudioContext || window.webkitAudioContext)();
+      const comp = ac.createDynamicsCompressor();
+      comp.threshold.value = -18; comp.ratio.value = 4;
+      comp.connect(ac.destination);
+      out = ac.createGain(); out.gain.value = 0.5; out.connect(comp);
+      // dark feedback delay for some space
+      const send = ac.createGain(); send.gain.value = 0.3;
+      const dl = ac.createDelay(1); dl.delayTime.value = 0.33;
+      const fb = ac.createGain(); fb.gain.value = 0.38;
+      const damp = ac.createBiquadFilter(); damp.type = 'lowpass'; damp.frequency.value = 2200;
+      out.connect(send); send.connect(dl); dl.connect(damp); damp.connect(fb); fb.connect(dl);
+      damp.connect(comp);
+    }
+
+    function voice(midi, bright, vel = 1, len = 0.9) {
+      const t = ac.currentTime, f = hz(midi);
+      const o1 = ac.createOscillator(), o2 = ac.createOscillator();
+      o1.type = 'sawtooth'; o1.frequency.value = f;
+      o2.type = 'square'; o2.frequency.value = f; o2.detune.value = 7;
+      const mix = ac.createGain(); mix.gain.value = 0.5;
+      const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 6;
+      const top = 400 + bright * bright * 7000;
+      lp.frequency.setValueAtTime(top, t);
+      lp.frequency.exponentialRampToValueAtTime(Math.max(120, top * 0.12), t + len);
+      const amp = ac.createGain();
+      amp.gain.setValueAtTime(0.0001, t);
+      amp.gain.exponentialRampToValueAtTime(0.22 * vel, t + 0.006);
+      amp.gain.exponentialRampToValueAtTime(0.0001, t + len);
+      o1.connect(mix); o2.connect(mix); mix.connect(lp); lp.connect(amp); amp.connect(out);
+      o1.start(t); o2.start(t); o1.stop(t + len + 0.05); o2.stop(t + len + 0.05);
+    }
+
+    // ── geometry
+    let W = 0, H = 0, dpr = 1;
+    function resize() {
+      const r = cv.getBoundingClientRect();
+      dpr = Math.min(2, devicePixelRatio || 1);
+      W = r.width; H = r.height;
+      cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+      kick();
+    }
+    new ResizeObserver(resize).observe(cv);
+
+    const stepAt = x => Math.max(0, Math.min(STEPS - 1, Math.floor(x / W * STEPS)));
+    const brightAt = y => 1 - Math.max(0, Math.min(1, y / H));
+
+    // ── visuals
+    const rings = [];   // {x, y, r, max, life, w}
+    const lit = new Float32Array(STEPS);
+    function ring(x, y, big, step) {
+      rings.push({ x, y, r: big ? 4 : 2, max: big ? 140 : 70, life: 1, w: big ? 1.6 : 1 });
+      lit[step] = 1;
+      kick();
+    }
+
+    // ── fingers (multi-touch friendly)
+    const fingers = new Map();   // pointerId -> {x, y, timer, arp, i}
+    function play(f, arpNote) {
+      const step = stepAt(f.x), bright = brightAt(f.y);
+      const s = arpNote == null ? step : Math.min(STEPS + 7, step + ARP[arpNote]);
+      voice(midiOf(s), bright, arpNote == null ? 1 : 0.7, arpNote == null ? 0.9 : 0.45);
+      ring(f.x, f.y, arpNote == null, Math.min(STEPS - 1, s));
+    }
+    const pos = e => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+
+    pad.addEventListener('pointerdown', e => {
+      e.preventDefault();
+      initAudio();
+      pad.classList.add('used');
+      pad.setPointerCapture(e.pointerId);
+      const f = { ...pos(e), arp: null, i: 0 };
+      play(f);
+      f.timer = setTimeout(() => {
+        f.arp = setInterval(() => { f.i = (f.i + 1) % ARP.length; play(f, f.i); }, ARP_MS);
+      }, HOLD_MS);
+      fingers.set(e.pointerId, f);
+    });
+    pad.addEventListener('pointermove', e => {
+      const f = fingers.get(e.pointerId); if (!f) return;
+      Object.assign(f, pos(e));
+    });
+    function lift(e) {
+      const f = fingers.get(e.pointerId); if (!f) return;
+      clearTimeout(f.timer); clearInterval(f.arp);
+      fingers.delete(e.pointerId);
+    }
+    pad.addEventListener('pointerup', lift);
+    pad.addEventListener('pointercancel', lift);
+    pad.addEventListener('contextmenu', e => e.preventDefault());
+
+    // ── draw loop (only runs while something is moving)
+    let running = false, last = 0;
+    function kick() { if (!running) { running = true; last = performance.now(); requestAnimationFrame(draw); } }
+    function draw(now) {
+      const dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); last = now;
+      g.setTransform(dpr, 0, 0, dpr, 0, 0);
+      g.clearRect(0, 0, W, H);
+
+      // columns: one per note, octaves slightly stronger
+      const cw = W / STEPS;
+      for (let i = 0; i < STEPS; i++) {
+        if (lit[i] > 0) {
+          g.fillStyle = `rgba(255,255,255,${(0.10 * lit[i]).toFixed(3)})`;
+          g.fillRect(i * cw, 0, cw, H);
+          lit[i] = Math.max(0, lit[i] - dt * 2.2);
+        }
+        g.fillStyle = i % SCALE.length === 0 ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.05)';
+        g.fillRect(Math.round(i * cw), 0, 1, H);
+        g.fillStyle = 'rgba(255,255,255,0.22)';
+        g.font = '10px "Space Mono", monospace';
+        g.fillText(NAMES[i % SCALE.length], i * cw + 6, H - 8);
+      }
+
+      // rings
+      for (let k = rings.length - 1; k >= 0; k--) {
+        const o = rings[k];
+        o.life -= dt * (calm ? 3 : 1.4);
+        o.r += (o.max - o.r) * Math.min(1, dt * 5);
+        if (o.life <= 0) { rings.splice(k, 1); continue; }
+        g.strokeStyle = `rgba(255,255,255,${(o.life * 0.9).toFixed(3)})`;
+        g.lineWidth = o.w;
+        g.beginPath(); g.arc(o.x, o.y, o.r, 0, Math.PI * 2); g.stroke();
+      }
+
+      // held fingers: a crosshair that follows the pointer
+      for (const f of fingers.values()) {
+        g.fillStyle = 'rgba(255,255,255,0.9)';
+        g.beginPath(); g.arc(f.x, f.y, 3, 0, Math.PI * 2); g.fill();
+        g.fillStyle = 'rgba(255,255,255,0.12)';
+        g.fillRect(0, Math.round(f.y), W, 1);
+      }
+
+      const busy = rings.length || fingers.size || lit.some(v => v > 0);
+      if (busy) requestAnimationFrame(draw); else running = false;
+    }
   })();
 </script>
 </body>
