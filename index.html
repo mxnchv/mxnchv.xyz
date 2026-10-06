@@ -717,6 +717,85 @@
       .section-page.active .section-label ~ *,
       .section-page.active .label-bg { animation: none; }
     }
+    /* ══════════════════════════════════════════
+       PHONES & PORTRAIT TABLETS
+    ══════════════════════════════════════════ */
+    @supports (height: 100dvh) {
+      #home, .section-page, .cards-panel { height: 100dvh; }
+    }
+    @media (max-width: 760px), (orientation: portrait) and (max-width: 1100px) {
+      /* home becomes one scrolling column: about first, then the cards */
+      #home {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto;
+        width: 100%;
+        overflow-y: auto;
+        overflow-x: hidden;
+        scrollbar-width: none;
+      }
+      #home::-webkit-scrollbar { display: none; }
+      .about-panel {
+        min-height: 72vh;
+        min-height: 72svh;
+        border-right: 0;
+        border-bottom: 1px solid #1c1c1c;
+        padding: 1.25rem;
+      }
+      .about-logo { top: 1.25rem; left: 1.25rem; }
+      .about-footer { left: 1.25rem; bottom: 1.25rem; }
+      .about-text p { font-size: 0.8rem; }
+      .cards-panel {
+        height: auto !important;
+        grid-template-rows: none;
+        grid-auto-rows: 24vh;
+        grid-auto-rows: 24svh;
+      }
+      .card-content { padding: 0 1.25rem; }
+      .card-title { font-size: clamp(3rem, 15vw, 5.6rem); }
+      .card-arrow, .home-tagline { display: none; }
+      /* no hover on touch: show the cards a bit livelier by default */
+      .card-bg { filter: grayscale(100%) brightness(0.8); }
+
+      /* section header: logo on top, the other sections in a swipeable row below */
+      .section-header {
+        height: auto;
+        flex-wrap: wrap;
+        gap: 0.55rem 1rem;
+        padding: 0.85rem 1.25rem 0.6rem;
+      }
+      .section-logo { margin-right: 0; }
+      .section-nav {
+        width: 100%;
+        gap: 1.4rem;
+        overflow-x: auto;
+        scrollbar-width: none;
+        padding-bottom: 0.2rem;
+      }
+      .section-nav::-webkit-scrollbar { display: none; }
+      .section-nav a { font-size: 1rem; flex-shrink: 0; }
+
+      .section-label { padding: 2.2rem 1.25rem 1rem; }
+      .section-label h1 { font-size: clamp(3.2rem, 14vw, 7rem); }
+      .section-label.compact { padding: 0.9rem 1.25rem; }
+      .section-label.compact h1 { font-size: 2.4rem; }
+
+      /* videos keep their shape instead of filling the screen */
+      .video-item { height: auto; min-height: 0; aspect-ratio: 16 / 9; }
+      .video-label { padding: 0.8rem 1.25rem; }
+
+      .lab-body { padding: 0 1.25rem 2.5rem; }
+      .playground { margin-top: 1.5rem; }
+      .pad { height: 52vh; height: 52svh; min-height: 260px; }
+      .orbits { height: auto; aspect-ratio: 1; min-height: 0; max-height: 75vh; max-height: 75svh; }
+      .orbit-controls { gap: 0.5rem 1.4rem; font-size: 0.66rem; }
+      .orbit-controls button { padding: 0.45rem 0; }
+      .oc-group button { padding: 0.45rem 0.6rem; }
+      .samples-list { max-width: none; }
+      .sample-row:hover { padding-left: 0; }
+
+      .section-footer { padding: 0 1.25rem; }
+      .social-links { gap: 1.1rem; }
+    }
   </style>
 </head>
 <body>
