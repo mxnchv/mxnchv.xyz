@@ -138,8 +138,7 @@
     /* about text: letters near the cursor get blown away */
     .about-text .ch {
       display: inline-block;
-      transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-                  opacity 0.7s ease;
+      will-change: transform;
     }
 
     .about-footer {
@@ -1081,36 +1080,65 @@ i &lt;3 to work with u</p>
         return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
       });
       chars.forEach(ch => { ch.style.transform = ''; ch.style.opacity = ''; });
+      if (typeof wake === 'function') wake();
     }
     requestAnimationFrame(measure);
     addEventListener('resize', measure);
     document.fonts && document.fonts.ready.then(measure);
 
-    let mouse = null, queued = false;
-    function update() {
-      queued = false;
+    // each letter is a tiny body: the cursor blasts it out, then it drifts in slow motion,
+    // wobbling a little, and a weak spring eases it back home
+    const st = chars.map(() => ({
+      x: 0, y: 0, vx: 0, vy: 0, r: 0, vr: 0, heat: 0,
+      p1: rnd(0, 6.28), p2: rnd(0, 6.28), f: rnd(0.25, 0.5),
+    }));
+    const SPRING = 0.8, DAMP = 1.5;    // low spring + low damping = slow, floaty return
+    const FLOAT_S = 3;                 // how long a hit letter keeps floating around
+
+    let mouse = null, running = false, last = 0;
+    function step(now) {
+      const dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); last = now;
+      const t = now / 1000;
+      let moving = !!mouse;
       chars.forEach((ch, i) => {
-        const c = centers[i];
-        const dx = mouse ? c.x - mouse.x : 0, dy = mouse ? c.y - mouse.y : 0;
-        const d = Math.hypot(dx, dy);
-        if (!mouse || d > RADIUS) {
-          ch.style.transform = '';
-          ch.style.opacity = '';
-          return;
+        const s = st[i], c = centers[i];
+        if (!c) return;
+        // blast: letters inside the radius are pushed straight out
+        if (mouse) {
+          const dx = c.x + s.x - mouse.x, dy = c.y + s.y - mouse.y, d = Math.hypot(dx, dy);
+          if (d < RADIUS) {
+            const k = (1 - d / RADIUS) * ch._jit;
+            const ux = d ? dx / d : rnd(-1, 1), uy = d ? dy / d : rnd(-1, 1);
+            // steer towards an outward speed (bounded, so letters don't fly off the page)
+            const pull = Math.min(1, dt * 10);
+            s.vx += (ux * FORCE * k * 3 - s.vx) * pull;
+            s.vy += (uy * FORCE * k * 3 - s.vy) * pull;
+            s.vr += (ch._spin * 300 * k - s.vr) * pull;
+            s.heat = 1;
+          }
         }
-        const k = (1 - d / RADIUS) * ch._jit;
-        const ux = d ? dx / d : rnd(-1, 1), uy = d ? dy / d : rnd(-1, 1);
-        ch.style.transform =
-          `translate(${(ux * FORCE * k).toFixed(0)}px, ${(uy * FORCE * k).toFixed(0)}px) ` +
-          `rotate(${(ch._spin * 220 * k).toFixed(0)}deg)`;
-        ch.style.opacity = (1 - k * 0.7).toFixed(2);
+        // float: a slow wandering push that fades out a few seconds after the hit
+        s.heat *= Math.exp(-dt / FLOAT_S);
+        const away = s.heat;
+        const ax = Math.sin(t * s.f + s.p1) * 14 * away - SPRING * s.x - DAMP * s.vx;
+        const ay = Math.cos(t * s.f * 0.8 + s.p2) * 14 * away - SPRING * s.y - DAMP * s.vy;
+        s.vx += ax * dt; s.vy += ay * dt;
+        s.vr += (Math.sin(t * s.f * 0.6 + s.p1) * 10 * away - SPRING * s.r - DAMP * s.vr) * dt;
+        s.x += s.vx * dt; s.y += s.vy * dt; s.r += s.vr * dt;
+
+        const off = Math.hypot(s.x, s.y);
+        if (off > 0.3 || Math.abs(s.r) > 0.3 || Math.hypot(s.vx, s.vy) > 0.5) moving = true;
+        if (off < 0.3 && Math.abs(s.r) < 0.3 && !mouse) { ch.style.transform = ''; ch.style.opacity = ''; return; }
+        ch.style.transform = `translate(${s.x.toFixed(1)}px, ${s.y.toFixed(1)}px) rotate(${s.r.toFixed(1)}deg)`;
+        ch.style.opacity = (1 - Math.min(0.7, off / FORCE * 0.7)).toFixed(2);
       });
+      if (moving) requestAnimationFrame(step); else running = false;
     }
-    function schedule() { if (!queued) { queued = true; requestAnimationFrame(update); } }
+    function wake() { if (!running) { running = true; last = performance.now(); requestAnimationFrame(step); } }
 
     const panel = box.closest('.about-panel');
-    panel.addEventListener('mousemove', e => { mouse = { x: e.clientX, y: e.clientY }; schedule(); });
-    panel.addEventListener('mouseleave', () => { mouse = null; schedule(); });
+    panel.addEventListener('mousemove', e => { mouse = { x: e.clientX, y: e.clientY }; wake(); });
+    panel.addEventListener('mouseleave', () => { mouse = null; wake(); });
   })();
   // Lab instrument: every click drops a note that keeps looping at its own pace,
   // so the loops drift against each other into a soundscape. Click a loop to remove it.
