@@ -231,6 +231,17 @@
     .card:nth-child(3) .card-title { animation-delay: 6.1s; }
     .card:nth-child(4) .card-title { animation-delay: 8.7s; }
 
+    /* logo glitch: x↔o, v↔u */
+    .lg {
+      display: inline-block;
+      position: relative;
+    }
+    .lg.glitch {
+      text-shadow: -2px 0 rgba(255,0,60,0.85), 2px 0 rgba(0,240,255,0.85);
+      transform: translate(var(--gx, 0), var(--gy, 0)) skewX(var(--gs, 0));
+      opacity: 0.85;
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .card-title { animation: none; }
       .card-bg { transition: none; }
@@ -487,7 +498,7 @@
 <div id="home">
 
   <div class="about-panel">
-    <a href="#" class="about-logo" onclick="showHome();return false;">m x n c h v</a>
+    <a href="#" class="about-logo" onclick="showHome();return false;" aria-label="mxnchv">m <span class="lg" data-a="x" data-b="o">x</span> n c h <span class="lg" data-a="v" data-b="u">v</span></a>
 
     <video class="about-video" poster="media/about_me.jpg" autoplay muted loop playsinline preload="auto">
       <source src="media/about_me.mp4" type="video/mp4">
@@ -554,7 +565,7 @@ i &lt;3 to work with u  ☺</p>
 <!-- ══════════════════ BRANDING ══════════════════ -->
 <div class="section-page" id="page-branding">
   <header class="section-header">
-    <a class="section-logo" onclick="showHome();return false;">m x n c h v</a>
+    <a class="section-logo" onclick="showHome();return false;" aria-label="mxnchv">m <span class="lg" data-a="x" data-b="o">x</span> n c h <span class="lg" data-a="v" data-b="u">v</span></a>
     <nav class="section-nav">
       <a class="active" onclick="showSection('branding')">Branding</a>
       <a onclick="showSection('videogames')">Videogames</a>
@@ -597,7 +608,7 @@ i &lt;3 to work with u  ☺</p>
 <!-- ══════════════════ VIDEOGAMES ══════════════════ -->
 <div class="section-page" id="page-videogames">
   <header class="section-header">
-    <a class="section-logo" onclick="showHome();return false;">m x n c h v</a>
+    <a class="section-logo" onclick="showHome();return false;" aria-label="mxnchv">m <span class="lg" data-a="x" data-b="o">x</span> n c h <span class="lg" data-a="v" data-b="u">v</span></a>
     <nav class="section-nav">
       <a onclick="showSection('branding')">Branding</a>
       <a class="active" onclick="showSection('videogames')">Videogames</a>
@@ -636,7 +647,7 @@ i &lt;3 to work with u  ☺</p>
 <!-- ══════════════════ COLLABS ══════════════════ -->
 <div class="section-page" id="page-collabs">
   <header class="section-header">
-    <a class="section-logo" onclick="showHome();return false;">m x n c h v</a>
+    <a class="section-logo" onclick="showHome();return false;" aria-label="mxnchv">m <span class="lg" data-a="x" data-b="o">x</span> n c h <span class="lg" data-a="v" data-b="u">v</span></a>
     <nav class="section-nav">
       <a onclick="showSection('branding')">Branding</a>
       <a onclick="showSection('videogames')">Videogames</a>
@@ -679,7 +690,7 @@ i &lt;3 to work with u  ☺</p>
 <!-- ══════════════════ LAB ══════════════════ -->
 <div class="section-page" id="page-lab">
   <header class="section-header">
-    <a class="section-logo" onclick="showHome();return false;">m x n c h v</a>
+    <a class="section-logo" onclick="showHome();return false;" aria-label="mxnchv">m <span class="lg" data-a="x" data-b="o">x</span> n c h <span class="lg" data-a="v" data-b="u">v</span></a>
     <nav class="section-nav">
       <a onclick="showSection('branding')">Branding</a>
       <a onclick="showSection('videogames')">Videogames</a>
@@ -766,6 +777,32 @@ i &lt;3 to work with u  ☺</p>
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') showHome();
   });
+  // logo glitch: mxnchv ↔ monchv ↔ mxnchu ↔ monchu, forever
+  (() => {
+    const letters = [...document.querySelectorAll('.lg')];
+    const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const rnd = (a, b) => a + Math.random() * (b - a);
+
+    function flip(el, alt) {
+      el.textContent = alt ? el.dataset.b : el.dataset.a;
+      if (calm) return;
+      el.style.setProperty('--gx', rnd(-3, 3).toFixed(1) + 'px');
+      el.style.setProperty('--gy', rnd(-2, 2).toFixed(1) + 'px');
+      el.style.setProperty('--gs', rnd(-12, 12).toFixed(0) + 'deg');
+      el.classList.add('glitch');
+      setTimeout(() => el.classList.remove('glitch'), rnd(60, 160));
+    }
+
+    function tick() {
+      // pick a reading for this beat; every copy of the logo stays in sync
+      const alt = { x: Math.random() < 0.5, v: Math.random() < 0.5 };
+      letters.forEach(el => flip(el, alt[el.dataset.a]));
+      // mostly quick stutters, sometimes it rests on a word for a bit
+      const wait = Math.random() < 0.25 ? rnd(700, 1600) : rnd(70, 260);
+      setTimeout(tick, calm ? wait * 4 : wait);
+    }
+    tick();
+  })();
 </script>
 </body>
 </html>
