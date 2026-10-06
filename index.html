@@ -114,6 +114,17 @@
       text-shadow: 0 1px 8px rgba(0,0,0,0.9);
     }
 
+    /* about text: letters scatter on hover */
+    .about-text .ch {
+      display: inline-block;
+      transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+                  opacity 0.9s ease;
+    }
+    .about-text.scattered .ch {
+      transform: translate(var(--dx), var(--dy)) rotate(var(--rot));
+      opacity: var(--op);
+    }
+
     .about-footer {
       position: absolute;
       bottom: 1.75rem; left: 2rem;
@@ -823,6 +834,43 @@ i &lt;3 to work with u</p>
       setTimeout(tick, calm ? wait * 4 : wait);
     }
     tick();
+  })();
+  // about text: split into letters that scatter on hover and come back on leave
+  (() => {
+    const box = document.querySelector('.about-text');
+    const p = box.querySelector('p');
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const frag = document.createDocumentFragment();
+    for (const c of p.textContent) {
+      if (/\s/.test(c)) { frag.append(c); continue; }
+      const span = document.createElement('span');
+      span.className = 'ch';
+      span.textContent = c;
+      frag.append(span);
+    }
+    p.setAttribute('aria-label', p.textContent);
+    p.textContent = '';
+    p.append(frag);
+    const chars = [...p.querySelectorAll('.ch')];
+    chars.forEach(ch => ch.setAttribute('aria-hidden', 'true'));
+
+    const rnd = (a, b) => a + Math.random() * (b - a);
+    p.addEventListener('mouseenter', () => {
+      chars.forEach(ch => {
+        const angle = rnd(0, Math.PI * 2), dist = rnd(30, 160);
+        ch.style.setProperty('--dx', (Math.cos(angle) * dist).toFixed(0) + 'px');
+        ch.style.setProperty('--dy', (Math.sin(angle) * dist).toFixed(0) + 'px');
+        ch.style.setProperty('--rot', rnd(-180, 180).toFixed(0) + 'deg');
+        ch.style.setProperty('--op', rnd(0.15, 0.7).toFixed(2));
+        ch.style.transitionDelay = rnd(0, 120).toFixed(0) + 'ms';
+      });
+      box.classList.add('scattered');
+    });
+    p.addEventListener('mouseleave', () => {
+      chars.forEach(ch => { ch.style.transitionDelay = rnd(0, 200).toFixed(0) + 'ms'; });
+      box.classList.remove('scattered');
+    });
   })();
 </script>
 </body>
