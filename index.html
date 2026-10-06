@@ -453,8 +453,8 @@
       position: relative;
       height: min(56vh, 520px);
       min-height: 300px;
-      border: 1px solid #1e1e1e;
-      background: var(--grey-1);
+      border: 1px solid #161616;
+      background: var(--black);
       overflow: hidden;
       cursor: crosshair;
       touch-action: none;
@@ -481,6 +481,17 @@
       transition: opacity 0.6s ease;
     }
     .pad.used .pad-hint { opacity: 0; }
+    .pad-clear {
+      font: inherit;
+      color: inherit;
+      background: none;
+      border: 0;
+      padding: 0;
+      cursor: pointer;
+      letter-spacing: inherit;
+      transition: color 0.2s;
+    }
+    .pad-clear:hover { color: var(--white); }
     .pad-legend {
       display: flex;
       justify-content: space-between;
@@ -849,13 +860,13 @@ i &lt;3 to work with u</p>
 
     <div class="lab-body">
       <h2 class="lab-heading">Play</h2>
-      <p class="lab-intro">make some noise right here. click for a note, hold for an arpeggio, drag to move it around.</p>
+      <p class="lab-intro">build a little soundscape. click anywhere to drop a note that keeps looping, click it again to remove it.</p>
 
       <div class="pad" id="pad">
         <canvas></canvas>
-        <div class="pad-hint">click · hold · drag</div>
+        <div class="pad-hint">click anywhere</div>
       </div>
-      <div class="pad-legend"><span>← low · pitch · high →</span><span>↑ bright · tone · dark ↓</span></div>
+      <div class="pad-legend"><span>← low · high →</span><button class="pad-clear" type="button">clear</button></div>
 
       <h2 class="lab-heading">Samples</h2>
       <p class="lab-intro">Free sample packs. Use them, mangle them, don't ask permission.</p>
@@ -1015,22 +1026,23 @@ i &lt;3 to work with u</p>
     panel.addEventListener('mousemove', e => { mouse = { x: e.clientX, y: e.clientY }; schedule(); });
     panel.addEventListener('mouseleave', () => { mouse = null; schedule(); });
   })();
-  // Lab instrument: click = note, hold = arpeggio, drag = move it.
-  // x picks the note on a minor pentatonic scale, y opens/closes the filter.
+  // Lab instrument: every click drops a note that keeps looping at its own pace,
+  // so the loops drift against each other into a soundscape. Click a loop to remove it.
+  // x picks the note (A minor pentatonic, three octaves), y sets the tone (top = bright).
   (() => {
     const pad = document.getElementById('pad');
     const cv = pad.querySelector('canvas'), g = cv.getContext('2d');
     const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    const SCALE = [0, 3, 5, 7, 10];          // A minor pentatonic
-    const STEPS = SCALE.length * 3;          // three octaves across the pad
-    const ROOT = 45;                         // A2 (midi)
-    const HOLD_MS = 180, ARP_MS = 115;
-    const ARP = [0, 2, 4, 5, 7, 5, 4, 2];    // scale steps above the root: up and back down
-    const NAMES = ['A', 'C', 'D', 'E', 'G'];
+    const SCALE = [0, 3, 5, 7, 10];
+    const STEPS = SCALE.length * 3;
+    const ROOT = 45;                     // A2
+    const MAX_LOOPS = 14;
+    const HIT = 16;                      // px: clicking this close to a loop removes it
 
     const midiOf = step => ROOT + 12 * Math.floor(step / SCALE.length) + SCALE[step % SCALE.length];
     const hz = m => 440 * Math.pow(2, (m - 69) / 12);
+    const rnd = (a, b) => a + Math.random() * (b - a);
 
     // ── audio
     let ac = null, out = null;
@@ -1038,38 +1050,85 @@ i &lt;3 to work with u</p>
       if (ac) { if (ac.state === 'suspended') ac.resume(); return; }
       ac = new (window.AudioContext || window.webkitAudioContext)();
       const comp = ac.createDynamicsCompressor();
-      comp.threshold.value = -18; comp.ratio.value = 4;
+      comp.threshold.value = -20; comp.ratio.value = 3;
       comp.connect(ac.destination);
-      out = ac.createGain(); out.gain.value = 0.5; out.connect(comp);
-      // dark feedback delay for some space
-      const send = ac.createGain(); send.gain.value = 0.3;
-      const dl = ac.createDelay(1); dl.delayTime.value = 0.33;
-      const fb = ac.createGain(); fb.gain.value = 0.38;
-      const damp = ac.createBiquadFilter(); damp.type = 'lowpass'; damp.frequency.value = 2200;
-      out.connect(send); send.connect(dl); dl.connect(damp); damp.connect(fb); fb.connect(dl);
-      damp.connect(comp);
+      out = ac.createGain(); out.gain.value = 0.55; out.connect(comp);
+      // two dark delay lines, slightly different, for a wide washy tail
+      [[0.41, 0.5], [0.67, 0.45]].forEach(([time, amount]) => {
+        const send = ac.createGain(); send.gain.value = 0.32;
+        const dl = ac.createDelay(2); dl.delayTime.value = time;
+        const fb = ac.createGain(); fb.gain.value = amount;
+        const damp = ac.createBiquadFilter(); damp.type = 'lowpass'; damp.frequency.value = 1800;
+        out.connect(send); send.connect(dl); dl.connect(damp); damp.connect(fb); fb.connect(dl);
+        damp.connect(comp);
+      });
     }
 
-    function voice(midi, bright, vel = 1, len = 0.9) {
-      const t = ac.currentTime, f = hz(midi);
+    function voice(at, midi, bright) {
+      const f = hz(midi), len = 2.6;
       const o1 = ac.createOscillator(), o2 = ac.createOscillator();
-      o1.type = 'sawtooth'; o1.frequency.value = f;
-      o2.type = 'square'; o2.frequency.value = f; o2.detune.value = 7;
-      const mix = ac.createGain(); mix.gain.value = 0.5;
-      const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 6;
-      const top = 400 + bright * bright * 7000;
-      lp.frequency.setValueAtTime(top, t);
-      lp.frequency.exponentialRampToValueAtTime(Math.max(120, top * 0.12), t + len);
+      o1.type = 'triangle'; o1.frequency.value = f;
+      o2.type = 'sawtooth'; o2.frequency.value = f; o2.detune.value = rnd(-9, 9);
+      const m2 = ac.createGain(); m2.gain.value = 0.25 + bright * 0.35;
+      const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 2;
+      const top = 300 + bright * bright * 5200;
+      lp.frequency.setValueAtTime(top, at);
+      lp.frequency.exponentialRampToValueAtTime(Math.max(140, top * 0.2), at + len);
       const amp = ac.createGain();
-      amp.gain.setValueAtTime(0.0001, t);
-      amp.gain.exponentialRampToValueAtTime(0.22 * vel, t + 0.006);
-      amp.gain.exponentialRampToValueAtTime(0.0001, t + len);
-      o1.connect(mix); o2.connect(mix); mix.connect(lp); lp.connect(amp); amp.connect(out);
-      o1.start(t); o2.start(t); o1.stop(t + len + 0.05); o2.stop(t + len + 0.05);
+      amp.gain.setValueAtTime(0.0001, at);
+      amp.gain.exponentialRampToValueAtTime(0.16, at + 0.015);
+      amp.gain.exponentialRampToValueAtTime(0.0001, at + len);
+      o1.connect(amp); o2.connect(m2); m2.connect(lp); lp.connect(amp); amp.connect(out);
+      o1.start(at); o2.start(at); o1.stop(at + len + 0.05); o2.stop(at + len + 0.05);
     }
 
-    // ── geometry
+    // ── loops
     let W = 0, H = 0, dpr = 1;
+    const loops = [];   // {u, v, midi, bright, period, next, pulses: [times]}
+    const visible = () => pad.offsetParent !== null;
+
+    function addLoop(x, y) {
+      const u = x / W, v = y / H;
+      const step = Math.max(0, Math.min(STEPS - 1, Math.floor(u * STEPS)));
+      const loop = {
+        u, v, midi: midiOf(step), bright: 1 - v,
+        period: rnd(2.2, 6.5),          // each loop has its own pace, so they drift apart
+        next: ac.currentTime + 0.02,
+        pulses: [], born: performance.now(),
+      };
+      loops.push(loop);
+      if (loops.length > MAX_LOOPS) loops.shift();
+    }
+
+    // look-ahead scheduler: steady timing even if the page stutters
+    setInterval(() => {
+      if (!ac || !loops.length) return;
+      const now = ac.currentTime;
+      if (!visible()) { loops.forEach(l => { if (l.next < now) l.next = now + l.period; }); return; }
+      for (const l of loops) {
+        while (l.next < now + 0.2) {
+          voice(Math.max(l.next, now), l.midi, l.bright);
+          l.pulses.push(l.next);
+          l.next += l.period;
+        }
+      }
+    }, 50);
+
+    // ── input
+    const pos = e => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+    pad.addEventListener('pointerdown', e => {
+      e.preventDefault();
+      initAudio();
+      pad.classList.add('used');
+      const p = pos(e);
+      const hit = loops.findIndex(l => Math.hypot(l.u * W - p.x, l.v * H - p.y) < HIT);
+      if (hit >= 0) loops.splice(hit, 1); else addLoop(p.x, p.y);
+      kick();
+    });
+    pad.addEventListener('contextmenu', e => e.preventDefault());
+    document.querySelector('.pad-clear').addEventListener('click', () => { loops.length = 0; kick(); });
+
+    // ── drawing: just the loops, nothing else
     function resize() {
       const r = cv.getBoundingClientRect();
       dpr = Math.min(2, devicePixelRatio || 1);
@@ -1079,97 +1138,31 @@ i &lt;3 to work with u</p>
     }
     new ResizeObserver(resize).observe(cv);
 
-    const stepAt = x => Math.max(0, Math.min(STEPS - 1, Math.floor(x / W * STEPS)));
-    const brightAt = y => 1 - Math.max(0, Math.min(1, y / H));
-
-    // ── visuals
-    const rings = [];   // {x, y, r, max, life, w}
-    const lit = new Float32Array(STEPS);
-    function ring(x, y, big, step) {
-      rings.push({ x, y, r: big ? 4 : 2, max: big ? 140 : 70, life: 1, w: big ? 1.6 : 1 });
-      lit[step] = 1;
-      kick();
-    }
-
-    // ── fingers (multi-touch friendly)
-    const fingers = new Map();   // pointerId -> {x, y, timer, arp, i}
-    function play(f, arpNote) {
-      const step = stepAt(f.x), bright = brightAt(f.y);
-      const s = arpNote == null ? step : Math.min(STEPS + 7, step + ARP[arpNote]);
-      voice(midiOf(s), bright, arpNote == null ? 1 : 0.7, arpNote == null ? 0.9 : 0.45);
-      ring(f.x, f.y, arpNote == null, Math.min(STEPS - 1, s));
-    }
-    const pos = e => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
-
-    pad.addEventListener('pointerdown', e => {
-      e.preventDefault();
-      initAudio();
-      pad.classList.add('used');
-      pad.setPointerCapture(e.pointerId);
-      const f = { ...pos(e), arp: null, i: 0 };
-      play(f);
-      f.timer = setTimeout(() => {
-        f.arp = setInterval(() => { f.i = (f.i + 1) % ARP.length; play(f, f.i); }, ARP_MS);
-      }, HOLD_MS);
-      fingers.set(e.pointerId, f);
-    });
-    pad.addEventListener('pointermove', e => {
-      const f = fingers.get(e.pointerId); if (!f) return;
-      Object.assign(f, pos(e));
-    });
-    function lift(e) {
-      const f = fingers.get(e.pointerId); if (!f) return;
-      clearTimeout(f.timer); clearInterval(f.arp);
-      fingers.delete(e.pointerId);
-    }
-    pad.addEventListener('pointerup', lift);
-    pad.addEventListener('pointercancel', lift);
-    pad.addEventListener('contextmenu', e => e.preventDefault());
-
-    // ── draw loop (only runs while something is moving)
-    let running = false, last = 0;
-    function kick() { if (!running) { running = true; last = performance.now(); requestAnimationFrame(draw); } }
-    function draw(now) {
-      const dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); last = now;
+    let running = false;
+    function kick() { if (!running) { running = true; requestAnimationFrame(draw); } }
+    function draw(t) {
       g.setTransform(dpr, 0, 0, dpr, 0, 0);
       g.clearRect(0, 0, W, H);
-
-      // columns: one per note, octaves slightly stronger
-      const cw = W / STEPS;
-      for (let i = 0; i < STEPS; i++) {
-        if (lit[i] > 0) {
-          g.fillStyle = `rgba(255,255,255,${(0.10 * lit[i]).toFixed(3)})`;
-          g.fillRect(i * cw, 0, cw, H);
-          lit[i] = Math.max(0, lit[i] - dt * 2.2);
+      const now = ac ? ac.currentTime : 0;
+      for (const l of loops) {
+        const x = l.u * W, y = l.v * H;
+        // a ring opens every time the loop sounds
+        l.pulses = l.pulses.filter(p0 => now - p0 < 2.2);
+        for (const p0 of l.pulses) {
+          const age = now - p0; if (age < 0) continue;
+          const k = age / 2.2;
+          g.strokeStyle = `rgba(255,255,255,${(0.6 * (1 - k)).toFixed(3)})`;
+          g.lineWidth = 1;
+          g.beginPath(); g.arc(x, y, 4 + (calm ? 30 : 90) * Math.sqrt(k), 0, Math.PI * 2); g.stroke();
         }
-        g.fillStyle = i % SCALE.length === 0 ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.05)';
-        g.fillRect(Math.round(i * cw), 0, 1, H);
-        g.fillStyle = 'rgba(255,255,255,0.22)';
-        g.font = '10px "Space Mono", monospace';
-        g.fillText(NAMES[i % SCALE.length], i * cw + 6, H - 8);
+        // the loop itself: a dot that swells right after it plays
+        const since = l.pulses.length ? now - l.pulses[l.pulses.length - 1] : 9;
+        const glow = since >= 0 ? Math.max(0, 1 - since / 0.6) : 0;
+        const fadeIn = Math.min(1, (t - l.born) / 300);
+        g.fillStyle = `rgba(255,255,255,${(0.55 + 0.45 * glow) * fadeIn})`;
+        g.beginPath(); g.arc(x, y, 3 + glow * 3, 0, Math.PI * 2); g.fill();
       }
-
-      // rings
-      for (let k = rings.length - 1; k >= 0; k--) {
-        const o = rings[k];
-        o.life -= dt * (calm ? 3 : 1.4);
-        o.r += (o.max - o.r) * Math.min(1, dt * 5);
-        if (o.life <= 0) { rings.splice(k, 1); continue; }
-        g.strokeStyle = `rgba(255,255,255,${(o.life * 0.9).toFixed(3)})`;
-        g.lineWidth = o.w;
-        g.beginPath(); g.arc(o.x, o.y, o.r, 0, Math.PI * 2); g.stroke();
-      }
-
-      // held fingers: a crosshair that follows the pointer
-      for (const f of fingers.values()) {
-        g.fillStyle = 'rgba(255,255,255,0.9)';
-        g.beginPath(); g.arc(f.x, f.y, 3, 0, Math.PI * 2); g.fill();
-        g.fillStyle = 'rgba(255,255,255,0.12)';
-        g.fillRect(0, Math.round(f.y), W, 1);
-      }
-
-      const busy = rings.length || fingers.size || lit.some(v => v > 0);
-      if (busy) requestAnimationFrame(draw); else running = false;
+      if (loops.length) requestAnimationFrame(draw); else running = false;
     }
   })();
 </script>
