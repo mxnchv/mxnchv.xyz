@@ -231,17 +231,6 @@
     .card:nth-child(3) .card-title { animation-delay: 6.1s; }
     .card:nth-child(4) .card-title { animation-delay: 8.7s; }
 
-    /* logo glitch: x↔o, v↔u */
-    .lg {
-      display: inline-block;
-      position: relative;
-    }
-    .lg.glitch {
-      text-shadow: -2px 0 rgba(255,0,60,0.85), 2px 0 rgba(0,240,255,0.85);
-      transform: translate(var(--gx, 0), var(--gy, 0)) skewX(var(--gs, 0));
-      opacity: 0.85;
-    }
-
     @media (prefers-reduced-motion: reduce) {
       .card-title { animation: none; }
       .card-bg { transition: none; }
@@ -777,26 +766,18 @@ i &lt;3 to work with u  ☺</p>
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') showHome();
   });
-  // logo glitch: mxnchv ↔ monchv ↔ mxnchu ↔ monchu, forever
+  // logo: swap letters mxnchv ↔ monchv ↔ mxnchu ↔ monchu, forever
   (() => {
     const letters = [...document.querySelectorAll('.lg')];
     const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const rnd = (a, b) => a + Math.random() * (b - a);
 
-    function flip(el, alt) {
-      el.textContent = alt ? el.dataset.b : el.dataset.a;
-      if (calm) return;
-      el.style.setProperty('--gx', rnd(-3, 3).toFixed(1) + 'px');
-      el.style.setProperty('--gy', rnd(-2, 2).toFixed(1) + 'px');
-      el.style.setProperty('--gs', rnd(-12, 12).toFixed(0) + 'deg');
-      el.classList.add('glitch');
-      setTimeout(() => el.classList.remove('glitch'), rnd(60, 160));
-    }
-
     function tick() {
       // pick a reading for this beat; every copy of the logo stays in sync
       const alt = { x: Math.random() < 0.5, v: Math.random() < 0.5 };
-      letters.forEach(el => flip(el, alt[el.dataset.a]));
+      letters.forEach(el => {
+        el.textContent = alt[el.dataset.a] ? el.dataset.b : el.dataset.a;
+      });
       // mostly quick stutters, sometimes it rests on a word for a bit
       const wait = Math.random() < 0.25 ? rnd(700, 1600) : rnd(70, 260);
       setTimeout(tick, calm ? wait * 4 : wait);
