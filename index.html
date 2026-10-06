@@ -449,6 +449,9 @@
     }
     .lab-heading + .lab-intro { margin-top: 1.25rem; }
 
+    .playground { margin-top: 2.5rem; }
+    .orbits { margin-top: 1.5rem; }
+
     .pad {
       position: relative;
       height: min(56vh, 520px);
@@ -903,25 +906,20 @@ i &lt;3 to work with u</p>
     </div>
 
     <div class="lab-body">
-      <h2 class="lab-heading">Play</h2>
-      <p class="lab-intro">build a little soundscape. click anywhere to drop a note that keeps looping, click it again to remove it.</p>
-
+      <div class="playground">
       <div class="pad" id="pad">
         <canvas></canvas>
         <div class="pad-hint">click anywhere</div>
       </div>
-      <div class="pad-legend"><span>← low · high →</span><button class="pad-clear" type="button">clear</button></div>
-
-      <h2 class="lab-heading">Orbits</h2>
-      <p class="lab-intro">a tiny circular sequencer. click on an orbit to drop a note, it plays every time it passes the needle. click a note to remove it.</p>
+      <div class="pad-legend"><span></span><button class="pad-clear" type="button">clear</button></div>
 
       <div class="orbits" id="orbits"><canvas></canvas></div>
       <div class="orbit-controls">
-        <button type="button" data-act="play">play</button>
         <span class="oc-group"><button type="button" data-act="less" aria-label="fewer orbits">−</button><span data-show="orbits">4 orbits</span><button type="button" data-act="more" aria-label="more orbits">+</button></span>
         <span class="oc-group"><button type="button" data-act="slower" aria-label="slower">−</button><span data-show="bpm">90 bpm</span><button type="button" data-act="faster" aria-label="faster">+</button></span>
         <button type="button" data-act="quant" aria-pressed="true">quantize on</button>
         <button type="button" data-act="clear">clear</button>
+      </div>
       </div>
 
       <h2 class="lab-heading">Samples</h2>
@@ -1235,7 +1233,7 @@ i &lt;3 to work with u</p>
     const PITCH = [81, 79, 76, 74, 72, 69, 67, 64].map(m => m - 12);
     const hz = m => 440 * Math.pow(2, (m - 69) / 12);
 
-    let count = 4, bpm = 90, quant = true, playing = false;   // starts on first click (browsers need a gesture for sound)
+    let count = 4, bpm = 90, quant = true, playing = false;   // starts turning on the first click (browsers need a gesture for sound)
     const notes = [];                 // {o: ring, a: 0..1 position on the ring, hits: [times]}
     const period = () => 240 / bpm;   // seconds per turn (4 beats)
 
@@ -1317,7 +1315,6 @@ i &lt;3 to work with u</p>
     function start() {
       initAudio();
       t0 = ac.currentTime - pausedPhase * period(); schedUntil = ac.currentTime; playing = true;
-      ctrl.querySelector('[data-act="play"]').textContent = 'stop';
     }
     box.addEventListener('pointerdown', e => {
       e.preventDefault();
@@ -1353,11 +1350,6 @@ i &lt;3 to work with u</p>
     ctrl.addEventListener('click', e => {
       const b = e.target.closest('button'); if (!b) return;
       const act = b.dataset.act;
-      if (act === 'play') {
-        initAudio();
-        if (playing) { pausedPhase = phaseAt(ac.currentTime); playing = false; b.textContent = 'play'; }
-        else start();
-      }
       if (act === 'more' && count < MAX) count++;
       if (act === 'less' && count > 1) { count--; for (let i = notes.length - 1; i >= 0; i--) if (notes[i].o >= count) notes.splice(i, 1); }
       if (act === 'more' || act === 'less') show('orbits', `${count} orbit${count > 1 ? 's' : ''}`);
