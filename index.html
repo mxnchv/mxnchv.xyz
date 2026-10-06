@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>mxnchv — audio design</title>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
     /* ─── TOKENS ─── */
     :root {
@@ -17,6 +17,8 @@
       --grey-dim: rgba(255,255,255,0.35);
       --font-display: 'EVA Tall Serif', Georgia, serif;
       --font-ui: 'Space Mono', 'Courier New', monospace;
+      /* Evangelion title-card look: heavy Mincho serif (stand-in for Matisse EB) */
+      --font-eva: 'Shippori Mincho B1', 'Times New Roman', serif;
       color-scheme: dark;
     }
 
@@ -177,14 +179,18 @@
     }
 
     .card-title {
-      font-family: var(--font-display);
-      font-size: clamp(4.8rem, 9vw, 7.6rem);
-      font-weight: normal;
+      font-family: var(--font-eva);
+      font-size: clamp(3.4rem, 6.4vw, 5.6rem);
+      font-weight: 800;
       line-height: 1;
-      letter-spacing: 0.04em;
+      letter-spacing: -0.01em;
+      /* EVA cards squeeze the type horizontally and stretch it vertically */
+      scale: 0.72 1.25;
+      transform-origin: left center;
       text-transform: uppercase;
       color: var(--white);
-      margin-bottom: 0.45rem;
+      /* make room for the vertical stretch, which doesn't affect layout */
+      margin-bottom: 1.3rem;
     }
 
     .card-desc {
