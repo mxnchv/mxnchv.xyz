@@ -33,6 +33,27 @@
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* cursor: a small dot that shows the negative of whatever is under it */
+    @media (pointer: fine) {
+      html.has-cursor, html.has-cursor * { cursor: none !important; }
+    }
+    #cursor {
+      position: fixed;
+      left: 0; top: 0;
+      width: 18px; height: 18px;
+      margin: -9px 0 0 -9px;
+      border-radius: 50%;
+      background: #fff;
+      mix-blend-mode: difference;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0;
+      transition: width 0.25s ease, height 0.25s ease, margin 0.25s ease, opacity 0.2s ease;
+      will-change: transform;
+    }
+    #cursor.on { opacity: 1; }
+    #cursor.big { width: 44px; height: 44px; margin: -22px 0 0 -22px; }
+
     html, body {
       width: 100%; height: 100%;
       background: var(--black);
@@ -547,6 +568,7 @@
     }
     .orbit-controls button:hover { color: var(--white); }
     .oc-group { display: inline-flex; align-items: center; gap: 0.7rem; }
+    .oc-group [data-act="in"], .oc-group [data-act="out"], .oc-group [data-act="scatter"] { padding: 0.2rem 0; margin-right: 0.8rem; }
     .oc-group button { padding: 0.2rem 0.35rem; }
     .orbit-controls [data-act="clear"] { margin-left: auto; }
 
@@ -642,6 +664,8 @@
   </style>
 </head>
 <body>
+
+<div id="cursor" aria-hidden="true"></div>
 
 <!-- ══════════════════ HOME ══════════════════ -->
 <div id="home">
@@ -918,6 +942,7 @@ i &lt;3 to work with u</p>
         <span class="oc-group"><button type="button" data-act="less" aria-label="fewer orbits">−</button><span data-show="orbits">4 orbits</span><button type="button" data-act="more" aria-label="more orbits">+</button></span>
         <span class="oc-group"><button type="button" data-act="slower" aria-label="slower">−</button><span data-show="bpm">90 bpm</span><button type="button" data-act="faster" aria-label="faster">+</button></span>
         <button type="button" data-act="quant" aria-pressed="true">quantize on</button>
+        <span class="oc-group"><button type="button" data-act="in">← inward</button><button type="button" data-act="out">outward →</button><button type="button" data-act="scatter">scatter</button></span>
         <button type="button" data-act="clear">clear</button>
       </div>
       </div>
@@ -1233,15 +1258,18 @@ i &lt;3 to work with u</p>
     const PITCH = [81, 79, 76, 74, 72, 69, 67, 64].map(m => m - 12);
     const hz = m => 440 * Math.pow(2, (m - 69) / 12);
 
-    let count = 4, bpm = 90, quant = true, playing = false;   // starts turning on the first click (browsers need a gesture for sound)
-    const notes = [];                 // {o: ring, a: 0..1 position on the ring, hits: [times]}
+    let count = 4, bpm = 90, quant = true;
+    const notes = [];                 // {o: ring, a: 0..1 position on the ring, r: drawn radius, hits: [times]}
     const period = () => 240 / bpm;   // seconds per turn (4 beats)
 
     // ── audio
     let ac = null, out = null;
-    let t0 = 0, pausedPhase = 0, schedUntil = 0;
+    // the rings turn from the start; until the first click (no sound allowed yet) they run on the page clock
+    let t0 = performance.now() / 1000, schedUntil = 0;
+    const clock = () => ac ? ac.currentTime : performance.now() / 1000;
     function initAudio() {
       if (ac) { if (ac.state === 'suspended') ac.resume(); return; }
+      const ph = phaseAt(clock());
       ac = new (window.AudioContext || window.webkitAudioContext)();
       const comp = ac.createDynamicsCompressor();
       comp.threshold.value = -18; comp.ratio.value = 4;
@@ -1253,7 +1281,7 @@ i &lt;3 to work with u</p>
       const damp = ac.createBiquadFilter(); damp.type = 'lowpass'; damp.frequency.value = 2000;
       out.connect(send); send.connect(dl); dl.connect(damp); damp.connect(fb); fb.connect(dl);
       damp.connect(comp);
-      t0 = ac.currentTime - pausedPhase * period();
+      t0 = ac.currentTime - ph * period();   // carry on from the same rotation
       schedUntil = ac.currentTime;
     }
     function pluck(at, midi) {
@@ -1270,14 +1298,14 @@ i &lt;3 to work with u</p>
       o1.start(at); o2.start(at); o1.stop(at + len + 0.05); o2.stop(at + len + 0.05);
     }
 
-    // rotation of every ring, 0..1, at audio time t
-    const phaseAt = t => playing && ac ? (((t - t0) / period()) % 1 + 1) % 1 : pausedPhase;
+    // rotation of every ring, 0..1, at clock time t
+    const phaseAt = t => (((t - t0) / period()) % 1 + 1) % 1;
     const wrap = x => ((x % 1) + 1) % 1;
     const visible = () => box.offsetParent !== null;
 
     // look-ahead scheduler: a note at position a hits the needle when phase + a = 0 (mod 1)
     setInterval(() => {
-      if (!ac || !playing) return;
+      if (!ac) return;
       const now = ac.currentTime, to = now + 0.15;
       if (!visible()) { schedUntil = to; return; }
       const from = Math.max(schedUntil, now), P = period();
@@ -1309,19 +1337,13 @@ i &lt;3 to work with u</p>
     // ── input
     const pos = e => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
     function noteXY(n, ph) {
-      const c = centre(), ang = (n.a + ph) * TAU - Math.PI / 2, r = radius(n.o);
+      const c = centre(), ang = (n.a + ph) * TAU - Math.PI / 2, r = n.r ?? radius(n.o);
       return { x: c.x + Math.cos(ang) * r, y: c.y + Math.sin(ang) * r };
-    }
-    function start() {
-      initAudio();
-      t0 = ac.currentTime - pausedPhase * period(); schedUntil = ac.currentTime; playing = true;
     }
     box.addEventListener('pointerdown', e => {
       e.preventDefault();
-      const first = !ac;
       initAudio();
-      const p = pos(e), ph = phaseAt(ac.currentTime);
-      if (first) start();
+      const p = pos(e), ph = phaseAt(clock());
       // hit an existing note? remove it
       const hit = notes.findIndex(n => { const q = noteXY(n, ph); return Math.hypot(q.x - p.x, q.y - p.y) < 12; });
       if (hit >= 0) { notes.splice(hit, 1); return; }
@@ -1335,7 +1357,7 @@ i &lt;3 to work with u</p>
       let a = wrap(world - ph);
       if (quant) a = wrap(Math.round(a * GRID) / GRID);
       if (notes.some(n => n.o === best && Math.abs(wrap(n.a - a + 0.5) - 0.5) < 0.5 / GRID)) return;
-      notes.push({ o: best, a, hits: [] });
+      notes.push({ o: best, a, r: radius(best), hits: [] });
     });
     box.addEventListener('contextmenu', e => e.preventDefault());
 
@@ -1343,8 +1365,7 @@ i &lt;3 to work with u</p>
     const show = (k, v) => { ctrl.querySelector(`[data-show="${k}"]`).textContent = v; };
     function setTempo(next) {
       next = Math.max(40, Math.min(200, next));
-      if (ac && playing) { const ph = phaseAt(ac.currentTime); bpm = next; t0 = ac.currentTime - ph * period(); }
-      else bpm = next;
+      const ph = phaseAt(clock()); bpm = next; t0 = clock() - ph * period();
       show('bpm', `${bpm} bpm`);
     }
     ctrl.addEventListener('click', e => {
@@ -1361,6 +1382,10 @@ i &lt;3 to work with u</p>
         b.setAttribute('aria-pressed', quant);
         if (quant) notes.forEach(n => { n.a = wrap(Math.round(n.a * GRID) / GRID); });
       }
+      // move every note one ring in / out (wrapping round), or scatter them across the rings
+      if (act === 'in') notes.forEach(n => { n.o = (n.o - 1 + count) % count; });
+      if (act === 'out') notes.forEach(n => { n.o = (n.o + 1) % count; });
+      if (act === 'scatter') notes.forEach(n => { n.o = Math.floor(Math.random() * count); });
       if (act === 'clear') notes.length = 0;
     });
 
@@ -1368,7 +1393,7 @@ i &lt;3 to work with u</p>
     function draw() {
       requestAnimationFrame(draw);
       if (!visible() || !W) return;
-      const now = ac ? ac.currentTime : 0, ph = phaseAt(now), c = centre();
+      const now = clock(), ph = phaseAt(now), c = centre();
       g.setTransform(dpr, 0, 0, dpr, 0, 0);
       g.clearRect(0, 0, W, H);
 
@@ -1396,6 +1421,7 @@ i &lt;3 to work with u</p>
 
       // notes
       for (const n of notes) {
+        n.r = n.r == null ? radius(n.o) : n.r + (radius(n.o) - n.r) * (calm ? 1 : 0.18);   // glide between rings
         n.hits = n.hits.filter(t => now - t < 1.2);
         const q = noteXY(n, ph);
         let glow = 0;
@@ -1411,10 +1437,19 @@ i &lt;3 to work with u</p>
       }
     }
     requestAnimationFrame(draw);
-
-    // a little starter pattern so it isn't empty
-    [[0, 0], [0, 0.5], [1, 0.25], [1, 0.625], [2, 0.125], [3, 0.75], [3, 0.875]]
-      .forEach(([o, a]) => notes.push({ o, a, hits: [] }));
+  })();
+  // cursor: a negative dot that follows the mouse (mouse/trackpad only)
+  (() => {
+    if (!matchMedia('(pointer: fine)').matches) return;
+    const dot = document.getElementById('cursor');
+    document.documentElement.classList.add('has-cursor');
+    addEventListener('pointermove', e => {
+      if (e.pointerType !== 'mouse') return;
+      dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+      dot.classList.add('on');
+      dot.classList.toggle('big', !!e.target.closest('a, button, .card, .sample-row'));
+    });
+    document.addEventListener('mouseleave', () => dot.classList.remove('on'));
   })();
 </script>
 </body>
