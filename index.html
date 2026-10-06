@@ -317,26 +317,56 @@
 
     /* section label — full width strip at top of scroll */
     .section-label {
+      position: relative;
+      overflow: hidden;
       display: flex;
-      align-items: flex-end;
-      padding: 3rem 2.5rem 1.5rem;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: flex-start;
+      min-height: 34vh;
+      padding: 3rem 2.5rem 1.75rem;
       border-bottom: 1px solid #141414;
     }
+    .section-label > :not(.label-bg) { position: relative; z-index: 2; }
+    .section-label::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        100deg,
+        rgba(0,0,0,0.82) 0%,
+        rgba(0,0,0,0.3) 55%,
+        rgba(0,0,0,0.05) 100%
+      );
+      z-index: 1;
+      transition: opacity 0.6s ease;
+    }
+    .section-label:hover::before { opacity: 0.75; }
+    .label-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: grayscale(100%) brightness(0.38);
+      transition: filter 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    .section-label:hover .label-bg { filter: grayscale(0%) brightness(0.55); }
     .section-label h1 {
-      font-family: var(--font-display);
-      font-size: clamp(3.5rem, 8vw, 7rem);
-      font-weight: normal;
-      line-height: 0.9;
-      letter-spacing: 0.04em;
+      font-family: var(--font-eva);
+      font-size: clamp(3.4rem, 6.4vw, 5.6rem);
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.01em;
+      scale: 0.72 1.25;
+      transform-origin: left bottom;
       text-transform: uppercase;
     }
     .section-label-sub {
       font-family: var(--font-ui);
       font-size: 0.6rem;
-      color: var(--grey-text);
+      color: rgba(255,255,255,0.45);
       letter-spacing: 0.08em;
-      margin-left: 2rem;
-      padding-bottom: 0.6rem;
+      margin-top: 0.9rem;
     }
 
     /* ── VIDEO ITEMS: full-width, scroll libre ── */
@@ -414,12 +444,14 @@
     .sample-row:hover { padding-left: 0.75rem; }
 
     .sample-name {
-      font-family: var(--font-display);
+      font-family: var(--font-eva);
       font-size: 1.3rem;
-      font-weight: normal;
+      font-weight: 800;
       line-height: 1;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: -0.01em;
+      scale: 0.72 1.25;
+      transform-origin: left center;
     }
 
     .sample-by {
@@ -427,7 +459,7 @@
       font-size: 0.58rem;
       color: var(--grey-text);
       letter-spacing: 0.06em;
-      margin-top: 0.3rem;
+      margin-top: 0.55rem;
     }
 
     .sample-dl {
@@ -567,6 +599,7 @@ i &lt;3 to work with u</p>
 
   <div class="section-body">
     <div class="section-label">
+      <video class="label-bg" src="media/card_branding.mp4" poster="media/card_branding.jpg" autoplay muted loop playsinline preload="metadata"></video>
       <h1>Branding</h1>
       <span class="section-label-sub">sound for brands &amp; motion.</span>
     </div>
@@ -610,6 +643,7 @@ i &lt;3 to work with u</p>
 
   <div class="section-body">
     <div class="section-label">
+      <video class="label-bg" src="media/card_videogames.mp4" poster="media/card_videogames.jpg" autoplay muted loop playsinline preload="metadata"></video>
       <h1>Videogames</h1>
       <span class="section-label-sub">game audio &amp; implementation.</span>
     </div>
@@ -649,6 +683,7 @@ i &lt;3 to work with u</p>
 
   <div class="section-body">
     <div class="section-label">
+      <video class="label-bg" src="media/card_collabs.mp4" poster="media/card_collabs.jpg" autoplay muted loop playsinline preload="metadata"></video>
       <h1>Collabs</h1>
       <span class="section-label-sub">audio / visual work with others.</span>
     </div>
@@ -692,6 +727,7 @@ i &lt;3 to work with u</p>
 
   <div class="section-body">
     <div class="section-label">
+      <video class="label-bg" src="media/card_lab.mp4" poster="media/card_lab.jpg" autoplay muted loop playsinline preload="metadata"></video>
       <h1>Lab</h1>
       <span class="section-label-sub">plugins, samples &amp; experiments.</span>
     </div>
