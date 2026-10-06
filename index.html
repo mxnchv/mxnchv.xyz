@@ -67,7 +67,7 @@
       inset: 0;
       width: 100%; height: 100%;
       object-fit: cover;
-      filter: brightness(0.5);
+      filter: brightness(0.8);
       z-index: 0;
     }
 
@@ -111,6 +111,7 @@
       line-height: 2;
       color: rgba(255,255,255,0.75);
       white-space: pre-line;
+      text-shadow: 0 1px 8px rgba(0,0,0,0.9);
     }
 
     .about-footer {
@@ -145,13 +146,13 @@
       inset: 0;
       width: 100%; height: 100%;
       object-fit: cover;
-      filter: grayscale(100%) brightness(0.38);
+      filter: grayscale(100%) brightness(0.65);
       transition: filter 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
                   transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       will-change: filter, transform;
     }
     .card:hover .card-bg {
-      filter: grayscale(0%) brightness(0.55);
+      filter: grayscale(0%) brightness(0.9);
       transform: scale(1.04);
     }
 
@@ -161,8 +162,8 @@
       inset: 0;
       background: linear-gradient(
         100deg,
-        rgba(0,0,0,0.82) 0%,
-        rgba(0,0,0,0.3) 55%,
+        rgba(0,0,0,0.6) 0%,
+        rgba(0,0,0,0.15) 55%,
         rgba(0,0,0,0.05) 100%
       );
       z-index: 1;
@@ -190,6 +191,7 @@
       scale: 0.72 1.25;
       transform-origin: left center;
       text-transform: uppercase;
+      text-shadow: 0 2px 28px rgba(0,0,0,0.45);
       color: var(--white);
       /* make room for the vertical stretch, which doesn't affect layout */
       margin-bottom: 1.3rem;
@@ -198,7 +200,8 @@
     .card-desc {
       font-family: var(--font-ui);
       font-size: 0.62rem;
-      color: rgba(255,255,255,0.38);
+      color: rgba(255,255,255,0.6);
+      text-shadow: 0 1px 8px rgba(0,0,0,0.9);
       letter-spacing: 0.06em;
       transition: color 0.4s ease;
     }
@@ -333,8 +336,8 @@
       inset: 0;
       background: linear-gradient(
         100deg,
-        rgba(0,0,0,0.82) 0%,
-        rgba(0,0,0,0.3) 55%,
+        rgba(0,0,0,0.55) 0%,
+        rgba(0,0,0,0.1) 55%,
         rgba(0,0,0,0.05) 100%
       );
       z-index: 1;
@@ -346,7 +349,7 @@
       width: 100%; height: 100%;
       object-fit: cover;
       /* section headers: black & white negative (home cards stay as they are) */
-      filter: grayscale(100%) invert(100%) brightness(0.45);
+      filter: grayscale(100%) invert(100%) brightness(0.8);
     }
     .section-label h1 {
       font-family: var(--font-eva);
@@ -357,11 +360,13 @@
       scale: 0.72 1.25;
       transform-origin: left bottom;
       text-transform: uppercase;
+      text-shadow: 0 2px 28px rgba(0,0,0,0.45);
     }
     .section-label-sub {
       font-family: var(--font-ui);
       font-size: 0.6rem;
-      color: rgba(255,255,255,0.45);
+      color: rgba(255,255,255,0.7);
+      text-shadow: 0 1px 8px rgba(0,0,0,0.9);
       letter-spacing: 0.08em;
       margin-top: 1rem;
     }
