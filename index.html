@@ -1092,8 +1092,8 @@ i &lt;3 to work with u</p>
       x: 0, y: 0, vx: 0, vy: 0, r: 0, vr: 0, heat: 0,
       p1: rnd(0, 6.28), p2: rnd(0, 6.28), f: rnd(0.25, 0.5),
     }));
-    const SPRING = 0.8, DAMP = 1.5;    // low spring + low damping = slow, floaty return
-    const FLOAT_S = 3;                 // how long a hit letter keeps floating around
+    const SPRING = 3, DAMP = 2.8;      // soft spring, light damping: floaty but quick to settle
+    const FLOAT_S = 1.2;               // how long a hit letter keeps floating around
 
     let mouse = null, running = false, last = 0;
     function step(now) {
