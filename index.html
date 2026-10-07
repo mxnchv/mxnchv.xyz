@@ -2741,21 +2741,21 @@ i &lt;3 to work with u</p>
     }
 
     // hopping between sections with the top tabs (e.g. branding → videogames) plays a short
-    // ~2 s slice of the destination card's loop, from a random point between 30% and 70% of it
+    // slice of the destination card's loop, from a random point between 30% and 70% of it
     document.querySelectorAll('.section-nav a').forEach(a => a.addEventListener('click', () => {
       if (a.classList.contains('active')) return;                        // already there
       const i = cards.findIndex(c => c.getAttribute('href') === a.getAttribute('href'));
       const buf = buffers[i];
       if (i < 0 || !buf || !ac || ac.state !== 'running') return;
-      const LEN = 2, t = ac.currentTime + 0.01;
+      const ATK = 1, FALL = 2, t = ac.currentTime + 0.01;
       const offset = buf.duration * (0.3 + 0.4 * Math.random());
       const src = ac.createBufferSource(), env = ac.createGain();
       src.buffer = buf;
-      env.gain.setValueAtTime(0.0001, t);
-      env.gain.exponentialRampToValueAtTime(0.75, t + 0.012);            // in almost at once (no click)
-      env.gain.exponentialRampToValueAtTime(0.0001, t + LEN);            // and decays from that moment on
+      env.gain.setValueAtTime(0, t);
+      env.gain.linearRampToValueAtTime(0.75, t + ATK);                   // swells in over 1 s
+      env.gain.exponentialRampToValueAtTime(0.0001, t + ATK + FALL);     // then falls away over 2 s
       src.connect(env); env.connect(out);
-      src.start(t, offset, LEN + 0.05);
+      src.start(t, offset, ATK + FALL + 0.05);
     }));
 
     // scheduler: overlapping Hann-windowed grains read around each sounding card's position
@@ -2811,8 +2811,8 @@ i &lt;3 to work with u</p>
             src.buffer = buf; src.loop = true;
             src.playbackRate.value = Math.pow(2, (m - 60) / 12); src.detune.value = 4;   // synth 03 is 4 ¢ flat
             g.gain.setValueAtTime(0, t);                                    // a quick pad:
-            g.gain.linearRampToValueAtTime(0.32, t + 1);                     // 1 s swell
-            g.gain.setTargetAtTime(0, t + 1.2, 1.1);                         // then a long ~5 s fade
+            g.gain.linearRampToValueAtTime(0.32, t + 0.25);                  // soft ~250 ms swell
+            g.gain.setTargetAtTime(0, t + 0.45, 1.1);                        // then a long ~5 s fade
             pan.pan.value = (i - 1) * 0.3;
             src.connect(g); g.connect(pan); pan.connect(out);
             src.start(t, 1 + i * 0.7); src.stop(t + 7.5);
