@@ -537,31 +537,6 @@
     }
     .yt:hover .yt-play, .yt:focus-visible .yt-play { background: #fff; color: #000; }
 
-    /* a film hosted somewhere that can't be embedded: a cover that opens it in a new tab */
-    .video-out {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: clamp(1.6rem, 3.5vw, 3rem);           /* room for the title's vertical stretch */
-      text-decoration: none; color: var(--white);
-    }
-    .video-out video {
-      position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
-      filter: grayscale(100%) brightness(0.45);
-      transition: filter 0.6s ease, transform 0.7s ease;
-    }
-    .video-out:hover video { filter: grayscale(0%) brightness(0.7); transform: scale(1.03); }
-    .vo-title, .vo-cta { position: relative; }
-    .vo-title {
-      font-family: var(--font-eva); font-weight: 800; text-transform: uppercase;
-      font-size: clamp(2.6rem, 7vw, 6rem); line-height: 0.9; text-align: center;
-      scale: 0.72 1.25;
-      text-shadow: 0 2px 28px rgba(0,0,0,0.5);
-    }
-    .vo-cta {
-      font-family: var(--font-ui); font-size: 0.8rem; letter-spacing: 0.12em;
-      padding: 0.7rem 1.3rem; border: 1px solid rgba(255,255,255,0.5);
-      transition: background 0.25s, color 0.25s;
-    }
-    .video-out:hover .vo-cta { background: var(--white); color: var(--black); }
 
     .video-item iframe {
       position: absolute;
@@ -1554,11 +1529,10 @@ i &lt;3 to work with u</p>
       <span class="section-label-sub">audio / visual work with others.</span>
     </div>
     <div class="video-stack">
-      <a class="video-item video-out" href="https://framerate.tv/watch/3xI1x2XW" target="_blank" rel="noopener">
-        <video src="media/card_collabs.mp4" poster="media/card_collabs.jpg" autoplay muted loop playsinline preload="metadata" aria-hidden="true"></video>
-        <span class="vo-title">The Wood Wide Web</span>
-        <span class="vo-cta">watch on framerate ↗</span>
-      </a>
+      <div class="video-item">
+        <iframe src="https://framerate.tv/embed/25988a3b-6a6e-4e70-8d84-87c46a97b27f?primary_color=%23ffffff&amp;track_color=%23ffffff&amp;theme=minimal" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" loading="lazy" allowfullscreen title="The Wood Wide Web"></iframe>
+        <div class="video-label">The Wood Wide Web</div>
+      </div>
       <div class="video-item">
         <button type="button" class="yt" data-yt="mOuyEFRMTz0" data-q="rel=0&amp;modestbranding=1&amp;color=white" aria-label="play video"><img src="https://i.ytimg.com/vi/mOuyEFRMTz0/hqdefault.jpg" alt="" loading="lazy" decoding="async"><span class="yt-play">▶ play</span></button>
         <div class="video-label">Paula Carvajal — 3D compilation</div>
