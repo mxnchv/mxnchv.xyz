@@ -2744,13 +2744,13 @@ i &lt;3 to work with u</p>
     }
 
     // hopping between sections with the top tabs (e.g. branding → videogames) plays a short
-    // ~0.7 s slice of the destination card's loop, from a random point between 30% and 70% of it
+    // ~1.5 s slice of the destination card's loop, from a random point between 30% and 70% of it
     document.querySelectorAll('.section-nav a').forEach(a => a.addEventListener('click', () => {
       if (a.classList.contains('active')) return;                        // already there
       const i = cards.findIndex(c => c.getAttribute('href') === a.getAttribute('href'));
       const buf = buffers[i];
       if (i < 0 || !buf || !ac || ac.state !== 'running') return;
-      const LEN = 0.7, t = ac.currentTime + 0.01;
+      const LEN = 1.5, t = ac.currentTime + 0.01;
       const offset = buf.duration * (0.3 + 0.4 * Math.random());
       const src = ac.createBufferSource(), env = ac.createGain();
       src.buffer = buf;
