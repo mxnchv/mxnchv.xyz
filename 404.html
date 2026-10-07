@@ -757,7 +757,7 @@
     .hp-start [data-hp="mouse"]:hover { background: none; color: var(--white); }
     .hp-note { color: rgba(255,255,255,0.3); font-size: 0.58rem; }
     .hp-stage.running .hp-start { opacity: 0; pointer-events: none; }
-    /* shown with the camera on until the visitor switches sound with a fist once */
+    /* fist gestures: shown the whole time the camera is on */
     .hp-fist-hint {
       position: absolute;
       left: 0; right: 0; bottom: 1.1rem;
@@ -773,7 +773,25 @@
     }
     .hp-stage.cam .hp-fist-hint { opacity: 1; animation: ghost 2.4s ease-in-out infinite; }
     .hp-fist-hint span { display: block; line-height: 1.9; transition: opacity 0.8s ease; }
-    .hp-stage.fisted .hint-fist, .hp-stage.pinched .hint-pinch { opacity: 0; }
+    /* what each hand does, in the top corners (on the side the hand shows up on, mirrored) */
+    .hp-legend {
+      position: absolute;
+      top: 0.9rem;
+      font-family: var(--font-ui);
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      line-height: 1.9;
+      color: rgba(255,255,255,0.6);
+      text-shadow: 0 1px 8px rgba(0,0,0,0.9);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.8s ease;
+    }
+    .hp-legend b { display: block; font-weight: 400; color: rgba(255,255,255,0.9); }
+    .hp-legend span { display: block; white-space: nowrap; }
+    .hp-legend-l { left: 1rem; }
+    .hp-legend-r { right: 1rem; text-align: right; }
+    .hp-stage.cam .hp-legend { opacity: 1; }
 
     .hp-synth {
       display: grid;
@@ -1421,6 +1439,8 @@ i &lt;3 to work with u</p>
           <video playsinline muted></video>
           <canvas></canvas>
           <div class="hp-ghost hp-ghost-l"><svg viewBox="0 0 100 140" aria-hidden="true"><path d="M30 138 C18 120 14 104 14 90 L14 60 C14 54 22 54 22 60 L22 80 L26 80 L26 22 C26 14 36 14 36 22 L36 72 L40 72 L40 12 C40 4 50 4 50 12 L50 72 L54 72 L54 18 C54 10 64 10 64 18 L64 76 L68 76 L68 38 C68 30 78 30 78 38 L78 96 C78 116 70 128 62 138 Z"/></svg></div>
+          <div class="hp-legend hp-legend-l" aria-hidden="true"><b>left hand</b><span>↔ chord</span><span>↕ notes</span></div>
+          <div class="hp-legend hp-legend-r" aria-hidden="true"><b>right hand</b><span>filter ↔</span><span>reverb · grains ↕</span></div>
           <div class="hp-fist-hint"><span class="hint-fist">blink your right fist · next sound ›</span><span class="hint-pinch">‹ hold your left fist · arpeggio</span></div>
           <div class="hp-ghost hp-ghost-r"><svg viewBox="0 0 100 140" aria-hidden="true"><path d="M30 138 C18 120 14 104 14 90 L14 60 C14 54 22 54 22 60 L22 80 L26 80 L26 22 C26 14 36 14 36 22 L36 72 L40 72 L40 12 C40 4 50 4 50 12 L50 72 L54 72 L54 18 C54 10 64 10 64 18 L64 76 L68 76 L68 38 C68 30 78 30 78 38 L78 96 C78 116 70 128 62 138 Z"/></svg></div>
           <div class="hp-start">
@@ -2417,7 +2437,7 @@ i &lt;3 to work with u</p>
         fl.open = 0;
         if (!fl.since) fl.since = now;
         lFistClosed = now - fl.since > SETTLE_MS;
-        if (!pinch && now - fl.since > 150) { pinch = true; stage.classList.add('pinched'); }
+        if (!pinch && now - fl.since > 150) pinch = true;
       } else {
         if (!fl.open) fl.open = now;
         if (now - fl.open > SETTLE_MS) { fl.since = 0; lFistClosed = false; pinch = false; }
@@ -2435,7 +2455,6 @@ i &lt;3 to work with u</p>
             setSynth(synthIdx + 1);
             const btn = root.querySelector('.hp-next');
             btn.classList.add('flash'); setTimeout(() => btn.classList.remove('flash'), 450);
-            stage.classList.add('fisted');                       // they got it: hide that hint
           }
           fr.since = 0;
         }
@@ -2553,7 +2572,7 @@ i &lt;3 to work with u</p>
       if (ac) { ac.close(); ac = null; nodes = null; voices = null; buffers = {}; }
       mode = null; pointerDown = false; hands = { L: null, R: null };
       Object.assign(ctl, { reverb: 0.2, notes: 2, filter: 1, grain: 0, on: 0, chord: 0 });
-      stage.classList.remove('running', 'cam', 'mouse', 'fisted', 'pinched');
+      stage.classList.remove('running', 'cam', 'mouse');
       pinch = false; lFistClosed = false; fist.L.since = fist.L.open = fist.R.since = fist.R.open = 0;
       root.style.removeProperty('--ar');
       stage.querySelector('.hp-note').textContent = 'your camera never leaves your device';
