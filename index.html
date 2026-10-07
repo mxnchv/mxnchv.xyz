@@ -1484,7 +1484,7 @@ i &lt;3 to work with u</p>
       osc.frequency.exponentialRampToValueAtTime(f, t + 0.015);             // …down to the note, fast (a click, not a zap)
       amp.gain.setValueAtTime(0.0001, t);
       amp.gain.exponentialRampToValueAtTime(0.18, t + 0.004);
-      const decay = 0.22 + 0.3 * far;                                       // 220 ms → 520 ms
+      const decay = 0.35 + 1.15 * far;                                      // 350 ms → 1.5 s
       amp.gain.exponentialRampToValueAtTime(0.0001, t + decay);
       pan.pan.value = Math.max(-1, Math.min(1, xRatio * 2 - 1)) * 0.7;      // left letters sound left
       osc.connect(amp); amp.connect(pan); pan.connect(blipOut);
