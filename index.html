@@ -2740,6 +2740,25 @@ i &lt;3 to work with u</p>
       cardGain[i].gain.setTargetAtTime(0, ac.currentTime, RELEASE);
     }
 
+    // hopping between sections with the top tabs (e.g. branding → videogames) plays a short
+    // ~0.7 s slice of the destination card's loop, from a random point between 30% and 70% of it
+    document.querySelectorAll('.section-nav a').forEach(a => a.addEventListener('click', () => {
+      if (a.classList.contains('active')) return;                        // already there
+      const i = cards.findIndex(c => c.getAttribute('href') === a.getAttribute('href'));
+      const buf = buffers[i];
+      if (i < 0 || !buf || !ac || ac.state !== 'running') return;
+      const LEN = 0.7, t = ac.currentTime + 0.01;
+      const offset = buf.duration * (0.3 + 0.4 * Math.random());
+      const src = ac.createBufferSource(), env = ac.createGain();
+      src.buffer = buf;
+      env.gain.setValueAtTime(0, t);
+      env.gain.linearRampToValueAtTime(0.7, t + 0.03);                   // quick fade in
+      env.gain.setValueAtTime(0.7, t + LEN - 0.25);
+      env.gain.linearRampToValueAtTime(0, t + LEN);                      // and a short tail out
+      src.connect(env); env.connect(out);
+      src.start(t, offset, LEN + 0.05);
+    }));
+
     // scheduler: overlapping Hann-windowed grains read around each sounding card's position
     setInterval(() => {
       if (!ac || ac.state !== 'running') return;
