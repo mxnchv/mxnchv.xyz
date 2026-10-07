@@ -447,25 +447,19 @@
     }
     .section-body::-webkit-scrollbar { display: none; }
 
-    /* section label — full width strip at top of scroll */
+    /* section label — a slim strip at the top of the section: name, then "• description" on its right */
     .section-label {
       position: sticky;   /* stays at the top while the section scrolls */
       top: 0;
       z-index: 5;
       overflow: hidden;
       display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      align-items: flex-start;
-      padding: 3rem 2.5rem 1.1rem;
+      align-items: center;
+      gap: 1.1rem;
+      padding: 1.15rem 2.5rem;
       border-bottom: 1px solid #141414;
       background: var(--black);
-      transition: padding 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
     }
-    /* once you scroll, the strip shrinks and drops the description */
-    .section-label.compact { padding: 1.15rem 2.5rem; justify-content: center; }
-    .section-label.compact h1 { font-size: clamp(2.6rem, 4.6vw, 4.2rem); transform-origin: left center; }
-    .section-label.compact .section-label-sub { opacity: 0; max-height: 0; margin-top: 0; }
     .section-label > :not(.label-bg) { position: relative; z-index: 2; }
     .section-label::before {
       content: '';
@@ -490,27 +484,26 @@
     }
     .section-label h1 {
       font-family: var(--font-eva);
-      font-size: clamp(5rem, 11vw, 10rem);
+      font-size: clamp(2.6rem, 4.6vw, 4.2rem);
       font-weight: 800;
       line-height: 0.82;
       letter-spacing: -0.01em;
-      scale: 0.72 1.25;
-      transform-origin: left bottom;
+      scale: 0.72 1.25;               /* narrow & tall; JS trims the width the x-scale leaves empty */
+      transform-origin: left center;
       text-transform: uppercase;
       text-shadow: 0 2px 28px rgba(0,0,0,0.45);
-      transition: font-size 0.45s cubic-bezier(0.2, 0.7, 0.2, 1), transform-origin 0.45s ease;
     }
     .section-label-sub {
       font-family: var(--font-ui);
-      font-size: 0.6rem;
-      color: rgba(255,255,255,0.7);
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.8);
       text-shadow: 0 1px 8px rgba(0,0,0,0.9);
       letter-spacing: 0.08em;
-      margin-top: 1rem;
-      max-height: 2em;
-      overflow: hidden;
-      transition: opacity 0.3s ease, max-height 0.45s ease, margin-top 0.45s ease;
+      line-height: 1.6;
+      flex: 1 1 0;                    /* always to the right of the name; wraps onto two lines if narrow */
+      min-width: 0;
     }
+    .section-label-sub::before { content: '•'; margin-right: 1.1rem; }
 
     /* ── VIDEO ITEMS: full-width, scroll libre ── */
     .video-stack {
@@ -1047,10 +1040,10 @@
       .section-nav::-webkit-scrollbar { display: none; }
       .section-nav a { font-size: 1rem; flex-shrink: 0; }
 
-      .section-label { padding: 2.2rem 1.25rem 1rem; }
-      .section-label h1 { font-size: clamp(3.2rem, 14vw, 7rem); }
-      .section-label.compact { padding: 0.9rem 1.25rem; }
-      .section-label.compact h1 { font-size: 2.4rem; }
+      .section-label { padding: 0.9rem 1.25rem; gap: 0.7rem; }
+      .section-label h1 { font-size: 2.2rem; }
+      .section-label-sub { font-size: 0.62rem; }
+      .section-label-sub::before { margin-right: 0.6rem; }
 
       /* videos keep their shape instead of filling the screen */
       .video-item { height: auto; min-height: 0; aspect-ratio: 16 / 9; }
@@ -2174,15 +2167,13 @@ i &lt;3 to work with u</p>
     });
     document.addEventListener('mouseleave', () => dot.classList.remove('on'));
   })();
-  // section header strip: compact once the section is scrolled
-  document.querySelectorAll('.section-body').forEach(body => {
-    const label = body.querySelector('.section-label');
-    body.addEventListener('scroll', () => {
-      const y = body.scrollTop;
-      if (y > 80) label.classList.add('compact');
-      else if (y < 10) label.classList.remove('compact');
-    }, { passive: true });
-  });
+  // section titles are squeezed to 72% width with CSS scale, which leaves their layout box wider
+  // than the letters; pull the description in by the difference so it sits right after the name
+  {
+    const trim = h => { h.style.marginRight = (-(1 - 0.72) * h.offsetWidth).toFixed(1) + 'px'; };
+    const ro = new ResizeObserver(es => es.forEach(e => trim(e.target)));
+    document.querySelectorAll('.section-label h1').forEach(h => ro.observe(h));
+  }
   // Lab: hand synth. Your hands play one of mxnchv's synth one-shots (looped):
   //   left hand  x → reverb (further left = more)      y → notes in the chord (higher = more)
   //   right hand x → low-pass filter (further right = more open)   y → granular glitch (higher = smaller, more scattered grains)
