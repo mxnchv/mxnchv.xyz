@@ -633,11 +633,16 @@
     .orbit-controls [data-act="clear"] { margin-left: auto; }
 
     /* ── LAB: hand-tracking synth ── */
-    .handplay { margin-top: 1.5rem; }
+    /* the whole game takes the camera's own shape (--ar = width / height), up to 80% of the screen
+       height, so the picture is shown whole instead of being cropped/zoomed to fill a box */
+    .handplay {
+      --ar: 1.7778;
+      margin: 1.5rem auto 0;
+      width: min(100%, 80vh * var(--ar));
+    }
     .hp-stage {
       position: relative;
-      aspect-ratio: 16 / 9;
-      max-height: 72vh;
+      aspect-ratio: var(--ar);
       width: 100%;
       background: var(--black);
       border: 1px solid #161616;
@@ -961,7 +966,7 @@
       .orbit-controls button { padding: 0.45rem 0; }
       .oc-group button { padding: 0.45rem 0.6rem; }
       .samples-list { max-width: none; }
-      .hp-stage { aspect-ratio: 3 / 4; max-height: 70svh; }
+      .handplay { --ar: 0.75; width: min(100%, 72svh * var(--ar)); }
       .hp-ghost { height: 34%; }
       .hp-ghost-l { left: 6%; }
       .hp-ghost-r { right: 6%; }
@@ -2104,9 +2109,16 @@ i &lt;3 to work with u</p>
       const status = stage.querySelector('.hp-note');
       status.textContent = 'waking up the camera…';
       try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }, audio: false });
+        const portrait = innerHeight > innerWidth;               // phones held upright: ask for an upright picture
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user',
+          width: { ideal: portrait ? 720 : 1280 }, height: { ideal: portrait ? 1280 : 720 } }, audio: false });
       } catch (e) { status.textContent = 'no camera, no problem: play with the mouse'; return; }
       video.srcObject = stream; await video.play();
+      if (video.videoWidth && video.videoHeight) {              // match the box to the camera: no crop, no zoom
+        let ar = video.videoWidth / video.videoHeight;
+        if (innerHeight > innerWidth) ar = Math.min(ar, 1);    // upright screen + wide picture: at most square, not a thin strip
+        root.style.setProperty('--ar', ar.toFixed(4));
+      }
       status.textContent = 'loading hand tracking…';
       try {
         const { FilesetResolver, HandLandmarker } = await import('./vendor/mediapipe/vision_bundle.mjs');
@@ -2246,6 +2258,7 @@ i &lt;3 to work with u</p>
       mode = null; pointerDown = false; hands = { L: null, R: null };
       Object.assign(ctl, { reverb: 0.2, notes: 2, filter: 1, grain: 0, on: 0 });
       stage.classList.remove('running', 'cam', 'mouse');
+      root.style.removeProperty('--ar');
       stage.querySelector('.hp-note').textContent = 'your camera never leaves your device';
       ghostL.classList.remove('show'); ghostR.classList.remove('show');
       setSynth(0);
