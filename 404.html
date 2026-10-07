@@ -2731,21 +2731,23 @@ i &lt;3 to work with u</p>
         if (ac) { cardGain[i].gain.cancelScheduledValues(ac.currentTime); cardGain[i].gain.setTargetAtTime(1, ac.currentTime, ATTACK); }
       });
       card.addEventListener('mousemove', read);
-      card.addEventListener('mouseleave', () => {
-        if (!ac) { v.until = 0; return; }
-        v.until = ac.currentTime + RELEASE * 5;                          // keep grains coming while it fades
-        cardGain[i].gain.cancelScheduledValues(ac.currentTime);
-        cardGain[i].gain.setTargetAtTime(0, ac.currentTime, RELEASE);
-      });
+      card.addEventListener('mouseleave', () => release(i));
+      card.addEventListener('click', () => release(i));                  // opening a section lets it ring out the same way
     });
+    function release(i) {
+      const v = voices[i];
+      if (!ac) { v.until = 0; return; }
+      if (v.until !== Infinity) return;                                  // already releasing
+      v.until = ac.currentTime + RELEASE * 5;                            // keep grains coming while it fades
+      cardGain[i].gain.cancelScheduledValues(ac.currentTime);
+      cardGain[i].gain.setTargetAtTime(0, ac.currentTime, RELEASE);
+    }
 
     // scheduler: overlapping Hann-windowed grains read around each sounding card's position
     setInterval(() => {
       if (!ac || ac.state !== 'running') return;
       const now = ac.currentTime, until = now + 0.12;
-      if (homeEl.style.display === 'none') {                             // left the home page: let everything go
-        voices.forEach((v, i) => { if (v.until > now) { v.until = Math.min(v.until, now + 1); cardGain[i].gain.setTargetAtTime(0, now, 0.15); } });
-      }
+      if (homeEl.style.display === 'none') voices.forEach((v, i) => release(i));   // left home: same release as un-hovering
       voices.forEach((v, i) => {
         const buf = buffers[i];
         if (!buf || v.until <= now) { v.next = 0; return; }
