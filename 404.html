@@ -257,7 +257,8 @@
                   transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       will-change: filter, transform;
     }
-    .card:hover .card-bg {
+    @media (hover: none) { .card, .about-panel { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; } }
+    .card:hover .card-bg, .card.held .card-bg {
       filter: grayscale(0%) brightness(0.9);
       transform: scale(1.04);
     }
@@ -275,7 +276,7 @@
       z-index: 1;
       transition: opacity 0.6s ease;
     }
-    .card:hover::before { opacity: 0.75; }
+    .card:hover::before, .card.held::before { opacity: 0.75; }
 
     .card-content {
       position: relative;
@@ -311,7 +312,7 @@
       letter-spacing: 0.06em;
       transition: color 0.4s ease;
     }
-    .card:hover .card-desc { color: rgba(255,255,255,0.7); }
+    .card:hover .card-desc, .card.held .card-desc { color: rgba(255,255,255,0.7); }
 
     .card-arrow {
       position: absolute;
@@ -321,7 +322,7 @@
       transition: opacity 0.4s ease, transform 0.4s ease;
       z-index: 2;
     }
-    .card:hover .card-arrow {
+    .card:hover .card-arrow, .card.held .card-arrow {
       opacity: 1;
       transform: translateY(-50%) translateX(0);
     }
@@ -1580,6 +1581,38 @@ i &lt;3 to work with u</p>
     }
     tick();
   })();
+  // touch screens have no hover, so the things that sound on hover sound while a finger is held
+  // on them instead: rest the finger ~0.2 s (a quick swipe still scrolls, a quick tap still
+  // taps), then it takes over — sliding plays instead of scrolling, and lifting stops it.
+  function holdToPlay(el, { start, move, end }) {
+    let timer = 0, held = false, x0 = 0, y0 = 0;
+    const pt = e => e.touches[0] || e.changedTouches[0];
+    el.addEventListener('touchstart', e => {
+      if (e.touches.length > 1) return;
+      const p = pt(e); x0 = p.clientX; y0 = p.clientY;
+      clearTimeout(timer);
+      timer = setTimeout(() => { held = true; start(x0, y0); }, 200);
+    }, { passive: true });
+    el.addEventListener('touchmove', e => {
+      const p = pt(e);
+      if (!held) { if (Math.hypot(p.clientX - x0, p.clientY - y0) > 8) clearTimeout(timer); return; }   // it's a scroll
+      e.preventDefault();                                                // held: the finger plays, the page stays put
+      move(p.clientX, p.clientY);
+    }, { passive: false });
+    function stop() {
+      clearTimeout(timer);
+      if (!held) return;
+      held = false; end();
+      // the lift after a hold isn't a tap: swallow the click it would make
+      const swallow = e => { e.preventDefault(); e.stopPropagation(); };
+      addEventListener('click', swallow, { capture: true, once: true });
+      setTimeout(() => removeEventListener('click', swallow, { capture: true }), 400);
+    }
+    el.addEventListener('touchend', stop);
+    el.addEventListener('touchcancel', stop);
+    el.addEventListener('contextmenu', e => { if (held) e.preventDefault(); });   // no long-press menu
+  }
+
   // about text: split into letters; the ones near the cursor get blown away
   (() => {
     const box = document.querySelector('.about-text');
@@ -1638,7 +1671,7 @@ i &lt;3 to work with u</p>
       }
       if (blipCtx.state === 'suspended') blipCtx.resume();
     }
-    ['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, unlockBlips, { capture: true }));
+    ['pointerdown', 'pointerup', 'touchend', 'keydown'].forEach(ev => addEventListener(ev, unlockBlips, { capture: true }));
     // far: 0 when the letter is at home … 1 when it's ~120px away; farther letters ring a bit longer
     function blip(xRatio, far = 0) {
       if (!blipCtx || blipCtx.state !== 'running') return;
@@ -1720,6 +1753,12 @@ i &lt;3 to work with u</p>
       mouse = { x: e.clientX, y: e.clientY, t: e.timeStamp }; wake();
     });
     panel.addEventListener('mouseleave', () => { mouse = null; wake(); });
+    // touch: a held finger does the same
+    function finger(x, y, t = performance.now()) {
+      if (mouse) speed = Math.max(speed, Math.hypot(x - mouse.x, y - mouse.y) / Math.max(0.008, (t - mouse.t) / 1000));
+      mouse = { x, y, t }; wake();
+    }
+    holdToPlay(panel, { start: (x, y) => { speed = 400; finger(x, y); }, move: finger, end: () => { mouse = null; wake(); } });
   })();
   // Lab instrument: every click drops a note that keeps looping at its own pace,
   // so the loops drift against each other into a soundscape. Click a loop to remove it.
@@ -2691,8 +2730,8 @@ i &lt;3 to work with u</p>
   //   x → position in the loop: left edge 10% … right edge 90%
   //   y → grain size: top 1 s … bottom 75 ms
   // Sound starts after the visitor's first click/tap/key on the page (browser rule).
+  // On touch screens it plays while a finger is held on the card (see holdToPlay).
   (() => {
-    if (!matchMedia('(pointer: fine)').matches) return;
     const homeEl = document.getElementById('home');
     const cards = [...homeEl.querySelectorAll('.card')];
     const LOOPS = cards.map((_, i) => `media/grains/loop_${i + 1}.mp3`);
@@ -2712,7 +2751,7 @@ i &lt;3 to work with u</p>
       }
       if (ac.state === 'suspended') ac.resume();
     }
-    ['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, unlock, { capture: true }));
+    ['pointerdown', 'pointerup', 'touchend', 'keydown'].forEach(ev => addEventListener(ev, unlock, { capture: true }));
 
     // what the pointer is doing on which card. Each card is its own voice: it swells in slowly on
     // enter and keeps making grains through a long release after the pointer leaves, so moving
@@ -2726,12 +2765,19 @@ i &lt;3 to work with u</p>
         v.pos = 0.1 + 0.8 * clamp01((e.clientX - r.left) / r.width);
         v.size = Math.pow(0.075, clamp01((e.clientY - r.top) / r.height));   // 1 s at the top → 75 ms at the bottom
       }
-      card.addEventListener('mouseenter', e => {
+      function press(e) {
         read(e); v.until = Infinity;
         if (ac) { cardGain[i].gain.cancelScheduledValues(ac.currentTime); cardGain[i].gain.setTargetAtTime(1, ac.currentTime, ATTACK); }
+      }
+      const isMouse = e => e.pointerType === 'mouse' || e.pointerType === 'pen';
+      card.addEventListener('pointerenter', e => { if (isMouse(e)) press(e); });
+      card.addEventListener('pointermove', e => { if (isMouse(e)) read(e); });
+      card.addEventListener('pointerleave', e => { if (isMouse(e)) release(i); });
+      holdToPlay(card, {
+        start: (x, y) => { card.classList.add('held'); press({ clientX: x, clientY: y }); },
+        move: (x, y) => read({ clientX: x, clientY: y }),
+        end: () => { card.classList.remove('held'); release(i); },
       });
-      card.addEventListener('mousemove', read);
-      card.addEventListener('mouseleave', () => release(i));
       card.addEventListener('click', () => release(i));                  // opening a section lets it ring out the same way
     });
     function release(i) {
