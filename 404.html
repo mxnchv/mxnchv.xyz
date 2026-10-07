@@ -225,6 +225,25 @@
       background: rgba(255,255,255,0.7);
     }
     html.has-cursor .split-handle, html.has-cursor .split-handle * { cursor: none !important; }
+    /* "drag me" tag that rides the line at the pointer's height until the visitor has tried it */
+    .split-tip {
+      position: absolute;
+      left: 50%; top: 0;
+      translate: -50% calc(var(--tip-y, 0px) - 50%);
+      padding: 5px 9px;
+      font-family: var(--font-ui);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      color: #fff;
+      background: #000;
+      border: 1px solid rgba(255,255,255,0.7);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .split-tip.on { opacity: 1; }
 
     .card-bg {
       position: absolute;
@@ -1113,7 +1132,7 @@ i &lt;3 to work with u</p>
     </div>
   </div>
 
-  <div class="split-handle" role="separator" aria-orientation="vertical" aria-label="drag to resize · double-click to reset"></div>
+  <div class="split-handle" role="separator" aria-orientation="vertical" aria-label="drag to resize · double-click to reset"><span class="split-tip" aria-hidden="true">&larr; drag me &rarr;</span></div>
 
   <div class="cards-panel">
 
@@ -2601,9 +2620,33 @@ i &lt;3 to work with u</p>
     }
 
     // ── dragging
+    // ── "drag me" tag: follows the pointer's height along the line, fades out shortly after the
+    // pointer leaves, and retires for good once the visitor has actually dragged (and heard) it
+    const tip = handle.querySelector('.split-tip');
+    let learned = false, tipTimer = 0, downAt = 0, downX = 0;
+    try { learned = !!localStorage.getItem('mxnchv-split-learned'); } catch (e) {}
+    if (learned) tip.remove();
+    function tipAt(clientY) {
+      if (learned || dragging || stacked.matches) return;
+      const r = handle.getBoundingClientRect();
+      tip.style.setProperty('--tip-y', (clientY - r.top - 26) + 'px');   // just above the pointer
+      tip.classList.add('on');
+      clearTimeout(tipTimer);
+    }
+    function tipOff(delay) {
+      if (learned) return;
+      clearTimeout(tipTimer);
+      tipTimer = setTimeout(() => tip.classList.remove('on'), delay);
+    }
+    handle.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse' || e.pointerType === 'pen') tipAt(e.clientY); });
+    handle.addEventListener('pointermove', e => { if (!dragging && e.pointerType !== 'touch') tipAt(e.clientY); });
+    handle.addEventListener('pointerleave', () => tipOff(700));
+
     handle.addEventListener('pointerdown', e => {
       if (stacked.matches) return;
       e.preventDefault();
+      downAt = performance.now(); downX = e.clientX;
+      tipOff(0);
       dragging = true; handle.setPointerCapture(e.pointerId); handle.classList.add('dragging');
       chordOn();
       setVerb(e.clientY);
@@ -2613,9 +2656,14 @@ i &lt;3 to work with u</p>
       setSplit(e.clientX / innerWidth * 100);
       setVerb(e.clientY);
     });
-    function release() {
+    function release(e) {
       if (!dragging) return;
       dragging = false; handle.classList.remove('dragging');
+      // held long enough to hear the chord, or actually moved the line → they've got it
+      if (!learned && (performance.now() - downAt > 400 || Math.abs(e.clientX - downX) > 12)) {
+        learned = true; tip.remove();
+        try { localStorage.setItem('mxnchv-split-learned', '1'); } catch (err) {}
+      }
       chordOff();
       dispatchEvent(new Event('resize'));                                // about letters re-measure their spots
     }
