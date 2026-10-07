@@ -152,7 +152,7 @@
 
     .about-text p {
       font-family: var(--font-ui);
-      font-size: 0.72rem;
+      font-size: 1.44rem;
       line-height: 2;
       color: rgba(255,255,255,0.75);
       white-space: pre-line;
@@ -955,7 +955,7 @@
       }
       .about-logo { top: 1.25rem; left: 1.25rem; }
       .about-footer { left: 1.25rem; bottom: 1.25rem; }
-      .about-text p { font-size: 0.8rem; }
+      .about-text p { font-size: 1.6rem; }
       .cards-panel {
         height: auto !important;
         grid-template-rows: none;
@@ -1525,8 +1525,8 @@ i &lt;3 to work with u</p>
     chars.forEach(ch => ch.setAttribute('aria-hidden', 'true'));
 
     const rnd = (a, b) => a + Math.random() * (b - a);
-    const RADIUS = 70;   // px around the cursor that gets hit
-    const FORCE = 140;   // how far a letter right under the cursor flies
+    const RADIUS = 115;   // px around the cursor that gets hit
+    const FORCE = 220;   // how far a letter right under the cursor flies
 
     // each letter keeps its own spin and jitter so the blast looks messy
     chars.forEach(ch => { ch._spin = rnd(-1, 1); ch._jit = rnd(0.6, 1.4); });
