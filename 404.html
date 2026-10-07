@@ -613,9 +613,9 @@
       left: 50%; top: 50%;
       translate: -50% -50%;
       font-family: var(--font-ui);
-      font-size: 0.66rem;
+      font-size: 0.78rem;
       letter-spacing: 0.12em;
-      color: rgba(255,255,255,0.45);
+      color: rgba(255,255,255,0.75);
       text-align: center;
       line-height: 2;
       pointer-events: none;
@@ -741,9 +741,9 @@
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       gap: 0.9rem;
       font-family: var(--font-ui);
-      font-size: 0.66rem;
+      font-size: 0.76rem;
       letter-spacing: 0.1em;
-      color: rgba(255,255,255,0.6);
+      color: rgba(255,255,255,0.8);
       transition: opacity 0.4s ease;
     }
     .hp-start button {
@@ -755,7 +755,7 @@
     .hp-start button:hover { background: var(--white); color: var(--black); }
     .hp-start [data-hp="mouse"] { border-color: transparent; color: rgba(255,255,255,0.55); padding: 0.3rem; }
     .hp-start [data-hp="mouse"]:hover { background: none; color: var(--white); }
-    .hp-note { color: rgba(255,255,255,0.3); font-size: 0.58rem; }
+    .hp-note { color: rgba(255,255,255,0.55); font-size: 0.66rem; }
     .hp-stage.running .hp-start { opacity: 0; pointer-events: none; }
     /* fist gestures: shown the whole time the camera is on */
     .hp-fist-hint {
@@ -763,31 +763,32 @@
       left: 0; right: 0; bottom: 1.1rem;
       text-align: center;
       font-family: var(--font-ui);
-      font-size: 0.66rem;
-      letter-spacing: 0.12em;
-      color: rgba(255,255,255,0.75);
-      text-shadow: 0 1px 8px rgba(0,0,0,0.9);
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.95);
+      text-shadow: 0 0 3px #000, 0 1px 10px rgba(0,0,0,0.95);
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.8s ease;
     }
-    .hp-stage.cam .hp-fist-hint { opacity: 1; animation: ghost 2.4s ease-in-out infinite; }
+    .hp-stage.cam .hp-fist-hint { opacity: 1; animation: breathe 2.4s ease-in-out infinite; }
+    @keyframes breathe { 50% { opacity: 0.75; } }                     /* gentler than the ghost pulse: stays readable */
     .hp-fist-hint span { display: block; line-height: 1.9; transition: opacity 0.8s ease; }
     /* what each hand does, in the top corners (on the side the hand shows up on, mirrored) */
     .hp-legend {
       position: absolute;
       top: 0.9rem;
       font-family: var(--font-ui);
-      font-size: 0.6rem;
-      letter-spacing: 0.12em;
-      line-height: 1.9;
-      color: rgba(255,255,255,0.6);
-      text-shadow: 0 1px 8px rgba(0,0,0,0.9);
+      font-size: 0.74rem;
+      letter-spacing: 0.1em;
+      line-height: 1.8;
+      color: rgba(255,255,255,0.85);
+      text-shadow: 0 0 3px #000, 0 1px 10px rgba(0,0,0,0.95);
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.8s ease;
     }
-    .hp-legend b { display: block; font-weight: 400; color: rgba(255,255,255,0.9); }
+    .hp-legend b { display: block; font-weight: 400; color: #fff; }
     .hp-legend span { display: block; white-space: nowrap; }
     .hp-legend-l { left: 1rem; }
     .hp-legend-r { right: 1rem; text-align: right; }
