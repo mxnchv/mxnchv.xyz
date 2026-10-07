@@ -1024,7 +1024,7 @@ i &lt;3 to work with u</p>
     </a>
 
     <a class="card" href="#" onclick="showSection('content');return false;">
-      <video class="card-bg" src="media/card_branding.mp4" poster="media/card_branding.jpg" autoplay muted loop playsinline preload="auto"></video>
+      <video class="card-bg" src="media/card_content.mp4" poster="media/card_content.jpg" autoplay muted loop playsinline preload="auto"></video>
       <div class="card-content">
         <h2 class="card-title">Content</h2>
         <p class="card-desc">social media &amp; content creation.</p>
@@ -1157,7 +1157,7 @@ i &lt;3 to work with u</p>
 
   <div class="section-body">
     <div class="section-label">
-      <video class="label-bg" src="media/card_branding.mp4" poster="media/card_branding.jpg" autoplay muted loop playsinline preload="metadata"></video>
+      <video class="label-bg" src="media/card_content.mp4" poster="media/card_content.jpg" autoplay muted loop playsinline preload="metadata"></video>
       <h1>Content</h1>
       <span class="section-label-sub">social media &amp; content creation.</span>
     </div>
@@ -1456,32 +1456,34 @@ i &lt;3 to work with u</p>
     // each letter is a tiny body: the cursor blasts it out, then it drifts in slow motion,
     // wobbling a little, and a weak spring eases it back home
     const st = chars.map(() => ({
-      x: 0, y: 0, vx: 0, vy: 0, r: 0, vr: 0, heat: 0,
+      x: 0, y: 0, vx: 0, vy: 0, r: 0, vr: 0, heat: 0, cool: 0,
       p1: rnd(0, 6.28), p2: rnd(0, 6.28), f: rnd(0.25, 0.5),
     }));
     const SPRING = 3, DAMP = 2.8;      // soft spring, light damping: floaty but quick to settle
     const FLOAT_S = 1.2;               // how long a hit letter keeps floating around
 
-    let mouse = null, running = false, last = 0;
+    let mouse = null, running = false, last = 0, speed = 0;   // speed: how fast the cursor moves (px/s)
     function step(now) {
       const dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); last = now;
       const t = now / 1000;
+      speed *= Math.exp(-dt * 6);                                // a still cursor stops pushing
       let moving = !!mouse;
       chars.forEach((ch, i) => {
         const s = st[i], c = centers[i];
         if (!c) return;
-        // blast: letters inside the radius are pushed straight out
-        if (mouse) {
+        // blast: letters near a moving cursor get one kick each, in a roughly outward but
+        // random direction and strength, then rest a moment, so they scatter instead of
+        // settling into a ring around a still cursor
+        if (mouse && speed > 25 && now > s.cool) {
           const dx = c.x + s.x - mouse.x, dy = c.y + s.y - mouse.y, d = Math.hypot(dx, dy);
           if (d < RADIUS) {
-            const k = (1 - d / RADIUS) * ch._jit;
-            const ux = d ? dx / d : rnd(-1, 1), uy = d ? dy / d : rnd(-1, 1);
-            // steer towards an outward speed (bounded, so letters don't fly off the page)
-            const pull = Math.min(1, dt * 10);
-            s.vx += (ux * FORCE * k * 3 - s.vx) * pull;
-            s.vy += (uy * FORCE * k * 3 - s.vy) * pull;
-            s.vr += (ch._spin * 300 * k - s.vr) * pull;
+            const k = (1 - d / RADIUS) * ch._jit * (0.45 + Math.min(1, speed / 900)) * rnd(0.5, 1.3);
+            const ang = (d ? Math.atan2(dy, dx) : rnd(0, 6.28)) + rnd(-1.1, 1.1);
+            s.vx += Math.cos(ang) * FORCE * k * 3.2;
+            s.vy += Math.sin(ang) * FORCE * k * 3.2;
+            s.vr += ch._spin * rnd(150, 380) * k;
             s.heat = 1;
+            s.cool = now + rnd(250, 650);
           }
         }
         // float: a slow wandering push that fades out a few seconds after the hit
@@ -1504,7 +1506,10 @@ i &lt;3 to work with u</p>
     function wake() { if (!running) { running = true; last = performance.now(); requestAnimationFrame(step); } }
 
     const panel = box.closest('.about-panel');
-    panel.addEventListener('mousemove', e => { mouse = { x: e.clientX, y: e.clientY }; wake(); });
+    panel.addEventListener('mousemove', e => {
+      if (mouse) speed = Math.max(speed, Math.hypot(e.clientX - mouse.x, e.clientY - mouse.y) / Math.max(0.008, (e.timeStamp - (mouse.t || e.timeStamp - 16)) / 1000));
+      mouse = { x: e.clientX, y: e.clientY, t: e.timeStamp }; wake();
+    });
     panel.addEventListener('mouseleave', () => { mouse = null; wake(); });
   })();
   // Lab instrument: every click drops a note that keeps looping at its own pace,
