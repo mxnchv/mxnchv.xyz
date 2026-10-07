@@ -2754,7 +2754,11 @@ i &lt;3 to work with u</p>
       env.gain.setValueAtTime(0, t);
       env.gain.linearRampToValueAtTime(0.75, t + ATK);                   // swells in over 1 s
       env.gain.exponentialRampToValueAtTime(0.0001, t + ATK + FALL);     // then falls away over 2 s
-      src.connect(env); env.connect(out);
+      const lp = ac.createBiquadFilter();                                // low-pass opening as it swells, no resonance
+      lp.type = 'lowpass'; lp.Q.value = 0;
+      lp.frequency.setValueAtTime(200, t);
+      lp.frequency.exponentialRampToValueAtTime(12000, t + ATK);
+      src.connect(lp); lp.connect(env); env.connect(out);
       src.start(t, offset, ATK + FALL + 0.05);
     }));
 
