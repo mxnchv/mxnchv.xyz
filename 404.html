@@ -86,7 +86,8 @@
     ══════════════════════════════════════════ */
     #home {
       display: grid;
-      grid-template-columns: 44fr 56fr;
+      grid-template-columns: var(--split, 44%) 1fr;   /* --split: width of the about panel, draggable */
+      position: relative;
       height: 100vh;
       width: 100vw;
     }
@@ -187,6 +188,7 @@
       display: grid;
       grid-template-rows: repeat(5, 1fr);
       height: 100vh;
+      container-type: inline-size;   /* card titles scale with this column, not the window */
     }
 
     .card {
@@ -198,6 +200,31 @@
       display: block;
     }
     .card:last-child { border-bottom: none; }
+
+    /* the line between about and cards can be dragged; it plays an A minor chord while held */
+    .split-handle {
+      position: absolute;
+      top: 0; bottom: 0;
+      left: var(--split, 44%);
+      width: 16px;
+      margin-left: -8px;
+      z-index: 20;
+      cursor: col-resize;
+      touch-action: none;
+    }
+    .split-handle::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0; left: 50%;
+      width: 1px;
+      background: rgba(255,255,255,0.1);
+      transition: background 0.25s, width 0.25s, margin 0.25s;
+    }
+    .split-handle:hover::after, .split-handle.dragging::after {
+      width: 2px; margin-left: -0.5px;
+      background: rgba(255,255,255,0.7);
+    }
+    html.has-cursor .split-handle, html.has-cursor .split-handle * { cursor: none !important; }
 
     .card-bg {
       position: absolute;
@@ -241,7 +268,7 @@
 
     .card-title {
       font-family: var(--font-eva);
-      font-size: clamp(3.4rem, 6.4vw, 5.6rem);
+      font-size: clamp(2.4rem, 11.2cqi, 5.6rem);
       font-weight: 800;
       line-height: 1;
       letter-spacing: -0.01em;
@@ -940,7 +967,7 @@
       }
       .card-content { padding: 0 1.25rem; }
       .card-title { font-size: clamp(3rem, 15vw, 5.6rem); }
-      .card-arrow, .home-tagline { display: none; }
+      .card-arrow, .home-tagline, .split-handle { display: none; }
       /* no hover on touch: show the cards a bit livelier by default */
       .card-bg { filter: grayscale(100%) brightness(0.8); }
 
@@ -1033,6 +1060,8 @@ i &lt;3 to work with u</p>
       <span class="about-place">Madrid, Spain</span>
     </div>
   </div>
+
+  <div class="split-handle" role="separator" aria-orientation="vertical" aria-label="drag to resize · double-click to reset"></div>
 
   <div class="cards-panel">
 
@@ -2431,6 +2460,78 @@ i &lt;3 to work with u</p>
     function go(rate) { target = rate; if (!running) { running = true; requestAnimationFrame(ease); } }
     cards.addEventListener('mouseenter', () => { homeEl.classList.add('calm'); go(0.3); });
     cards.addEventListener('mouseleave', () => { homeEl.classList.remove('calm'); go(1); });
+  })();
+  // home: drag the line between the about panel and the cards. While held it plays a sustained
+  // A minor chord; further left closes a low-pass filter, further right opens it. Double-click resets.
+  (() => {
+    const homeEl = document.getElementById('home');
+    const handle = homeEl.querySelector('.split-handle');
+    const DEFAULT = 44, MIN = 20, MAX = 80;
+    const stacked = matchMedia('(max-width: 760px), (orientation: portrait) and (max-width: 1100px)');
+    let split = DEFAULT, dragging = false;
+
+    const amount = () => (split - MIN) / (MAX - MIN);                 // 0 = far left … 1 = far right
+    const cutoff = () => 150 * Math.pow(12000 / 150, amount());          // closed → open
+    function setSplit(v) {
+      split = Math.max(MIN, Math.min(MAX, v));
+      homeEl.style.setProperty('--split', split.toFixed(2) + '%');
+      if (pad) pad.filter.frequency.setTargetAtTime(cutoff(), pad.ac.currentTime, 0.04);
+    }
+
+    // ── sound: A minor (A2 E3 A3 C4 E4), two slightly detuned saws per note, soft attack, long release
+    let pad = null;
+    function chordOn() {
+      if (!pad) {
+        const ac = new (window.AudioContext || window.webkitAudioContext)();
+        const filter = ac.createBiquadFilter(); filter.type = 'lowpass'; filter.Q.value = 3;
+        const amp = ac.createGain(); amp.gain.value = 0;
+        const verb = ac.createConvolver(), wet = ac.createGain(); wet.gain.value = 0.35;
+        const len = ac.sampleRate * 3, ir = ac.createBuffer(2, len, ac.sampleRate);
+        for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3); }
+        verb.buffer = ir;
+        const comp = ac.createDynamicsCompressor(); comp.threshold.value = -18; comp.ratio.value = 4;
+        filter.connect(amp); amp.connect(comp); amp.connect(verb); verb.connect(wet); wet.connect(comp); comp.connect(ac.destination);
+        [45, 52, 57, 60, 64].forEach(m => [-6, 6].forEach(cents => {
+          const o = ac.createOscillator(); o.type = 'sawtooth';
+          o.frequency.value = 440 * Math.pow(2, (m - 69) / 12); o.detune.value = cents;
+          const g = ac.createGain(); g.gain.value = 0.035;
+          o.connect(g); g.connect(filter); o.start();
+        }));
+        pad = { ac, filter, amp };
+      }
+      if (pad.ac.state === 'suspended') pad.ac.resume();
+      const t = pad.ac.currentTime;
+      pad.filter.frequency.setValueAtTime(cutoff(), t);
+      pad.amp.gain.cancelScheduledValues(t);
+      pad.amp.gain.setTargetAtTime(0.9, t, 0.12);                        // soft attack
+    }
+    function chordOff() {
+      if (!pad) return;
+      const t = pad.ac.currentTime;
+      pad.amp.gain.cancelScheduledValues(t);
+      pad.amp.gain.setTargetAtTime(0, t, 0.45);                          // ~1.5 s tail
+    }
+
+    // ── dragging
+    handle.addEventListener('pointerdown', e => {
+      if (stacked.matches) return;
+      e.preventDefault();
+      dragging = true; handle.setPointerCapture(e.pointerId); handle.classList.add('dragging');
+      chordOn();
+    });
+    handle.addEventListener('pointermove', e => {
+      if (!dragging) return;
+      setSplit(e.clientX / innerWidth * 100);
+    });
+    function release() {
+      if (!dragging) return;
+      dragging = false; handle.classList.remove('dragging');
+      chordOff();
+      dispatchEvent(new Event('resize'));                                // about letters re-measure their spots
+    }
+    handle.addEventListener('pointerup', release);
+    handle.addEventListener('pointercancel', release);
+    handle.addEventListener('dblclick', () => { setSplit(DEFAULT); dispatchEvent(new Event('resize')); });
   })();
 </script>
 </body>
