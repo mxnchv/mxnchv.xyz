@@ -345,21 +345,7 @@
       fill: none; stroke: white; stroke-width: 1.2;
     }
 
-    /* glitch — occasional, subtle */
-    @keyframes glitch {
-      0%, 92%, 100% { clip-path: none; transform: none; opacity: 1; }
-      93% { clip-path: inset(18% 0 65% 0); transform: translateX(-3px); opacity: 0.9; }
-      94% { clip-path: inset(55% 0 15% 0); transform: translateX(3px); opacity: 0.9; }
-      95% { clip-path: none; transform: none; opacity: 1; }
-    }
-    .card-title { animation: glitch 10s infinite; }
-    .card:nth-child(2) .card-title { animation-delay: 3.2s; }
-    .card:nth-child(3) .card-title { animation-delay: 6.1s; }
-    .card:nth-child(4) .card-title { animation-delay: 8.7s; }
-    .card:nth-child(5) .card-title { animation-delay: 5.0s; }
-
     @media (prefers-reduced-motion: reduce) {
-      .card-title { animation: none; }
       .card-bg { transition: none; }
     }
 
