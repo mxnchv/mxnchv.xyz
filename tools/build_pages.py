@@ -14,6 +14,14 @@ import re
 ROOT = Path(__file__).resolve().parent.parent
 SITE = 'https://mxnchv.xyz'
 SECTIONS = ['branding', 'videogames', 'content', 'collabs', 'lab']
+# what a shared link to each section says (and its preview image: media/og_<name>.jpg)
+DESC = {
+    'branding': 'Sound for brands &amp; motion, by mxnchv — sound designer in Madrid.',
+    'videogames': 'Game audio &amp; implementation (FMOD), by mxnchv — sound designer in Madrid.',
+    'content': 'Sound for social media &amp; content creation, by mxnchv — sound designer in Madrid.',
+    'collabs': 'Audio-visual work with other artists, by mxnchv — sound designer in Madrid.',
+    'lab': 'Sound toys to play in the browser and free sample packs, by mxnchv.',
+}
 NOTE = '<!-- generated from index.html by tools/build_pages.py — do not edit by hand -->\n'
 
 
@@ -26,6 +34,12 @@ def page(src, name=None, base=False):
         out = out.replace(f'property="og:url" content="{SITE}/"', f'property="og:url" content="{SITE}/{name}"', 1)
         out = out.replace('property="og:title" content="mxnchv — audio design"',
                           f'property="og:title" content="{name} — mxnchv"', 1)
+        out = out.replace(f'property="og:image" content="{SITE}/media/og.jpg"',
+                          f'property="og:image" content="{SITE}/media/og_{name}.jpg"', 1)
+        out = out.replace('property="og:image:alt" content="MXNCHV — audio design, Madrid"',
+                          f'property="og:image:alt" content="{name.upper()} — mxnchv, audio design"', 1)
+        out = re.sub(r'(property="og:description" content=")[^"]*"', rf'\g<1>{DESC[name]}"', out, count=1)
+        out = re.sub(r'(<meta name="description" content=")[^"]*"', rf'\g<1>{DESC[name]}"', out, count=1)
     if base:  # 404 can be served at any depth: resolve the site's files from the root
         out = out.replace('<head>', '<head>\n  <base href="/">', 1)
     return out.replace('<!DOCTYPE html>', '<!DOCTYPE html>\n' + NOTE, 1)
