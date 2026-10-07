@@ -789,25 +789,35 @@
     .hp-legend-r { right: 1rem; text-align: right; }
     .hp-stage.cam .hp-legend { opacity: 1; }
 
+    /* synth picker + waveform live inside the frame: just above the fist hints with the camera,
+       at the very bottom with the mouse. Blended as "difference", so the white waveform shows the
+       camera picture in negative (and plain white over the black of mouse mode) */
     .hp-synth {
+      position: absolute;
+      left: 0.6rem; right: 0.6rem; bottom: 0.6rem;
       display: grid;
       grid-template-columns: auto 1fr auto;
       align-items: center;
-      gap: 0.8rem;
-      margin-top: 0.8rem;
+      gap: 0.4rem;
+      mix-blend-mode: difference;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s ease, bottom 0.4s ease;
     }
+    .hp-stage.running .hp-synth { opacity: 1; pointer-events: auto; }
+    .hp-stage.cam .hp-synth { bottom: 4.6rem; }
     .hp-synth > button {
       font-family: var(--font-eva);
       font-size: 2.4rem;
       line-height: 1;
-      color: rgba(255,255,255,0.5);
+      color: rgba(255,255,255,0.75);
       background: none; border: 0; cursor: pointer;
       padding: 0.2rem 0.6rem;
       transition: color 0.2s;
     }
     .hp-synth > button:hover { color: var(--white); }
     .hp-synth > button.flash { color: var(--white); transform: scale(1.4); transition: transform 0.15s ease, color 0.15s; }
-    .hp-wave { position: relative; height: 84px; border: 1px solid #161616; }
+    .hp-wave { position: relative; height: 64px; }
     .hp-wave canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
     .hp-name {
       position: absolute; left: 0.6rem; top: 0.4rem;
@@ -1062,6 +1072,8 @@
       .samples-list { max-width: none; }
       .handplay { --ar: 0.75; width: min(100%, 72svh * var(--ar)); }
       .hp-ghost { height: 34%; }
+      .hp-synth > button { font-size: 1.8rem; padding: 0.2rem 0.3rem; }
+      .hp-wave { height: 48px; }
       .hp-ghost-l { left: 6%; }
       .hp-ghost-r { right: 6%; }
       .sample-row:hover { padding-left: 0; }
@@ -1440,16 +1452,16 @@ i &lt;3 to work with u</p>
           <div class="hp-legend hp-legend-r" aria-hidden="true"><b>right hand</b><span>filter ↔</span><span>reverb · grains ↕</span></div>
           <div class="hp-fist-hint"><span class="hint-fist">blink your right fist · next sound ›</span><span class="hint-pinch">‹ hold your left fist · arpeggio</span></div>
           <div class="hp-ghost hp-ghost-r"><svg viewBox="0 0 100 140" aria-hidden="true"><path d="M30 138 C18 120 14 104 14 90 L14 60 C14 54 22 54 22 60 L22 80 L26 80 L26 22 C26 14 36 14 36 22 L36 72 L40 72 L40 12 C40 4 50 4 50 12 L50 72 L54 72 L54 18 C54 10 64 10 64 18 L64 76 L68 76 L68 38 C68 30 78 30 78 38 L78 96 C78 116 70 128 62 138 Z"/></svg></div>
+          <div class="hp-synth">
+            <button type="button" class="hp-prev" aria-label="previous synth">‹</button>
+            <div class="hp-wave"><canvas></canvas><span class="hp-name">synth 01</span></div>
+            <button type="button" class="hp-next" aria-label="next synth">›</button>
+          </div>
           <div class="hp-start">
             <button type="button" data-hp="camera">use camera</button>
             <button type="button" data-hp="mouse">play with mouse</button>
             <p class="hp-note">your camera never leaves your device</p>
           </div>
-        </div>
-        <div class="hp-synth">
-          <button type="button" class="hp-prev" aria-label="previous synth">‹</button>
-          <div class="hp-wave"><canvas></canvas><span class="hp-name">synth 01</span></div>
-          <button type="button" class="hp-next" aria-label="next synth">›</button>
         </div>
         <a class="hp-download" href="media/synths/mxnchv_sxvnds_vol_1_one_shot_synth_01.wav" download>yeah you can download this sound if u want :)</a>
       </div>
@@ -2486,6 +2498,7 @@ i &lt;3 to work with u</p>
       ctl.filter = x; ctl.notes = 1 + 5 * (1 - y); ctl.reverb = 0.35; ctl.grain = 0;
       hands = { L: null, R: { palm: { x, y }, pts: null } };
     }
+    root.querySelector('.hp-synth').addEventListener('pointerdown', e => e.stopPropagation());   // picking a synth isn't playing
     stage.addEventListener('pointerdown', e => {
       if (mode !== 'mouse') return;
       pointerDown = true; stage.setPointerCapture(e.pointerId); fromPointer(e); ctl.on = 1;
@@ -2531,7 +2544,7 @@ i &lt;3 to work with u</p>
       const a = s.loopStart / s.dur, b = s.loopEnd / s.dur;
       for (let i = 0; i < n; i++) {
         const u = i / n, inLoop = u >= a && u <= b;
-        wg.fillStyle = inLoop ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.3)';
+        wg.fillStyle = inLoop ? '#fff' : 'rgba(255,255,255,0.4)';
         const h = Math.max(1, s.peaks[i] * (WH / 2 - 6));
         wg.fillRect(i * bw, mid - h, Math.max(1, bw - 0.6), h * 2);
       }
