@@ -162,11 +162,16 @@
       position: absolute;
       bottom: 1.75rem; left: 2rem;
       z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
       font-family: var(--font-ui);
       font-size: 0.6rem;
       color: rgba(255,255,255,0.28);
       letter-spacing: 0.1em;
     }
+    .about-footer .contact-link { font-size: 0.85rem; text-shadow: 0 1px 8px rgba(0,0,0,0.9); }
 
     /* ── RIGHT: CARDS ── */
     .cards-panel {
@@ -986,7 +991,10 @@ i &lt;3 glitches
 i &lt;3 to work with u</p>
     </div>
 
-    <div class="about-footer">Madrid, Spain</div>
+    <div class="about-footer">
+      <a href="mailto:mxnchv@gmail.com" class="contact-link" aria-label="email mxnchv@gmail.com"><span class="cl-mail">mxnchv@gmail.com</span><span class="cl-msg" aria-hidden="true">get in touch &amp; tell me about you :)</span></a>
+      <span class="about-place">Madrid, Spain</span>
+    </div>
   </div>
 
   <div class="cards-panel">
