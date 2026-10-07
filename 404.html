@@ -514,6 +514,26 @@
     }
     .video-item:last-child { border-bottom: none; }
 
+    /* YouTube videos load as a still + play button; the real player is only fetched on click */
+    .yt {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      padding: 0; border: 0; background: #000; cursor: pointer; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .yt img {
+      position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+      filter: grayscale(100%) brightness(0.55);
+      transition: filter 0.6s ease, transform 0.7s ease;
+    }
+    .yt:hover img, .yt:focus-visible img { filter: grayscale(0%) brightness(0.8); transform: scale(1.03); }
+    .yt-play {
+      position: relative;
+      font-family: var(--font-ui); font-size: 0.8rem; letter-spacing: 0.12em; color: #fff;
+      padding: 0.7rem 1.3rem; border: 1px solid rgba(255,255,255,0.5);
+      transition: background 0.25s, color 0.25s;
+    }
+    .yt:hover .yt-play, .yt:focus-visible .yt-play { background: #fff; color: #000; }
+
     /* a film hosted somewhere that can't be embedded: a cover that opens it in a new tab */
     .video-out {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -1357,15 +1377,15 @@ i &lt;3 to work with u</p>
     </div>
     <div class="video-stack">
       <div class="video-item">
-        <iframe src="https://www.youtube.com/embed/YpHJGhSClsI?rel=0&modestbranding=1&color=white" allowfullscreen loading="lazy"></iframe>
+        <button type="button" class="yt" data-yt="YpHJGhSClsI" data-q="rel=0&amp;modestbranding=1&amp;color=white" aria-label="play video"><img src="https://i.ytimg.com/vi/YpHJGhSClsI/hqdefault.jpg" alt="" loading="lazy" decoding="async"><span class="yt-play">▶ play</span></button>
         <div class="video-label">SERIE ECLIPSE</div>
       </div>
       <div class="video-item">
-        <iframe src="https://www.youtube.com/embed/Dy0RP1FaTws?rel=0&modestbranding=1&color=white" allowfullscreen loading="lazy"></iframe>
+        <button type="button" class="yt" data-yt="Dy0RP1FaTws" data-q="rel=0&amp;modestbranding=1&amp;color=white" aria-label="play video"><img src="https://i.ytimg.com/vi/Dy0RP1FaTws/hqdefault.jpg" alt="" loading="lazy" decoding="async"><span class="yt-play">▶ play</span></button>
         <div class="video-label">Vinos Alicante DOP — Un Vino Sobre Vivir</div>
       </div>
       <div class="video-item">
-        <iframe src="https://www.youtube.com/embed/SifP1mIsMtw?rel=0&modestbranding=1&color=white" allowfullscreen loading="lazy"></iframe>
+        <button type="button" class="yt" data-yt="SifP1mIsMtw" data-q="rel=0&amp;modestbranding=1&amp;color=white" aria-label="play video"><img src="https://i.ytimg.com/vi/SifP1mIsMtw/hqdefault.jpg" alt="" loading="lazy" decoding="async"><span class="yt-play">▶ play</span></button>
         <div class="video-label">Vega Baja del Segura</div>
       </div>
     </div>
@@ -1402,11 +1422,11 @@ i &lt;3 to work with u</p>
     </div>
     <div class="video-stack">
       <div class="video-item">
-        <iframe src="https://www.youtube.com/embed/eCaP8nuaS4Q?rel=0&modestbranding=1&color=white" allowfullscreen loading="lazy"></iframe>
+        <button type="button" class="yt" data-yt="eCaP8nuaS4Q" data-q="rel=0&amp;modestbranding=1&amp;color=white" aria-label="play video"><img src="https://i.ytimg.com/vi/eCaP8nuaS4Q/hqdefault.jpg" alt="" loading="lazy" decoding="async"><span class="yt-play">▶ play</span></button>
         <div class="video-label">FMOD Implementation Showreel</div>
       </div>
       <div class="video-item">
-        <iframe src="https://www.youtube.com/embed/gEJOrzsea0k?rel=0&modestbranding=1&color=white" allowfullscreen loading="lazy"></iframe>
+        <button type="button" class="yt" data-yt="gEJOrzsea0k" data-q="rel=0&amp;modestbranding=1&amp;color=white" aria-label="play video"><img src="https://i.ytimg.com/vi/gEJOrzsea0k/hqdefault.jpg" alt="" loading="lazy" decoding="async"><span class="yt-play">▶ play</span></button>
         <div class="video-label">Unity Implementation Showreel</div>
       </div>
     </div>
@@ -1443,24 +1463,24 @@ i &lt;3 to work with u</p>
     </div>
     <div class="video-stack">
       <div class="video-item">
-        <iframe src="https://www.youtube.com/embed/zK_j8Dra6TU?rel=0&modestbranding=1&color=white" allowfullscreen loading="lazy"></iframe>
+        <button type="button" class="yt" data-yt="zK_j8Dra6TU" data-q="rel=0&amp;modestbranding=1&amp;color=white" aria-label="play video"><img src="https://i.ytimg.com/vi/zK_j8Dra6TU/hqdefault.jpg" alt="" loading="lazy" decoding="async"><span class="yt-play">▶ play</span></button>
       </div>
       <div class="video-item">
-        <iframe src="https://www.youtube.com/embed/5hcuWsop6O4?rel=0&modestbranding=1&color=white" allowfullscreen loading="lazy"></iframe>
+        <button type="button" class="yt" data-yt="5hcuWsop6O4" data-q="rel=0&amp;modestbranding=1&amp;color=white" aria-label="play video"><img src="https://i.ytimg.com/vi/5hcuWsop6O4/hqdefault.jpg" alt="" loading="lazy" decoding="async"><span class="yt-play">▶ play</span></button>
       </div>
       <div class="video-item">
-        <iframe src="https://www.youtube.com/embed/cDzcvNzHdmg?rel=0&modestbranding=1&color=white" allowfullscreen loading="lazy"></iframe>
+        <button type="button" class="yt" data-yt="cDzcvNzHdmg" data-q="rel=0&amp;modestbranding=1&amp;color=white" aria-label="play video"><img src="https://i.ytimg.com/vi/cDzcvNzHdmg/hqdefault.jpg" alt="" loading="lazy" decoding="async"><span class="yt-play">▶ play</span></button>
       </div>
     </div>
     <div class="shorts-row">
       <div class="short">
-        <iframe src="https://www.youtube.com/embed/UQtK746WP6I?rel=0&modestbranding=1&color=white" allowfullscreen loading="lazy"></iframe>
+        <button type="button" class="yt" data-yt="UQtK746WP6I" data-q="rel=0&amp;modestbranding=1&amp;color=white" aria-label="play video"><img src="https://i.ytimg.com/vi/UQtK746WP6I/hqdefault.jpg" alt="" loading="lazy" decoding="async"><span class="yt-play">▶ play</span></button>
       </div>
       <div class="short">
-        <iframe src="https://www.youtube.com/embed/bmG6QrEczZ0?rel=0&modestbranding=1&color=white" allowfullscreen loading="lazy"></iframe>
+        <button type="button" class="yt" data-yt="bmG6QrEczZ0" data-q="rel=0&amp;modestbranding=1&amp;color=white" aria-label="play video"><img src="https://i.ytimg.com/vi/bmG6QrEczZ0/hqdefault.jpg" alt="" loading="lazy" decoding="async"><span class="yt-play">▶ play</span></button>
       </div>
       <div class="short">
-        <iframe src="https://www.youtube.com/embed/LduYVIg1fhs?rel=0&modestbranding=1&color=white" allowfullscreen loading="lazy"></iframe>
+        <button type="button" class="yt" data-yt="LduYVIg1fhs" data-q="rel=0&amp;modestbranding=1&amp;color=white" aria-label="play video"><img src="https://i.ytimg.com/vi/LduYVIg1fhs/hqdefault.jpg" alt="" loading="lazy" decoding="async"><span class="yt-play">▶ play</span></button>
       </div>
     </div>
   </div>
@@ -1501,11 +1521,11 @@ i &lt;3 to work with u</p>
         <span class="vo-cta">watch on framerate ↗</span>
       </a>
       <div class="video-item">
-        <iframe src="https://www.youtube.com/embed/mOuyEFRMTz0?rel=0&modestbranding=1&color=white" allowfullscreen loading="lazy"></iframe>
+        <button type="button" class="yt" data-yt="mOuyEFRMTz0" data-q="rel=0&amp;modestbranding=1&amp;color=white" aria-label="play video"><img src="https://i.ytimg.com/vi/mOuyEFRMTz0/hqdefault.jpg" alt="" loading="lazy" decoding="async"><span class="yt-play">▶ play</span></button>
         <div class="video-label">Paula Carvajal — 3D compilation</div>
       </div>
       <div class="video-item">
-        <iframe src="https://www.youtube.com/embed/WebUUpmoUsY?rel=0&modestbranding=1&color=white" allowfullscreen loading="lazy"></iframe>
+        <button type="button" class="yt" data-yt="WebUUpmoUsY" data-q="rel=0&amp;modestbranding=1&amp;color=white" aria-label="play video"><img src="https://i.ytimg.com/vi/WebUUpmoUsY/hqdefault.jpg" alt="" loading="lazy" decoding="async"><span class="yt-play">▶ play</span></button>
         <div class="video-label">Techviu × mxnchv</div>
       </div>
     </div>
@@ -3157,6 +3177,18 @@ i &lt;3 to work with u</p>
       }
     })(performance.now());
   })();
+
+  // YouTube: swap the still for the real player on click (and start it)
+  document.addEventListener('click', e => {
+    const b = e.target.closest('.yt');
+    if (!b) return;
+    const f = document.createElement('iframe');
+    f.src = `https://www.youtube.com/embed/${b.dataset.yt}?${b.dataset.q}&autoplay=1`;
+    f.allow = 'autoplay; fullscreen; encrypted-media; picture-in-picture';
+    f.allowFullscreen = true;
+    f.title = b.parentElement.querySelector('.video-label')?.textContent || 'video';
+    b.replaceWith(f);
+  });
 </script>
 </body>
 </html>
