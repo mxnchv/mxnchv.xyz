@@ -1027,11 +1027,63 @@
       .section-footer { padding: 0 1.25rem; }
       .social-links { gap: 1.1rem; }
     }
+
+    /* ── entry screen ── */
+    #enter {
+      position: fixed;
+      inset: 0;
+      z-index: 9000;
+      background: var(--black);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.6rem;
+      cursor: pointer;
+      transition: opacity 0.9s ease, visibility 0.9s;
+      outline: none;
+    }
+    #enter.gone { opacity: 0; visibility: hidden; }
+    .enter-logo {
+      font-family: var(--font-ui);
+      font-size: clamp(1.4rem, 3.4vw, 2.4rem);
+      letter-spacing: 0.5em;
+      margin-right: -0.5em;               /* balance the trailing letter-spacing */
+      color: var(--white);
+    }
+    .enter-cta {
+      font-family: var(--font-eva);
+      font-weight: 800;
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      text-transform: uppercase;
+      scale: 1 1.3;
+      color: var(--white);
+      animation: ghost 2.4s ease-in-out infinite;
+    }
+    .enter-note {
+      font-family: var(--font-ui);
+      font-size: 0.66rem;
+      letter-spacing: 0.14em;
+      color: rgba(255,255,255,0.45);
+    }
+    /* the home's entrance animations wait behind the entry screen */
+    html.pre-enter .card-content, html.pre-enter .about-text { animation-play-state: paused; }
   </style>
 </head>
 <body>
 
 <div id="cursor" aria-hidden="true"></div>
+
+<!-- entry screen: the click that lets the site make sound (browsers need one) -->
+<div id="enter" role="button" tabindex="0" aria-label="enter the site with sound on">
+  <div class="enter-logo" aria-hidden="true">m <span class="lg" data-a="x" data-b="o">x</span> n c h <span class="lg" data-a="v" data-b="u">v</span></div>
+  <div class="enter-cta">click to enter</div>
+  <div class="enter-note">sound on · headphones recommended</div>
+</div>
+<script>
+  try { if (sessionStorage.getItem('mxnchv-entered')) document.getElementById('enter').remove(); else document.documentElement.classList.add('pre-enter'); }
+  catch (e) { document.documentElement.classList.add('pre-enter'); }
+</script>
 
 <!-- ══════════════════ HOME ══════════════════ -->
 <div id="home">
@@ -2636,6 +2688,38 @@ i &lt;3 to work with u</p>
         next += Math.max(0.02, dur / OVERLAP) * (0.85 + Math.random() * 0.3);
       }
     }, 25);
+  })();
+  // entry screen: one click (tap / key) lets every sound on the site play, then it fades away
+  // with a small three-note welcome. Shown once per visit.
+  (() => {
+    const el = document.getElementById('enter');
+    if (!el) return;
+    el.focus({ preventScroll: true });
+    function welcome() {
+      try {
+        const ac = new (window.AudioContext || window.webkitAudioContext)(), t0 = ac.currentTime + 0.05;
+        [69, 72, 76].forEach((m, i) => {                                   // A4 C5 E5
+          const o = ac.createOscillator(), g = ac.createGain(), t = t0 + i * 0.09;
+          o.type = 'sine'; o.frequency.value = 440 * Math.pow(2, (m - 69) / 12);
+          g.gain.setValueAtTime(0.0001, t);
+          g.gain.exponentialRampToValueAtTime(0.12, t + 0.01);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + 1.1);
+          o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + 1.2);
+        });
+        setTimeout(() => ac.close(), 2000);
+      } catch (e) {}
+    }
+    function enter(e) {
+      if (e.type === 'keydown' && ['Tab', 'Shift', 'Alt', 'Meta', 'Control'].includes(e.key)) return;
+      removeEventListener('keydown', enter);
+      welcome();
+      try { sessionStorage.setItem('mxnchv-entered', '1'); } catch (_) {}
+      document.documentElement.classList.remove('pre-enter');
+      el.classList.add('gone');
+      setTimeout(() => el.remove(), 1000);
+    }
+    el.addEventListener('pointerdown', enter, { once: true });
+    addEventListener('keydown', enter);
   })();
 </script>
 </body>
