@@ -1173,12 +1173,13 @@
     #notfound:not([hidden]) ~ .snd { mix-blend-mode: difference; }   /* stays visible over the light picture */
     .nf-digits { margin: 0.12em 0 0.32em; display: flex; gap: 0.06em; font-family: var(--font-eva); font-weight: 800; font-size: clamp(7rem, 26vw, 20rem); line-height: 0.8; }
     .nf-digits span {
-      display: inline-block; cursor: pointer; color: #fff;
+      display: inline-block; cursor: grab; color: #fff;
       scale: 0.72 1.25;
-      transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.3), filter 0.3s;
+      touch-action: none;
     }
-    .nf-digits span.hit { transform: translateY(-0.06em) skewX(-6deg); filter: blur(0.6px); }
-    .nf-digits span.down { transition: transform 1.3s cubic-bezier(0.55, 0, 0.9, 0.4); }
+    .nf-digits span.held { cursor: grabbing; }
+    /* the trails dragged digits leave behind, fading out (blended in negative like the rest) */
+    #notfound > .nf-trail { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
     .nf-msg { font-family: var(--font-ui); font-size: 0.9rem; letter-spacing: 0.12em; color: rgba(255,255,255,0.85); }
     .nf-hint { font-family: var(--font-ui); font-size: 0.72rem; letter-spacing: 0.12em; color: rgba(255,255,255,0.5); }
     .nf-home {
@@ -1281,7 +1282,7 @@
 <div id="notfound" hidden>
   <div class="nf-digits" aria-label="404"><span>4</span><span>0</span><span>4</span></div>
   <p class="nf-msg">this page got lost in the mix</p>
-  <p class="nf-hint">hover the numbers · click to drop them</p>
+  <p class="nf-hint">drag the numbers around</p>
   <a class="nf-home" href="/">← back home</a>
 </div>
 
@@ -3231,8 +3232,9 @@ i &lt;3 to work with u</p>
     b.replaceWith(f);
   });
 
-  // 404: the numbers are a tiny instrument. Hovering one plays its note bending flat (lost,
-  // out of tune); a click anywhere drops them all with a tape-stop, and they spring back.
+  // 404: the about video (B&W negative, through the cards' video feedback) behind a 404 whose
+  // digits can be dragged anywhere, one by one. A dragged digit leaves fading trails and, while
+  // it's held, sustains a random chord played by Lab synth 03 (the sound of the entry screen).
   (() => {
     const el = document.getElementById('notfound');
     const KNOWN = ['', 'branding', 'videogames', 'content', 'collabs', 'lab', 'index'];
@@ -3241,98 +3243,114 @@ i &lt;3 to work with u</p>
     el.hidden = false;
     document.title = 'lost — mxnchv';
 
-    // background: about video at 0.35x, each frame melting into the last (slightly zoomed) one
+    // background video with feedback
     const cv = document.createElement('canvas'), g = cv.getContext('2d');
     cv.className = 'nf-bg'; cv.setAttribute('aria-hidden', 'true');
-    el.prepend(cv);
+    const tr = document.createElement('canvas'), tg = tr.getContext('2d');
+    tr.className = 'nf-trail'; tr.setAttribute('aria-hidden', 'true');
+    el.prepend(cv, tr);
     const vid = document.createElement('video');
     Object.assign(vid, { src: 'media/about_me.mp4', muted: true, loop: true, playsInline: true, autoplay: true });
-    vid.defaultPlaybackRate = vid.playbackRate = 0.35;
-    vid.addEventListener('loadeddata', () => { vid.playbackRate = 0.35; vid.play().catch(() => {}); });
     vid.play().catch(() => {});
     let fresh = true;
-    const size = () => { const k = Math.min(1, 960 / innerWidth); cv.width = Math.round(innerWidth * k); cv.height = Math.round(innerHeight * k); fresh = true; };
+    const size = () => {
+      const k = Math.min(1, 960 / innerWidth); cv.width = Math.round(innerWidth * k); cv.height = Math.round(innerHeight * k);
+      tr.width = innerWidth; tr.height = innerHeight; fresh = true;
+    };
     size(); addEventListener('resize', size);
+
+    // dragging
+    const digits = [...el.querySelectorAll('.nf-digits span')];
+    const pos = digits.map(() => ({ x: 0, y: 0 }));
+    const held = new Map();                                              // pointerId → { i, sx, sy, ox, oy, voice }
+    digits.forEach((d, i) => {
+      d.addEventListener('pointerdown', e => {
+        e.preventDefault();
+        d.setPointerCapture(e.pointerId); d.classList.add('held');
+        held.set(e.pointerId, { i, sx: e.clientX, sy: e.clientY, ox: pos[i].x, oy: pos[i].y, voice: chordOn() });
+      });
+      d.addEventListener('pointermove', e => {
+        const h = held.get(e.pointerId); if (!h) return;
+        pos[i].x = h.ox + e.clientX - h.sx; pos[i].y = h.oy + e.clientY - h.sy;
+        d.style.translate = `${pos[i].x}px ${pos[i].y}px`;
+      });
+      const drop = e => {
+        const h = held.get(e.pointerId); if (!h) return;
+        held.delete(e.pointerId); d.classList.remove('held'); chordOff(h.voice);
+      };
+      d.addEventListener('pointerup', drop); d.addEventListener('pointercancel', drop);
+    });
+
+    // every frame: video feedback behind, and trails of the held digits (white, fading; the
+    // canvas is blended as difference, so they read as negative)
     (function draw() {
       requestAnimationFrame(draw);
-      if (vid.readyState < 2) return;
-      const w = cv.width, h = cv.height, vw = vid.videoWidth, vh = vid.videoHeight;
-      const sc = Math.max(w / vw, h / vh), sw = w / sc, sh = h / sc, sx = (vw - sw) / 2, sy = (vh - sh) / 2;
-      if (fresh) { g.globalAlpha = 1; g.drawImage(vid, sx, sy, sw, sh, 0, 0, w, h); fresh = false; return; }
-      g.globalAlpha = 0.9; g.drawImage(cv, -w * 0.004, -h * 0.004, w * 1.008, h * 1.008);
-      g.globalAlpha = 0.2; g.drawImage(vid, sx, sy, sw, sh, 0, 0, w, h);
-    })();
-    if (matchMedia('(hover: none)').matches) el.querySelector('.nf-hint').textContent = 'touch the numbers · tap to drop them';
-    const digits = [...el.querySelectorAll('.nf-digits span')];
-    const NOTES = [57, 60, 64];                                          // A3 C4 E4
-    let ac = null, out = null;
-    function audio() {
-      if (!ac) {
-        ac = new (window.AudioContext || window.webkitAudioContext)();
-        out = ac.createGain(); out.gain.value = 0.5;
-        const verb = ac.createConvolver(), wet = ac.createGain(); wet.gain.value = 0.4;
-        const len = ac.sampleRate * 2.5, ir = ac.createBuffer(2, len, ac.sampleRate);
-        for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3); }
-        verb.buffer = ir;
-        out.connect(ac.destination); out.connect(verb); verb.connect(wet); wet.connect(ac.destination);
+      if (vid.readyState >= 2) {
+        const w = cv.width, h = cv.height, vw = vid.videoWidth, vh = vid.videoHeight;
+        const sc = Math.max(w / vw, h / vh), sw = w / sc, sh = h / sc, sx = (vw - sw) / 2, sy = (vh - sh) / 2;
+        if (fresh) { g.globalAlpha = 1; g.drawImage(vid, sx, sy, sw, sh, 0, 0, w, h); fresh = false; }
+        else {
+          g.globalAlpha = 0.9; g.drawImage(cv, -w * 0.004, -h * 0.004, w * 1.008, h * 1.008);
+          g.globalAlpha = 0.2; g.drawImage(vid, sx, sy, sw, sh, 0, 0, w, h);
+        }
       }
-      if (ac.state === 'suspended') ac.resume();
-      return ac.state === 'running';
+      tg.globalCompositeOperation = 'destination-out'; tg.fillStyle = 'rgba(0,0,0,0.045)';
+      tg.fillRect(0, 0, tr.width, tr.height);
+      tg.globalCompositeOperation = 'source-over';
+      held.forEach(h => {
+        const d = digits[h.i], r = d.getBoundingClientRect(), cs = getComputedStyle(d);
+        tg.save();
+        tg.translate(r.left + r.width / 2, r.top + r.height / 2); tg.scale(0.72, 1.25);
+        tg.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+        tg.textAlign = 'center'; tg.textBaseline = 'middle';
+        tg.fillStyle = 'rgba(255,255,255,0.18)'; tg.fillText(d.textContent, 0, 0);
+        tg.restore();
+      });
+    })();
+
+    // sound: synth 03's loop as a sustained chord, a new random one per grab
+    const CHORDS = [[57, 60, 64, 69], [60, 64, 67, 72], [62, 65, 69, 74], [64, 67, 71, 76], [53, 57, 60, 65], [55, 59, 62, 67]];  // Am C Dm Em F G
+    let ac = null, out = null, buf = null, last = -1;
+    const bytes = fetch('media/synths/loop_03.wav').then(r => r.arrayBuffer()).catch(() => null);
+    function chordOn() {
+      try {
+        if (!ac) {
+          ac = new (window.AudioContext || window.webkitAudioContext)();
+          out = ac.createGain(); out.gain.value = 0.8;
+          const verb = ac.createConvolver(), wet = ac.createGain(); wet.gain.value = 0.35;
+          const len = ac.sampleRate * 3.5, ir = ac.createBuffer(2, len, ac.sampleRate);
+          for (let c = 0; c < 2; c++) { const dd = ir.getChannelData(c); for (let i = 0; i < len; i++) dd[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3); }
+          verb.buffer = ir;
+          out.connect(ac.destination); out.connect(verb); verb.connect(wet); wet.connect(ac.destination);
+          bytes.then(b => b && ac.decodeAudioData(b.slice(0))).then(d => { buf = d; }).catch(() => {});
+        }
+        if (ac.state === 'suspended') ac.resume();
+      } catch (e) { return null; }
+      if (!buf) return null;
+      let k; do { k = Math.floor(Math.random() * CHORDS.length); } while (k === last); last = k;
+      const t = ac.currentTime + 0.01, amp = ac.createGain();
+      amp.gain.setValueAtTime(0, t); amp.gain.linearRampToValueAtTime(1, t + 0.25);   // the entry screen's soft swell
+      amp.connect(out);
+      const srcs = CHORDS[k].map((m, i) => {
+        const src = ac.createBufferSource(), pan = ac.createStereoPanner(), gn = ac.createGain();
+        src.buffer = buf; src.loop = true;
+        src.playbackRate.value = Math.pow(2, (m - 60) / 12); src.detune.value = 4;   // synth 03 is a C4, 4 ¢ flat
+        gn.gain.value = 0.26; pan.pan.value = (i - 1.5) * 0.25;
+        src.connect(gn); gn.connect(pan); pan.connect(amp);
+        src.start(t + i * 0.05, 1 + Math.random() * 3);
+        return src;
+      });
+      return { amp, srcs };
     }
-    ['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, audio, { capture: true }));
-    const hz = m => 440 * Math.pow(2, (m - 69) / 12);
-    function note(i, bend = -0.6, len = 1.4) {                            // bend in semitones
-      if (!ac || ac.state !== 'running') return;
-      const t = ac.currentTime, f = hz(NOTES[i] + (Math.random() - 0.5) * 0.3);
-      const o = ac.createOscillator(), o2 = ac.createOscillator(), g = ac.createGain(), pan = ac.createStereoPanner();
-      o.type = 'triangle'; o2.type = 'sine';
-      o.frequency.setValueAtTime(f, t); o.frequency.exponentialRampToValueAtTime(f * Math.pow(2, bend / 12), t + len);
-      o2.frequency.setValueAtTime(f * 2, t); o2.frequency.exponentialRampToValueAtTime(f * 2 * Math.pow(2, bend / 12), t + len);
-      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.35, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
-      pan.pan.value = (i - 1) * 0.5;
-      o.connect(g); o2.connect(g); g.connect(pan); pan.connect(out);
-      o.start(t); o2.start(t); o.stop(t + len + 0.05); o2.stop(t + len + 0.05);
-    }
-    function tapeStop() {                                                // all three notes slow to a halt
-      if (!ac || ac.state !== 'running') return;
+    function chordOff(v) {
+      if (!v || !ac) return;
       const t = ac.currentTime;
-      const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 0;
-      lp.frequency.setValueAtTime(5000, t); lp.frequency.exponentialRampToValueAtTime(200, t + 1.3);
-      lp.connect(out);
-      NOTES.forEach((m, i) => {
-        const o = ac.createOscillator(), g = ac.createGain();
-        o.type = 'sawtooth';
-        o.frequency.setValueAtTime(hz(m), t); o.frequency.exponentialRampToValueAtTime(hz(m) / 8, t + 1.3);
-        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.12, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.4);
-        o.connect(g); g.connect(lp); o.start(t); o.stop(t + 1.5);
-      });
+      v.amp.gain.cancelScheduledValues(t); v.amp.gain.setValueAtTime(v.amp.gain.value, t);
+      v.amp.gain.setTargetAtTime(0, t, 1.1);                            // long fade, like the welcome chord
+      v.srcs.forEach(s => s.stop(t + 6));
     }
-    function springBack() {                                              // ...and wind back up
-      if (!ac || ac.state !== 'running') return;
-      NOTES.forEach((_, i) => setTimeout(() => note(i, 0, 0.9), i * 70));
-    }
-    digits.forEach((d, i) => {
-      d.addEventListener('pointerenter', () => {
-        if (d.classList.contains('down')) return;
-        d.classList.add('hit'); note(i);
-        setTimeout(() => d.classList.remove('hit'), 260);
-      });
-    });
-    let dropped = false;
-    el.addEventListener('click', e => {
-      if (e.target.closest('.nf-home') || dropped) return;
-      dropped = true;
-      tapeStop();
-      digits.forEach((d, i) => {
-        d.classList.add('down');
-        d.style.transform = `translateY(${110 + i * 15}vh) rotate(${(i - 1) * 25 + (Math.random() - 0.5) * 30}deg)`;
-      });
-      setTimeout(() => {
-        digits.forEach(d => { d.classList.remove('down'); d.style.transform = ''; });
-        springBack();
-        setTimeout(() => { dropped = false; }, 600);
-      }, 1700);
-    });
+    // the sample is decoded on the first touch, so warm it up on any first gesture
+    addEventListener('pointerdown', () => { if (!ac) { chordOff(chordOn()); } }, { capture: true, once: true });
   })();
 </script>
 </body>
