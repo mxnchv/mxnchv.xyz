@@ -1149,11 +1149,99 @@
     }
     /* the home's entrance animations wait behind the entry screen */
     html.pre-enter .card-content, html.pre-enter .about-text { animation-play-state: paused; }
+    /* ── sound control: one master volume / mute for every sound on the site ── */
+    .snd {
+      position: fixed;
+      top: 1rem; right: 1.4rem;
+      z-index: 8000;                                   /* under the entry screen, over everything else */
+      display: flex; align-items: center; gap: 0.6rem;
+      flex-direction: row-reverse;
+      font-family: var(--font-ui);
+    }
+    .snd-btn {
+      display: flex; align-items: center; gap: 0.45rem;
+      background: none; border: 0; padding: 0.35rem 0.2rem; cursor: pointer;
+      color: rgba(255,255,255,0.85);
+    }
+    .snd-bars { display: flex; align-items: center; gap: 2px; height: 16px; }
+    .snd-bars i { display: block; width: 2px; height: 4px; background: currentColor; transition: height 0.08s linear; }
+    .snd-off { font-size: 0.62rem; letter-spacing: 0.12em; display: none; }
+    .snd.muted .snd-off { display: inline; }
+    .snd.muted .snd-bars i { height: 2px !important; opacity: 0.5; }
+    .snd-vol {                                         /* drops down under the bars, clear of the nav */
+      -webkit-appearance: none; appearance: none;
+      position: absolute; top: 100%; right: 0;
+      width: 90px; height: 22px; margin: 0;
+      background: transparent; cursor: pointer;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .snd:hover .snd-vol, .snd.open .snd-vol, .snd-vol:focus-visible { opacity: 1; pointer-events: auto; }
+    .snd-vol::-webkit-slider-runnable-track { height: 1px; background: rgba(255,255,255,0.5); }
+    .snd-vol::-moz-range-track { height: 1px; background: rgba(255,255,255,0.5); }
+    .snd-vol::-webkit-slider-thumb { -webkit-appearance: none; width: 10px; height: 10px; margin-top: -4.5px; border-radius: 50%; background: #fff; border: 0; }
+    .snd-vol::-moz-range-thumb { width: 10px; height: 10px; border-radius: 50%; background: #fff; border: 0; }
+    @media (min-width: 761px) { .section-header { padding-right: 4.5rem; } }   /* room for the control */
   </style>
+  <script>
+    // Every sound on the site goes through here: each AudioContext the page makes gets a master
+    // gain (the volume / mute control) and a level meter (the moving bars and the favicon)
+    // slipped in front of its real output. Contexts made before this runs would bypass it,
+    // so it sits in <head>.
+    (() => {
+      const Base = window.AudioContext || window.webkitAudioContext;
+      if (!Base) return;
+      let p = Base.prototype, d;
+      while (p && !(d = Object.getOwnPropertyDescriptor(p, 'destination'))) p = Object.getPrototypeOf(p);
+      if (!d || !d.get) return;
+      const realDest = d.get;
+      let vol = 1, muted = false;
+      try { const v = parseFloat(localStorage.getItem('mxnchv-vol')); if (!isNaN(v)) vol = v; muted = localStorage.getItem('mxnchv-muted') === '1'; } catch (e) {}
+      const ctxs = new Set();
+      const gainOf = () => (muted ? 0 : vol * vol);                 // squared: the slider feels even
+      class Mastered extends Base {
+        constructor(...a) {
+          super(...a);
+          this._master = this.createGain(); this._master.gain.value = gainOf();
+          this._meter = this.createAnalyser(); this._meter.fftSize = 256;
+          this._master.connect(realDest.call(this)); this._master.connect(this._meter);
+          ctxs.add(this);
+        }
+        get destination() { return this._master; }
+        close() { ctxs.delete(this); return super.close(); }
+      }
+      window.AudioContext = Mastered;
+      if (window.webkitAudioContext) window.webkitAudioContext = Mastered;
+      const buf = new Float32Array(256);
+      const apply = () => {
+        ctxs.forEach(c => c._master.gain.setTargetAtTime(gainOf(), c.currentTime, 0.03));
+        try { localStorage.setItem('mxnchv-vol', vol); localStorage.setItem('mxnchv-muted', muted ? '1' : '0'); } catch (e) {}
+      };
+      window.mxSound = {
+        get vol() { return vol; }, set vol(v) { vol = Math.max(0, Math.min(1, v)); apply(); },
+        get muted() { return muted; }, set muted(m) { muted = !!m; apply(); },
+        level() {                                                    // loudest context right now (RMS, pre-volume)
+          let max = 0;
+          ctxs.forEach(c => {
+            if (c.state !== 'running') return;
+            c._meter.getFloatTimeDomainData(buf);
+            let sum = 0; for (let i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
+            max = Math.max(max, Math.sqrt(sum / buf.length) / (gainOf() || 1));
+          });
+          return max;
+        },
+      };
+    })();
+  </script>
 </head>
 <body>
 
 <div id="cursor" aria-hidden="true"></div>
+
+<div class="snd" id="snd">
+  <button type="button" class="snd-btn" aria-label="mute sound"><span class="snd-off">off</span><span class="snd-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>
+  <input class="snd-vol" type="range" min="0" max="100" step="1" aria-label="volume">
+</div>
 
 <!-- entry screen: the click that lets the site make sound (browsers need one) -->
 <div id="enter" role="button" tabindex="0" aria-label="enter the site with sound on">
@@ -3015,6 +3103,59 @@ i &lt;3 to work with u</p>
     }
     el.addEventListener('pointerdown', enter, { once: true });
     addEventListener('keydown', enter);
+  })();
+
+  // sound control: click the bars to mute / unmute, hover (or tap, on touch) for the volume.
+  // The bars dance with whatever the site is playing, and so does the dot in the browser tab.
+  (() => {
+    const S = window.mxSound, el = document.getElementById('snd');
+    if (!S) { el.remove(); return; }
+    const btn = el.querySelector('.snd-btn'), range = el.querySelector('.snd-vol');
+    const bars = [...el.querySelectorAll('.snd-bars i')];
+    const touch = matchMedia('(hover: none)').matches;
+    let closeT = 0;
+    function show() {
+      el.classList.toggle('muted', S.muted);
+      btn.setAttribute('aria-label', S.muted ? 'unmute sound' : 'mute sound');
+      range.value = Math.round(S.vol * 100);
+    }
+    function keepOpen() { el.classList.add('open'); clearTimeout(closeT); closeT = setTimeout(() => el.classList.remove('open'), 3500); }
+    btn.addEventListener('click', () => {
+      if (touch && !el.classList.contains('open')) { keepOpen(); return; }   // first tap opens, next one mutes
+      S.muted = !S.muted; show(); if (touch) keepOpen();
+    });
+    range.addEventListener('input', () => { S.vol = range.value / 100; if (S.muted && S.vol > 0) S.muted = false; show(); if (touch) keepOpen(); });
+    show();
+
+    // favicon: the logo's dot swells with the sound
+    const icon = document.querySelector('link[rel="icon"]'), still = icon.href;
+    const fc = document.createElement('canvas'); fc.width = fc.height = 64;
+    const fg = fc.getContext('2d');
+    let lastIcon = 0, quietSince = 0, iconLive = false;
+    function drawIcon(r) {
+      fg.clearRect(0, 0, 64, 64);
+      fg.fillStyle = '#000'; fg.beginPath(); fg.roundRect ? fg.roundRect(0, 0, 64, 64, 14) : fg.rect(0, 0, 64, 64); fg.fill();
+      fg.fillStyle = '#fff'; fg.beginPath(); fg.arc(32, 32, r, 0, Math.PI * 2); fg.fill();
+      icon.href = fc.toDataURL('image/png');
+    }
+
+    let smooth = 0;
+    (function tick(now) {
+      requestAnimationFrame(tick);
+      const lv = Math.min(1, S.level() * 14);
+      smooth += (lv - smooth) * (lv > smooth ? 0.5 : 0.12);
+      if (!S.muted) bars.forEach((b, i) => {
+        const wob = 0.55 + 0.45 * Math.sin(now / (90 + i * 37) + i * 1.7);
+        b.style.height = (4 + 12 * smooth * wob).toFixed(1) + 'px';
+      });
+      if (smooth > 0.03 && !S.muted) {
+        quietSince = 0;
+        if (now - lastIcon > 110) { drawIcon(14 + 14 * smooth); lastIcon = now; iconLive = true; }
+      } else if (iconLive) {
+        if (!quietSince) quietSince = now;
+        if (now - quietSince > 600) { icon.href = still; iconLive = false; }
+      }
+    })(performance.now());
   })();
 </script>
 </body>
