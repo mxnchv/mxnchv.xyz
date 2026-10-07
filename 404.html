@@ -2717,7 +2717,7 @@ i &lt;3 to work with u</p>
     // what the pointer is doing on which card. Each card is its own voice: it swells in slowly on
     // enter and keeps making grains through a long release after the pointer leaves, so moving
     // between cards crossfades them
-    const ATTACK = 0.18, RELEASE = 0.55;                                 // time constants (s): ~0.5 s in, ~2 s out
+    const ATTACK = 0.36, RELEASE = 0.55;                                 // time constants (s): ~1 s in, ~2 s out
     const voices = cards.map(() => ({ pos: 0.5, size: 0.3, next: 0, until: 0 }));
     cards.forEach((card, i) => {
       const v = voices[i];
