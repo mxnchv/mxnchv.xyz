@@ -23,6 +23,9 @@
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="CONTENT — mxnchv, audio design">
   <meta name="twitter:card" content="summary_large_image">
+  <!-- visit stats: GoatCounter (no cookies, no personal data); only counts on the real site -->
+  <script>window.goatcounter = { no_onload: !/(^|\.)mxnchv\.xyz$/.test(location.hostname) };</script>
+  <script data-goatcounter="https://mxnchv.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
     /* ─── TOKENS ─── */
@@ -1721,7 +1724,10 @@ i &lt;3 to work with u</p>
     document.title = TITLES[name];
     if (!ROUTED || !push) return;
     const path = name === 'home' ? '/' : '/' + name;
-    if (location.pathname !== path) history.pushState({ page: name }, '', path);
+    if (location.pathname !== path) {
+      history.pushState({ page: name }, '', path);
+      if (window.goatcounter && window.goatcounter.count && !window.goatcounter.no_onload) window.goatcounter.count({ path });   // visit stats
+    }
   }
 
   function showHome(push = true) {
