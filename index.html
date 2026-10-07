@@ -259,9 +259,18 @@
       filter: grayscale(0%) brightness(0.9);
       transform: scale(1.04);
     }
-    /* while one card is played, the others slow down (JS) and sink back: darker and softly
-       blurred, which also smooths over the repeated frames of slowed-down video */
-    .cards-panel.focusing .card:not(.focus) .card-bg { filter: grayscale(100%) brightness(0.4) blur(3px); }
+    /* at rest the cards play in slow motion through a canvas with video feedback (JS): each frame
+       melts into the last, so the slowed footage flows instead of stepping. Hover / hold shows the
+       real video, in colour and at full speed */
+    .card-fb {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      filter: grayscale(100%) brightness(0.65);
+      pointer-events: none;
+      transition: opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    .card:hover .card-fb, .card.held .card-fb { opacity: 0; }
 
     .card::before {
       content: '';
@@ -1014,7 +1023,7 @@
       .card-title { font-size: clamp(3rem, 15vw, 5.6rem); }
       .card-arrow, .home-tagline, .split-handle { display: none; }
       /* no hover on touch: show the cards a bit livelier by default */
-      .card-bg { filter: grayscale(100%) brightness(0.8); }
+      .card-bg, .card-fb { filter: grayscale(100%) brightness(0.8); }
 
       /* section header: logo on top, the other sections in a swipeable row below */
       .section-header {
@@ -2837,27 +2846,64 @@ i &lt;3 to work with u</p>
       src.start(t, offset, ATK + FALL + 0.05);
     }));
 
-    // focus: every card but the one being played eases down to a slow-motion crawl
-    const panel = homeEl.querySelector('.cards-panel');
+    // slow motion at rest: every card plays at 0.35x except the one being played, which glides
+    // back to full speed (and back down when it's let go)
     const vids = cards.map(c => c.querySelector('.card-bg'));
     const SLOW = 0.35;
+    vids.forEach(v => { v.defaultPlaybackRate = SLOW; v.playbackRate = SLOW; });
     let focused = -1, easing = false;
     function focus(i) {
+      if (i < 0 && focused >= 0) fresh[focused] = true;                  // its canvas restarts clean
       focused = i;
-      panel.classList.toggle('focusing', i >= 0);
-      cards.forEach((c, j) => c.classList.toggle('focus', j === i));
       if (!easing) { easing = true; requestAnimationFrame(easeRates); }
     }
     function easeRates() {
       let moving = false;
       vids.forEach((vid, j) => {
-        const target = focused < 0 || j === focused ? 1 : SLOW;
+        const target = j === focused ? 1 : SLOW;
         const r = vid.playbackRate + (target - vid.playbackRate) * 0.05;     // ~1 s glide
         vid.playbackRate = Math.abs(r - target) < 0.01 ? target : r;
         if (vid.playbackRate !== target) moving = true;
       });
       if (moving) requestAnimationFrame(easeRates); else easing = false;
     }
+
+    // video feedback: each slowed card is redrawn onto a small canvas every frame — the previous
+    // picture, zoomed in a hair, with the new video frame laid over it at low opacity. Repeated
+    // frames dissolve into each other (no stepping) and motion leaves soft trails.
+    const fb = cards.map(c => {
+      const cv = document.createElement('canvas');
+      cv.className = 'card-fb'; cv.setAttribute('aria-hidden', 'true');
+      c.querySelector('.card-bg').after(cv);
+      return cv;
+    });
+    const ctxs = fb.map(cv => cv.getContext('2d'));
+    const fresh = fb.map(() => true), onScreen = fb.map(() => true);
+    const sizeFb = () => fb.forEach((cv, j) => {
+      const r = cards[j].getBoundingClientRect(), k = Math.min(1, 480 / Math.max(1, r.width));
+      cv.width = Math.max(2, Math.round(r.width * k)); cv.height = Math.max(2, Math.round(r.height * k));
+      fresh[j] = true;
+    });
+    new ResizeObserver(sizeFb).observe(homeEl.querySelector('.cards-panel'));
+    const io = new IntersectionObserver(es => es.forEach(e => { onScreen[fb.indexOf(e.target)] = e.isIntersecting; }));
+    fb.forEach(cv => io.observe(cv));
+    const ZOOM = 0.004, KEEP = 0.9, NEW = 0.2;
+    function drawFb() {
+      requestAnimationFrame(drawFb);
+      if (homeEl.style.display === 'none') return;
+      fb.forEach((cv, j) => {
+        const vid = vids[j], g = ctxs[j];
+        if (j === focused || !onScreen[j] || vid.readyState < 2) return;
+        const w = cv.width, h = cv.height, vw = vid.videoWidth, vh = vid.videoHeight;
+        const sc = Math.max(w / vw, h / vh), sw = w / sc, sh = h / sc;          // object-fit: cover
+        if (fresh[j]) { g.globalAlpha = 1; g.drawImage(vid, (vw - sw) / 2, (vh - sh) / 2, sw, sh, 0, 0, w, h); fresh[j] = false; return; }
+        g.globalAlpha = KEEP;
+        g.drawImage(cv, -w * ZOOM, -h * ZOOM, w * (1 + 2 * ZOOM), h * (1 + 2 * ZOOM));
+        g.globalAlpha = NEW;
+        g.drawImage(vid, (vw - sw) / 2, (vh - sh) / 2, sw, sh, 0, 0, w, h);
+      });
+    }
+    requestAnimationFrame(drawFb);
 
     // scheduler: overlapping Hann-windowed grains read around each sounding card's position
     setInterval(() => {
