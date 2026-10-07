@@ -2477,7 +2477,26 @@ i &lt;3 to work with u</p>
       if (pad) pad.filter.frequency.setTargetAtTime(cutoff(), pad.ac.currentTime, 0.04);
     }
 
-    // ── sound: A minor (A2 E3 A3 C4 E4), two slightly detuned saws per note, soft attack, long release
+    // ── sound: each grab picks a random chord of A minor (never the same twice in a row), voiced
+    // root · fifth · octave · third · fifth above; two slightly detuned saws per note,
+    // soft attack, long release
+    const CHORDS = [
+      { root: 45, minor: true },   // Am
+      { root: 48, minor: false },  // C
+      { root: 50, minor: true },   // Dm
+      { root: 52, minor: true },   // Em
+      { root: 53, minor: false },  // F
+      { root: 43, minor: false },  // G
+    ];
+    const voicing = c => [0, 7, 12, c.minor ? 15 : 16, 19].map(i => c.root + i);
+    let lastChord = 0;
+    function pickChord() {
+      let i;
+      do { i = Math.floor(Math.random() * CHORDS.length); } while (i === lastChord);
+      lastChord = i;
+      return voicing(CHORDS[i]);
+    }
+    const hz = m => 440 * Math.pow(2, (m - 69) / 12);
     let pad = null;
     function chordOn() {
       if (!pad) {
@@ -2490,16 +2509,20 @@ i &lt;3 to work with u</p>
         verb.buffer = ir;
         const comp = ac.createDynamicsCompressor(); comp.threshold.value = -18; comp.ratio.value = 4;
         filter.connect(amp); amp.connect(comp); amp.connect(verb); verb.connect(wet); wet.connect(comp); comp.connect(ac.destination);
-        [45, 52, 57, 60, 64].forEach(m => [-6, 6].forEach(cents => {
+        const oscs = [];
+        voicing(CHORDS[0]).forEach(m => [-6, 6].forEach(cents => {
           const o = ac.createOscillator(); o.type = 'sawtooth';
-          o.frequency.value = 440 * Math.pow(2, (m - 69) / 12); o.detune.value = cents;
+          o.frequency.value = hz(m); o.detune.value = cents;
           const g = ac.createGain(); g.gain.value = 0.035;
           o.connect(g); g.connect(filter); o.start();
+          oscs.push(o);
         }));
-        pad = { ac, filter, amp };
+        pad = { ac, filter, amp, oscs };
       }
       if (pad.ac.state === 'suspended') pad.ac.resume();
       const t = pad.ac.currentTime;
+      const notes = pickChord();                                         // new chord on every grab
+      pad.oscs.forEach((o, k) => o.frequency.setTargetAtTime(hz(notes[k >> 1]), t, 0.015));
       pad.filter.frequency.setValueAtTime(cutoff(), t);
       pad.amp.gain.cancelScheduledValues(t);
       pad.amp.gain.setTargetAtTime(0.9, t, 0.12);                        // soft attack
