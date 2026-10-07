@@ -586,6 +586,107 @@
     .oc-group button { padding: 0.2rem 0.35rem; }
     .orbit-controls [data-act="clear"] { margin-left: auto; }
 
+    /* ── LAB: hand-tracking synth ── */
+    .handplay { margin-top: 1.5rem; }
+    .hp-stage {
+      position: relative;
+      aspect-ratio: 16 / 9;
+      max-height: 72vh;
+      width: 100%;
+      background: var(--black);
+      border: 1px solid #161616;
+      overflow: hidden;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .hp-stage video {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);              /* mirror, like a selfie */
+      filter: grayscale(100%) brightness(0.5) contrast(1.15);
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+    .hp-stage.cam video { opacity: 1; }
+    .hp-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+    .hp-stage.mouse { cursor: crosshair; }
+    .hp-ghost {
+      position: absolute;
+      top: 50%;
+      height: 52%;
+      translate: 0 -50%;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      pointer-events: none;
+    }
+    .hp-ghost svg { height: 100%; width: auto; display: block; }
+    .hp-ghost path { fill: rgba(255,255,255,0.1); stroke: rgba(255,255,255,0.45); stroke-width: 1; stroke-dasharray: 3 4; }
+    .hp-ghost-l { left: 14%; }
+    .hp-ghost-l svg { transform: scaleX(-1); }
+    .hp-ghost-r { right: 14%; }
+    .hp-stage.cam .hp-ghost.show { opacity: 1; animation: ghost 2.4s ease-in-out infinite; }
+    @keyframes ghost { 50% { opacity: 0.45; } }
+    .hp-start {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 0.9rem;
+      font-family: var(--font-ui);
+      font-size: 0.66rem;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.6);
+      transition: opacity 0.4s ease;
+    }
+    .hp-start button {
+      font: inherit; letter-spacing: inherit; color: var(--white);
+      background: none; border: 1px solid rgba(255,255,255,0.3);
+      padding: 0.7rem 1.4rem; cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .hp-start button:hover { background: var(--white); color: var(--black); }
+    .hp-start [data-hp="mouse"] { border-color: transparent; color: rgba(255,255,255,0.55); padding: 0.3rem; }
+    .hp-start [data-hp="mouse"]:hover { background: none; color: var(--white); }
+    .hp-note { color: rgba(255,255,255,0.3); font-size: 0.58rem; }
+    .hp-stage.running .hp-start { opacity: 0; pointer-events: none; }
+
+    .hp-synth {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 0.8rem;
+      margin-top: 0.8rem;
+    }
+    .hp-synth > button {
+      font-family: var(--font-eva);
+      font-size: 2.4rem;
+      line-height: 1;
+      color: rgba(255,255,255,0.5);
+      background: none; border: 0; cursor: pointer;
+      padding: 0.2rem 0.6rem;
+      transition: color 0.2s;
+    }
+    .hp-synth > button:hover { color: var(--white); }
+    .hp-wave { position: relative; height: 84px; border: 1px solid #161616; }
+    .hp-wave canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+    .hp-name {
+      position: absolute; left: 0.6rem; top: 0.4rem;
+      font-family: var(--font-ui); font-size: 0.58rem; letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.5); pointer-events: none;
+    }
+    .hp-download {
+      display: inline-block;
+      margin-top: 0.7rem;
+      font-family: var(--font-ui);
+      font-size: 0.62rem;
+      letter-spacing: 0.08em;
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .hp-download::before { content: '↓ '; }
+    .hp-download:hover { color: var(--white); }
+
     .samples-list {
       max-width: 640px;
     }
@@ -791,6 +892,10 @@
       .orbit-controls button { padding: 0.45rem 0; }
       .oc-group button { padding: 0.45rem 0.6rem; }
       .samples-list { max-width: none; }
+      .hp-stage { aspect-ratio: 3 / 4; max-height: 70svh; }
+      .hp-ghost { height: 34%; }
+      .hp-ghost-l { left: 6%; }
+      .hp-ghost-r { right: 6%; }
       .sample-row:hover { padding-left: 0; }
 
       .section-footer { padding: 0 1.25rem; }
@@ -1080,6 +1185,26 @@ i &lt;3 to work with u</p>
         <span class="oc-group"><button type="button" data-act="in">← inward</button><button type="button" data-act="out">outward →</button><button type="button" data-act="scatter">scatter</button></span>
         <button type="button" data-act="clear">clear</button>
       </div>
+      </div>
+
+      <div class="handplay" id="handplay">
+        <div class="hp-stage">
+          <video playsinline muted></video>
+          <canvas></canvas>
+          <div class="hp-ghost hp-ghost-l"><svg viewBox="0 0 100 140" aria-hidden="true"><path d="M30 138 C18 120 14 104 14 90 L14 60 C14 54 22 54 22 60 L22 80 L26 80 L26 22 C26 14 36 14 36 22 L36 72 L40 72 L40 12 C40 4 50 4 50 12 L50 72 L54 72 L54 18 C54 10 64 10 64 18 L64 76 L68 76 L68 38 C68 30 78 30 78 38 L78 96 C78 116 70 128 62 138 Z"/></svg></div>
+          <div class="hp-ghost hp-ghost-r"><svg viewBox="0 0 100 140" aria-hidden="true"><path d="M30 138 C18 120 14 104 14 90 L14 60 C14 54 22 54 22 60 L22 80 L26 80 L26 22 C26 14 36 14 36 22 L36 72 L40 72 L40 12 C40 4 50 4 50 12 L50 72 L54 72 L54 18 C54 10 64 10 64 18 L64 76 L68 76 L68 38 C68 30 78 30 78 38 L78 96 C78 116 70 128 62 138 Z"/></svg></div>
+          <div class="hp-start">
+            <button type="button" data-hp="camera">use camera</button>
+            <button type="button" data-hp="mouse">play with mouse</button>
+            <p class="hp-note">your camera never leaves your device</p>
+          </div>
+        </div>
+        <div class="hp-synth">
+          <button type="button" class="hp-prev" aria-label="previous synth">‹</button>
+          <div class="hp-wave"><canvas></canvas><span class="hp-name">synth 01</span></div>
+          <button type="button" class="hp-next" aria-label="next synth">›</button>
+        </div>
+        <a class="hp-download" href="media/synths/mxnchv_sxvnds_vol_1_one_shot_synth_01.wav" download>yeah you can download this sound if u want :)</a>
       </div>
 
       <h2 class="lab-heading">Samples</h2>
@@ -1676,6 +1801,320 @@ i &lt;3 to work with u</p>
       else if (y < 10) label.classList.remove('compact');
     }, { passive: true });
   });
+  // Lab: hand synth. Your hands play one of mxnchv's synth one-shots (looped):
+  //   left hand  x → reverb (further left = more)      y → notes in the chord (higher = more)
+  //   right hand x → low-pass filter (further right = more open)   y → granular glitch (higher = smaller, more scattered grains)
+  // Without a camera the mouse/finger plays it: x = filter, y = notes.
+  (() => {
+    const root = document.getElementById('handplay');
+    const stage = root.querySelector('.hp-stage');
+    const video = stage.querySelector('video');
+    const cv = stage.querySelector('canvas'), g = cv.getContext('2d');
+    const ghostL = stage.querySelector('.hp-ghost-l'), ghostR = stage.querySelector('.hp-ghost-r');
+    const wcv = root.querySelector('.hp-wave canvas'), wg = wcv.getContext('2d');
+    const nameEl = root.querySelector('.hp-name'), dl = root.querySelector('.hp-download');
+
+    const SYNTHS = {"01":{"root":48,"cents":-2,"dur":8.0,"loopStart":1.0,"loopEnd":7.5,"peaks":[0.011,0.023,0.031,0.041,0.055,0.083,0.122,0.143,0.16,0.181,0.232,0.284,0.329,0.389,0.408,0.405,0.388,0.386,0.385,0.405,0.367,0.335,0.321,0.227,0.139,0.156,0.306,0.361,0.401,0.468,0.506,0.468,0.46,0.526,0.549,0.522,0.521,0.475,0.439,0.357,0.309,0.204,0.126,0.109,0.196,0.248,0.295,0.295,0.264,0.237,0.215,0.214,0.285,0.336,0.415,0.503,0.486,0.486,0.477,0.444,0.445,0.512,0.581,0.665,0.658,0.591,0.502,0.419,0.324,0.286,0.227,0.282,0.399,0.517,0.573,0.629,0.693,0.742,0.9,0.969,1.0,0.973,0.92,0.807,0.712,0.683,0.612,0.558,0.435,0.354,0.248,0.141,0.25,0.359,0.422,0.424,0.458,0.447,0.431,0.47,0.486,0.492,0.524,0.528,0.454,0.448,0.333,0.218,0.157,0.092,0.141,0.25,0.305,0.295,0.289,0.258,0.23,0.176,0.175,0.239,0.293,0.366,0.436,0.465,0.498,0.504,0.49,0.527,0.652,0.705,0.699,0.685,0.57,0.487,0.358,0.285,0.237,0.25,0.342,0.464,0.506,0.602,0.655,0.736,0.809,0.868,0.956,0.983,0.983,0.908,0.814,0.703,0.64,0.559,0.507,0.335,0.242,0.165,0.258,0.314,0.375,0.418,0.414,0.405,0.38,0.398,0.446,0.432,0.493,0.516,0.486,0.446,0.37,0.309,0.184,0.107,0.094,0.178,0.33,0.299,0.283,0.301,0.272,0.197,0.136,0.14,0.16,0.303,0.401,0.41,0.476,0.556,0.587,0.553,0.621,0.764,0.757,0.735,0.674,0.583,0.44,0.339,0.247,0.232,0.286,0.406,0.463,0.528,0.609,0.687,0.81,0.829,0.9,0.95,0.973,0.953,0.901,0.813,0.71,0.602,0.494,0.398,0.233,0.167,0.284,0.364,0.36,0.414,0.406,0.398,0.329,0.36,0.422,0.389,0.369,0.478,0.492,0.471,0.426,0.311,0.257,0.141,0.121,0.198,0.272,0.324,0.299,0.295,0.307,0.264,0.142,0.087,0.098,0.143,0.291,0.379,0.427,0.556,0.593,0.623,0.67,0.759,0.803,0.782,0.717,0.633,0.508,0.38,0.286,0.217,0.261,0.375,0.395,0.471,0.543,0.604,0.704,0.802,0.847,0.861,0.921,0.962,0.961,0.885,0.789,0.656,0.555,0.398,0.328,0.199,0.304,0.38,0.446,0.429,0.409,0.396,0.355,0.313,0.343,0.336,0.335,0.386,0.447,0.455,0.453,0.396,0.292,0.202,0.179,0.175,0.27,0.347,0.343,0.301,0.298,0.264,0.213,0.128,0.096,0.096,0.213,0.334,0.386,0.512,0.598,0.645,0.712,0.767,0.839,0.812,0.793,0.679,0.593,0.475,0.356,0.265,0.23,0.348,0.389,0.413,0.479,0.532,0.618,0.716,0.799,0.82,0.84,0.924,0.936,0.95,0.855,0.79,0.594,0.447,0.273,0.253,0.301,0.407,0.491,0.474,0.472,0.401,0.362,0.302,0.268,0.322,0.295,0.315,0.366,0.41,0.447,0.443,0.376,0.291,0.265,0.252,0.248,0.347,0.37,0.324,0.269,0.257,0.209,0.161,0.141,0.105,0.156,0.244,0.343,0.483,0.585,0.622,0.752,0.829,0.87,0.864,0.818,0.747,0.641,0.53]},"02":{"root":48,"cents":2,"dur":11.5,"loopStart":1.5,"loopEnd":7.5,"peaks":[0.474,0.454,0.467,0.419,0.458,0.446,0.432,0.401,0.434,0.4,0.424,0.481,0.454,0.295,0.326,0.483,0.559,0.446,0.499,0.641,0.525,0.454,0.51,0.571,0.558,0.501,0.499,0.453,0.461,0.462,0.557,0.52,0.549,0.67,0.683,0.621,0.578,0.655,0.65,0.644,0.593,0.635,0.657,0.644,0.635,0.666,0.601,0.698,0.621,0.779,0.731,0.795,0.658,0.647,0.795,0.858,0.805,0.674,0.649,0.772,0.708,0.646,0.632,0.584,0.626,0.617,0.698,0.596,0.452,0.655,0.626,0.672,0.631,0.607,0.651,0.742,0.73,0.848,0.929,0.938,0.995,0.911,0.906,0.854,0.909,0.682,0.671,0.668,0.697,0.604,0.589,0.531,0.534,0.628,0.819,0.991,0.981,0.891,0.675,0.733,0.609,0.569,0.643,0.819,0.689,0.781,0.821,0.782,0.604,0.603,0.618,0.78,0.857,0.771,0.741,0.798,0.735,0.673,0.571,0.58,0.608,0.569,0.497,0.526,0.452,0.529,0.551,0.683,0.605,0.465,0.488,0.545,0.619,0.604,0.636,0.745,0.637,0.53,0.53,0.615,0.561,0.593,0.597,0.56,0.538,0.501,0.48,0.562,0.959,1.0,0.566,0.377,0.322,0.458,0.36,0.394,0.342,0.364,0.462,0.497,0.368,0.34,0.364,0.419,0.379,0.425,0.352,0.417,0.433,0.427,0.398,0.356,0.418,0.421,0.594,0.573,0.606,0.557,0.521,0.516,0.477,0.512,0.54,0.543,0.587,0.608,0.567,0.499,0.543,0.649,0.673,0.725,0.72,0.609,0.517,0.623,0.616,0.601,0.557,0.528,0.461,0.398,0.388,0.374,0.36,0.381,0.524,0.562,0.577,0.625,0.662,0.686,0.657,0.632,0.769,0.8,0.796,0.586,0.439,0.397,0.376,0.382,0.499,0.495,0.467,0.422,0.51,0.533,0.544,0.457,0.358,0.364,0.393,0.385,0.49,0.538,0.546,0.503,0.442,0.406,0.426,0.404,0.396,0.401,0.406,0.402,0.507,0.505,0.448,0.42,0.368,0.311,0.3,0.264,0.367,0.463,0.426,0.343,0.341,0.294,0.334,0.37,0.358,0.276,0.253,0.369,0.405,0.383,0.337,0.344,0.453,0.48,0.415,0.38,0.516,0.573,0.513,0.487,0.528,0.262,0.224,0.181,0.183,0.195,0.215,0.226,0.183,0.188,0.196,0.21,0.214,0.222,0.177,0.172,0.127,0.088,0.084,0.072,0.087,0.097,0.123,0.104,0.057,0.056,0.061,0.069,0.081,0.08,0.073,0.079,0.07,0.061,0.079,0.082,0.095,0.071,0.056,0.046,0.029,0.027,0.038,0.038,0.033,0.038,0.031,0.036,0.037,0.032,0.032,0.024,0.028,0.029,0.028,0.027,0.033,0.031,0.026,0.025,0.022,0.022,0.014,0.013,0.01,0.009,0.01,0.015,0.017,0.019,0.019,0.017,0.015,0.014,0.014,0.011,0.007,0.007,0.007,0.008,0.007,0.007,0.007,0.006,0.006,0.005,0.005,0.003,0.004,0.006,0.007,0.007,0.007,0.007,0.006,0.006,0.006,0.005,0.004,0.003,0.002,0.002,0.002,0.002,0.002,0.003,0.003,0.002,0.003,0.002,0.002,0.002,0.002,0.002,0.003,0.003,0.002,0.002,0.002,0.002,0.002,0.002]},"03":{"root":60,"cents":-4,"dur":8.0,"loopStart":1.0,"loopEnd":7.6,"peaks":[0.025,0.051,0.068,0.084,0.099,0.116,0.132,0.149,0.17,0.189,0.206,0.218,0.235,0.256,0.279,0.304,0.33,0.348,0.362,0.389,0.416,0.44,0.47,0.492,0.505,0.524,0.55,0.585,0.614,0.637,0.645,0.658,0.69,0.728,0.761,0.783,0.789,0.759,0.745,0.761,0.776,0.787,0.78,0.747,0.721,0.734,0.747,0.761,0.763,0.754,0.72,0.737,0.743,0.763,0.767,0.75,0.69,0.712,0.736,0.744,0.744,0.71,0.628,0.673,0.721,0.735,0.728,0.68,0.625,0.602,0.601,0.617,0.618,0.599,0.582,0.601,0.599,0.584,0.578,0.57,0.537,0.579,0.583,0.561,0.532,0.534,0.557,0.555,0.549,0.558,0.559,0.547,0.537,0.573,0.575,0.597,0.627,0.63,0.607,0.657,0.68,0.678,0.702,0.721,0.716,0.739,0.742,0.729,0.754,0.798,0.803,0.82,0.832,0.832,0.848,0.893,0.898,0.891,0.927,0.933,0.943,0.968,0.969,0.948,0.955,0.996,1.0,0.983,0.934,0.9,0.9,0.915,0.907,0.844,0.768,0.765,0.738,0.71,0.744,0.762,0.761,0.741,0.751,0.749,0.724,0.75,0.779,0.799,0.817,0.815,0.807,0.824,0.834,0.843,0.851,0.853,0.82,0.795,0.805,0.837,0.881,0.888,0.87,0.825,0.87,0.905,0.942,0.953,0.953,0.917,0.894,0.928,0.965,0.977,0.954,0.891,0.873,0.922,0.963,0.967,0.954,0.899,0.84,0.865,0.895,0.91,0.908,0.871,0.846,0.845,0.865,0.895,0.907,0.898,0.83,0.803,0.819,0.833,0.834,0.816,0.814,0.835,0.851,0.865,0.866,0.854,0.824,0.826,0.808,0.794,0.796,0.789,0.754,0.76,0.739,0.687,0.651,0.628,0.631,0.651,0.657,0.65,0.625,0.596,0.606,0.625,0.627,0.617,0.593,0.569,0.567,0.604,0.616,0.612,0.598,0.588,0.598,0.647,0.678,0.675,0.66,0.654,0.657,0.688,0.688,0.679,0.685,0.701,0.701,0.708,0.737,0.743,0.77,0.798,0.799,0.78,0.761,0.786,0.798,0.796,0.777,0.746,0.759,0.78,0.77,0.711,0.727,0.728,0.71,0.698,0.698,0.68,0.655,0.635,0.626,0.582,0.548,0.574,0.61,0.612,0.607,0.587,0.565,0.558,0.537,0.541,0.547,0.545,0.523,0.511,0.54,0.575,0.599,0.601,0.586,0.616,0.656,0.697,0.725,0.725,0.699,0.671,0.705,0.731,0.748,0.762,0.779,0.784,0.798,0.829,0.847,0.866,0.875,0.878,0.896,0.916,0.929,0.939,0.938,0.918,0.906,0.926,0.941,0.948,0.943,0.889,0.802,0.79,0.81,0.812,0.807,0.764,0.746,0.772,0.79,0.793,0.789,0.778,0.769,0.764,0.745,0.732,0.724,0.708,0.732,0.746,0.733,0.7,0.669,0.64,0.655,0.673,0.675,0.661,0.638,0.621,0.65,0.687,0.688,0.682,0.667,0.666,0.681,0.711,0.722,0.723,0.717,0.701,0.667,0.693,0.7,0.695,0.694,0.694,0.678,0.658,0.666,0.647,0.63,0.66,0.664,0.677,0.686,0.676,0.685,0.712,0.714,0.697,0.69,0.692,0.713,0.73,0.726,0.699,0.7,0.72,0.718,0.58,0.311,0.09]},"04":{"root":60,"cents":-9,"dur":19.446,"loopStart":2.0,"loopEnd":14.0,"peaks":[0.076,0.121,0.155,0.154,0.177,0.251,0.274,0.316,0.316,0.356,0.393,0.444,0.416,0.393,0.35,0.313,0.3,0.294,0.298,0.197,0.23,0.248,0.33,0.469,0.563,0.619,0.596,0.521,0.424,0.394,0.463,0.55,0.543,0.413,0.294,0.291,0.43,0.39,0.288,0.332,0.26,0.3,0.481,0.502,0.432,0.387,0.278,0.368,0.457,0.636,0.637,0.747,0.743,0.657,0.527,0.414,0.574,0.75,0.777,0.794,0.842,0.767,0.725,0.734,0.761,0.78,0.813,0.873,0.912,0.813,0.664,0.533,0.689,0.634,0.533,0.596,0.566,0.517,0.426,0.423,0.357,0.336,0.281,0.379,0.325,0.339,0.472,0.452,0.502,0.422,0.461,0.377,0.39,0.354,0.434,0.453,0.539,0.389,0.314,0.366,0.625,0.554,0.562,0.515,0.276,0.417,0.521,0.411,0.492,0.405,0.354,0.401,0.513,0.681,0.764,0.61,0.379,0.334,0.351,0.354,0.439,0.42,0.558,0.682,0.69,0.689,0.625,0.562,0.486,0.47,0.432,0.423,0.431,0.445,0.412,0.476,0.463,0.391,0.332,0.382,0.395,0.324,0.342,0.346,0.431,0.476,0.477,0.508,0.515,0.64,0.639,0.723,0.689,0.681,0.482,0.427,0.522,0.465,0.557,0.541,0.429,0.261,0.518,0.384,0.339,0.48,0.489,0.465,0.338,0.455,0.46,0.595,0.595,0.47,0.427,0.395,0.58,0.703,0.63,0.491,0.428,0.402,0.528,0.503,0.553,0.606,0.661,0.6,0.521,0.559,0.384,0.337,0.593,0.628,0.731,0.735,0.743,0.706,0.666,0.527,0.548,0.654,0.714,0.653,0.69,0.701,0.562,0.487,0.545,0.552,0.54,0.605,0.562,0.571,0.484,0.408,0.396,0.293,0.391,0.447,0.502,0.613,0.616,0.55,0.431,0.453,0.308,0.304,0.331,0.388,0.398,0.374,0.309,0.251,0.3,0.504,0.457,0.361,0.348,0.486,0.555,0.574,0.396,0.42,0.366,0.606,0.508,0.459,0.459,0.562,0.535,0.401,0.441,0.434,0.353,0.386,0.351,0.444,0.564,0.593,0.59,0.652,0.651,0.7,0.528,0.654,0.645,0.596,0.649,0.585,0.514,0.49,0.473,0.349,0.425,0.404,0.369,0.514,0.507,0.501,0.458,0.538,0.511,0.393,0.325,0.325,0.374,0.245,0.286,0.325,0.386,0.503,0.584,0.477,0.619,0.602,0.533,0.423,0.426,0.552,0.511,0.553,0.449,0.31,0.479,0.49,0.596,0.435,0.387,0.405,0.355,0.599,0.814,0.691,0.532,0.469,0.664,0.861,0.942,1.0,0.829,0.485,0.367,0.239,0.381,0.477,0.468,0.345,0.269,0.307,0.353,0.406,0.353,0.342,0.276,0.251,0.204,0.236,0.187,0.232,0.235,0.254,0.179,0.199,0.163,0.147,0.154,0.148,0.122,0.104,0.105,0.067,0.033,0.031,0.032,0.027,0.02,0.016,0.021,0.022,0.017,0.015,0.012,0.012,0.008,0.007,0.007,0.006,0.008,0.003,0.003,0.003,0.003,0.004,0.003,0.003,0.003,0.002,0.002,0.002,0.001,0.001,0.001,0.001,0.001,0.001,0.001,0.001,0.001,0.001,0.001,0.001,0.001,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},"06":{"root":60,"cents":1,"dur":8.0,"loopStart":1.0,"loopEnd":7.5,"peaks":[0.612,0.644,0.647,0.669,0.664,0.655,0.64,0.629,0.608,0.6,0.649,0.651,0.604,0.539,0.553,0.617,0.679,0.685,0.638,0.599,0.612,0.549,0.601,0.6,0.579,0.581,0.623,0.61,0.602,0.536,0.59,0.597,0.556,0.548,0.619,0.64,0.597,0.613,0.667,0.656,0.654,0.627,0.601,0.578,0.498,0.539,0.552,0.503,0.489,0.555,0.584,0.575,0.55,0.5,0.538,0.6,0.605,0.566,0.538,0.54,0.616,0.626,0.613,0.594,0.589,0.543,0.496,0.518,0.562,0.593,0.556,0.532,0.519,0.549,0.563,0.564,0.543,0.567,0.547,0.592,0.633,0.648,0.635,0.601,0.558,0.557,0.593,0.618,0.602,0.661,0.687,0.667,0.706,0.779,0.724,0.609,0.626,0.621,0.624,0.65,0.674,0.605,0.591,0.622,0.629,0.714,0.757,0.745,0.695,0.718,0.738,0.717,0.693,0.648,0.676,0.675,0.709,0.772,0.856,0.899,0.902,0.873,0.828,0.78,0.764,0.816,0.871,0.883,0.853,0.776,0.818,0.895,0.932,0.953,0.927,0.886,0.866,0.923,0.921,0.902,0.89,0.887,0.893,0.915,0.92,0.876,0.882,0.904,0.969,0.97,0.958,0.977,0.975,0.983,1.0,0.997,0.949,0.859,0.838,0.864,0.823,0.815,0.785,0.793,0.805,0.799,0.783,0.735,0.663,0.676,0.69,0.697,0.661,0.632,0.661,0.686,0.708,0.64,0.707,0.72,0.715,0.673,0.593,0.623,0.6,0.564,0.587,0.588,0.581,0.607,0.638,0.558,0.604,0.618,0.572,0.521,0.607,0.632,0.601,0.536,0.475,0.496,0.493,0.474,0.499,0.487,0.428,0.402,0.466,0.473,0.45,0.393,0.406,0.435,0.429,0.376,0.278,0.207,0.224,0.231,0.268,0.311,0.323,0.34,0.331,0.289,0.251,0.222,0.179,0.144,0.12,0.163,0.198,0.216,0.256,0.259,0.232,0.248,0.289,0.288,0.301,0.35,0.365,0.36,0.38,0.436,0.448,0.452,0.452,0.458,0.466,0.442,0.407,0.404,0.479,0.58,0.639,0.683,0.67,0.629,0.593,0.553,0.5,0.541,0.556,0.532,0.496,0.545,0.581,0.608,0.587,0.545,0.525,0.528,0.491,0.492,0.53,0.542,0.526,0.547,0.543,0.526,0.546,0.541,0.594,0.598,0.569,0.611,0.617,0.601,0.624,0.585,0.562,0.562,0.57,0.627,0.612,0.605,0.612,0.576,0.555,0.574,0.581,0.541,0.537,0.545,0.522,0.535,0.546,0.561,0.536,0.559,0.559,0.57,0.576,0.572,0.587,0.559,0.533,0.486,0.544,0.567,0.573,0.526,0.533,0.587,0.573,0.518,0.466,0.471,0.464,0.466,0.484,0.503,0.538,0.525,0.47,0.471,0.491,0.517,0.504,0.433,0.511,0.536,0.539,0.523,0.486,0.454,0.395,0.351,0.322,0.307,0.359,0.4,0.393,0.32,0.3,0.261,0.285,0.314,0.322,0.31,0.268,0.187,0.102,0.095,0.117,0.141,0.142,0.122,0.116,0.122,0.171,0.207,0.203,0.194,0.227,0.29,0.32,0.317,0.325,0.401,0.459,0.523,0.527,0.47,0.568,0.598,0.581,0.544,0.583,0.627,0.622,0.627,0.627,0.644,0.623,0.571,0.516,0.537]}};
+    const IDS = Object.keys(SYNTHS);
+    // chord built on the synth's own root, notes added in this order (C major / A minor pentatonic,
+    // same notes as the other Lab toys): root, fifth, octave below, third, sixth, ninth
+    const VOICING = [0, 7, -12, 16, 9, 14];
+    const clamp01 = v => Math.max(0, Math.min(1, v));
+    const rnd = (a, b) => a + Math.random() * (b - a);
+
+    let synthIdx = 0;
+    let mode = null;                 // 'camera' | 'mouse'
+    // live controls (0..1), smoothed into the audio graph
+    const ctl = { reverb: 0.2, notes: 2, filter: 1, grain: 0, on: 0 };
+    let hands = { L: null, R: null };
+
+    // ── audio
+    let ac = null, nodes = null, voices = null, buffers = {}, t0 = 0, loopLen = 1;
+    function impulse(seconds) {
+      const len = Math.floor(ac.sampleRate * seconds), ir = ac.createBuffer(2, len, ac.sampleRate);
+      for (let ch = 0; ch < 2; ch++) {
+        const d = ir.getChannelData(ch); let lp = 0;
+        for (let i = 0; i < len; i++) { lp += (Math.random() * 2 - 1 - lp) * 0.35; d[i] = lp * Math.pow(1 - i / len, 3.2); }
+      }
+      return ir;
+    }
+    function initAudio() {
+      if (ac) { if (ac.state === 'suspended') ac.resume(); return; }
+      ac = new (window.AudioContext || window.webkitAudioContext)();
+      const n = {};
+      n.clean = ac.createGain();
+      n.grains = ac.createGain(); n.grains.gain.value = 0;
+      n.filter = ac.createBiquadFilter(); n.filter.type = 'lowpass'; n.filter.Q.value = 1.4; n.filter.frequency.value = 20000;
+      n.dry = ac.createGain();
+      n.verb = ac.createConvolver(); n.verb.buffer = impulse(4.5);
+      n.wet = ac.createGain(); n.wet.gain.value = 0;
+      n.master = ac.createGain(); n.master.gain.value = 0;
+      const comp = ac.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 4;
+      n.clean.connect(n.filter); n.grains.connect(n.filter);
+      n.filter.connect(n.dry); n.filter.connect(n.verb); n.verb.connect(n.wet);
+      n.dry.connect(n.master); n.wet.connect(n.master);
+      n.master.connect(comp); comp.connect(ac.destination);
+      nodes = n;
+    }
+    async function load(id) {
+      if (!buffers[id]) buffers[id] = fetch(`media/synths/loop_${id}.wav`).then(r => r.arrayBuffer()).then(b => ac.decodeAudioData(b));
+      return buffers[id];
+    }
+    const rateOf = i => Math.pow(2, VOICING[i] / 12);
+    async function startVoices() {
+      const id = IDS[synthIdx], s = SYNTHS[id], buf = await load(id);
+      if (IDS[synthIdx] !== id || !ac) return;                 // switched again while loading
+      const old = voices, now = ac.currentTime;
+      const set = { id, buf, src: [], gain: [] };
+      VOICING.forEach((_, i) => {
+        const src = ac.createBufferSource();
+        src.buffer = buf; src.loop = true;
+        src.playbackRate.value = rateOf(i);
+        src.detune.value = -s.cents;                            // tune the sample to a clean C
+        const gn = ac.createGain(); gn.gain.value = 0;
+        src.connect(gn); gn.connect(nodes.clean);
+        src.start(now + 0.02);
+        set.src.push(src); set.gain.push(gn);
+      });
+      voices = set; t0 = now + 0.02; loopLen = buf.duration;
+      if (old) {                                                 // crossfade out the previous synth
+        old.gain.forEach(gn => gn.gain.setTargetAtTime(0, now, 0.15));
+        old.src.forEach(src => src.stop(now + 1));
+      }
+    }
+
+    // granular layer: short windows of the same loop, scattered around the playhead
+    let grainFlashes = [];
+    setInterval(() => {
+      if (!ac || !voices || ctl.grain < 0.02 || ctl.on < 0.01) return;
+      const now = ac.currentTime, until = now + 0.12;
+      const size = 0.22 * Math.pow(0.07, ctl.grain);             // 220 ms → ~15 ms
+      const spread = ctl.grain * 2.5;                           // seconds of scatter around the playhead
+      const step = Math.max(size / 2.2, 0.008);
+      const weights = VOICING.map((_, i) => clamp01(ctl.notes - i));
+      const total = weights.reduce((a, b) => a + b, 0) || 1;
+      if (!voices.nextGrain || voices.nextGrain < now) voices.nextGrain = now;
+      while (voices.nextGrain < until) {
+        const t = voices.nextGrain;
+        let r = Math.random() * total, i = 0;
+        while (i < weights.length - 1 && (r -= weights[i]) > 0) i++;
+        const rate = rateOf(i);
+        const head = ((t - t0) % loopLen + loopLen) % loopLen;
+        const pos = ((head + rnd(-spread, spread)) % loopLen + loopLen) % loopLen;
+        const src = ac.createBufferSource(); src.buffer = voices.buf;
+        src.playbackRate.value = rate; src.detune.value = -SYNTHS[voices.id].cents;
+        const env = ac.createGain(), pan = ac.createStereoPanner();
+        const amp = 0.55 / Math.sqrt(total);
+        env.gain.setValueAtTime(0, t);
+        env.gain.linearRampToValueAtTime(amp, t + size / 2);
+        env.gain.linearRampToValueAtTime(0, t + size);
+        pan.pan.value = rnd(-0.7, 0.7) * ctl.grain;
+        src.connect(env); env.connect(pan); pan.connect(nodes.grains);
+        src.start(t, pos, size * rate + 0.01);
+        grainFlashes.push({ pos, at: performance.now() });
+        voices.nextGrain += step * rnd(0.7, 1.3);
+      }
+    }, 25);
+
+    // push the smoothed controls into the graph
+    function applyControls() {
+      if (!ac || !nodes) return;
+      const now = ac.currentTime, tc = 0.08;
+      nodes.master.gain.setTargetAtTime(ctl.on * 0.9, now, ctl.on > 0.5 ? 0.25 : 0.5);
+      nodes.filter.frequency.setTargetAtTime(120 * Math.pow(20000 / 120, ctl.filter), now, tc);
+      nodes.wet.gain.setTargetAtTime(ctl.reverb * 1.1, now, tc);
+      nodes.dry.gain.setTargetAtTime(1 - ctl.reverb * 0.4, now, tc);
+      const wet = clamp01((ctl.grain - 0.05) / 0.35);
+      nodes.clean.gain.setTargetAtTime(1 - wet, now, tc);
+      nodes.grains.gain.setTargetAtTime(wet, now, tc);
+      if (voices) {
+        const w = VOICING.map((_, i) => clamp01(ctl.notes - i)), sum = w.reduce((a, b) => a + b, 0) || 1;
+        voices.gain.forEach((gn, i) => gn.gain.setTargetAtTime(w[i] * 0.8 / Math.sqrt(sum), now, tc));
+      }
+    }
+
+    // ── synth picker + waveform
+    function setSynth(i) {
+      synthIdx = (i + IDS.length) % IDS.length;
+      const id = IDS[synthIdx];
+      nameEl.textContent = `synth ${id}`;
+      dl.href = `media/synths/mxnchv_sxvnds_vol_1_one_shot_synth_${id}.wav`;
+      grainFlashes = [];
+      if (ac && mode) startVoices();
+    }
+    root.querySelector('.hp-prev').addEventListener('click', () => setSynth(synthIdx - 1));
+    root.querySelector('.hp-next').addEventListener('click', () => setSynth(synthIdx + 1));
+
+    // ── geometry helpers (video is drawn with object-fit: cover and mirrored)
+    let W = 0, H = 0, WW = 0, WH = 0, dpr = 1;
+    function resize() {
+      dpr = Math.min(2, devicePixelRatio || 1);
+      const r = cv.getBoundingClientRect(); W = r.width; H = r.height;
+      cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+      const q = wcv.getBoundingClientRect(); WW = q.width; WH = q.height;
+      wcv.width = Math.round(WW * dpr); wcv.height = Math.round(WH * dpr);
+    }
+    new ResizeObserver(resize).observe(stage);
+    new ResizeObserver(resize).observe(wcv);
+    function toStage(nx, ny) {                                 // nx already mirrored (0 = left of screen)
+      const vw = video.videoWidth || 16, vh = video.videoHeight || 9;
+      const s = Math.max(W / vw, H / vh), dw = vw * s, dh = vh * s;
+      return { x: (W - dw) / 2 + nx * dw, y: (H - dh) / 2 + ny * dh };
+    }
+
+    // ── camera + MediaPipe hand tracking (self-hosted, loaded only when asked)
+    let landmarker = null, stream = null, lastVideoTime = -1, lastSeen = 0;
+    async function startCamera() {
+      const status = stage.querySelector('.hp-note');
+      status.textContent = 'waking up the camera…';
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }, audio: false });
+      } catch (e) { status.textContent = 'no camera, no problem: play with the mouse'; return; }
+      video.srcObject = stream; await video.play();
+      status.textContent = 'loading hand tracking…';
+      try {
+        const { FilesetResolver, HandLandmarker } = await import('./vendor/mediapipe/vision_bundle.mjs');
+        const base = new URL('vendor/mediapipe/wasm/', location.href).href;
+        const fileset = { wasmLoaderPath: base + 'vision_wasm_internal.js', wasmBinaryPath: base + 'vision_wasm_internal.wasm' };
+        const opts = d => ({ baseOptions: { modelAssetPath: new URL('media/models/hand_landmarker.task', location.href).href, delegate: d }, runningMode: 'VIDEO', numHands: 2 });
+        try { landmarker = await HandLandmarker.createFromOptions(fileset, opts('GPU')); }
+        catch (_) { landmarker = await HandLandmarker.createFromOptions(fileset, opts('CPU')); }
+      } catch (e) { status.textContent = 'hand tracking failed to load, try the mouse'; stopCamera(); return; }
+      mode = 'camera';
+      stage.classList.add('running', 'cam');
+      initAudio(); startVoices();
+    }
+    function stopCamera() {
+      if (stream) stream.getTracks().forEach(t => t.stop());
+      stream = null; video.srcObject = null;
+    }
+    function detect() {
+      if (!landmarker || video.readyState < 2 || video.currentTime === lastVideoTime) return;
+      lastVideoTime = video.currentTime;
+      const res = landmarker.detectForVideo(video, performance.now());
+      const found = (res.landmarks || []).map(lm => {
+        const pts = lm.map(p => ({ x: 1 - p.x, y: p.y }));    // mirrored to match the screen
+        const palm = [0, 5, 9, 13, 17].reduce((a, k) => ({ x: a.x + pts[k].x / 5, y: a.y + pts[k].y / 5 }), { x: 0, y: 0 });
+        return { pts, palm };
+      }).sort((a, b) => a.palm.x - b.palm.x);
+      hands = { L: null, R: null };
+      if (found.length === 2) { hands.L = found[0]; hands.R = found[1]; }
+      else if (found.length === 1) hands[found[0].palm.x < 0.5 ? 'L' : 'R'] = found[0];
+      if (found.length) lastSeen = performance.now();
+    }
+    function handsToControls() {
+      const L = hands.L, R = hands.R, ease = 0.25;
+      const target = {
+        reverb: L ? clamp01((0.45 - L.palm.x) / 0.4) : 0.2,
+        notes: L ? 1 + 5 * clamp01((0.85 - L.palm.y) / 0.65) : 2,
+        filter: R ? clamp01((R.palm.x - 0.55) / 0.4) : 1,           // no right hand → filter wide open
+        grain: R ? clamp01((0.85 - R.palm.y) / 0.65) : 0,
+        on: performance.now() - lastSeen < 400 ? 1 : 0,
+      };
+      for (const k in target) ctl[k] += (target[k] - ctl[k]) * (k === 'on' ? 1 : ease);
+      ghostL.classList.toggle('show', !L); ghostR.classList.toggle('show', !R);
+    }
+
+    // ── mouse / finger mode
+    let pointerDown = false;
+    function startMouse() {
+      mode = 'mouse';
+      stage.classList.add('running', 'mouse');
+      initAudio(); startVoices();
+    }
+    function fromPointer(e) {
+      const r = stage.getBoundingClientRect();
+      const x = clamp01((e.clientX - r.left) / r.width), y = clamp01((e.clientY - r.top) / r.height);
+      ctl.filter = x; ctl.notes = 1 + 5 * (1 - y); ctl.reverb = 0.35; ctl.grain = 0;
+      hands = { L: null, R: { palm: { x, y }, pts: null } };
+    }
+    stage.addEventListener('pointerdown', e => {
+      if (mode !== 'mouse') return;
+      pointerDown = true; stage.setPointerCapture(e.pointerId); fromPointer(e); ctl.on = 1;
+    });
+    stage.addEventListener('pointermove', e => { if (mode === 'mouse' && pointerDown) fromPointer(e); });
+    const lift = () => { if (mode === 'mouse') { pointerDown = false; ctl.on = 0; } };
+    stage.addEventListener('pointerup', lift);
+    stage.addEventListener('pointercancel', lift);
+
+    root.querySelector('[data-hp="camera"]').addEventListener('click', () => { initAudio(); startCamera(); });
+    root.querySelector('[data-hp="mouse"]').addEventListener('click', () => startMouse());
+
+    // ── drawing
+    const BONES = [[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]];
+    const fmtHz = v => v >= 1000 ? (v / 1000).toFixed(1) + 'k' : Math.round(v) + '';
+    function label(x, y, lines, alignRight) {
+      g.font = '11px "Space Mono", monospace';
+      g.fillStyle = 'rgba(255,255,255,0.85)';
+      g.textAlign = alignRight ? 'right' : 'left';
+      lines.forEach((t, i) => g.fillText(t, x, y + i * 15));
+    }
+    function drawHand(h, side) {
+      if (h.pts) {
+        const P = h.pts.map(p => toStage(p.x, p.y));
+        g.strokeStyle = 'rgba(255,255,255,0.55)'; g.lineWidth = 1;
+        g.beginPath(); BONES.forEach(([a, b]) => { g.moveTo(P[a].x, P[a].y); g.lineTo(P[b].x, P[b].y); }); g.stroke();
+        g.fillStyle = '#fff'; P.forEach(p => { g.beginPath(); g.arc(p.x, p.y, 2.2, 0, Math.PI * 2); g.fill(); });
+      }
+      const c = h.pts ? toStage(h.palm.x, h.palm.y) : { x: h.palm.x * W, y: h.palm.y * H };
+      if (!h.pts) { g.strokeStyle = 'rgba(255,255,255,0.8)'; g.beginPath(); g.arc(c.x, c.y, 10, 0, Math.PI * 2); g.stroke(); }
+      const notes = Math.round(ctl.notes);
+      const lines = side === 'L'
+        ? [`reverb ${Math.round(ctl.reverb * 100)}%`, `notes ${notes}`]
+        : mode === 'mouse'
+          ? [`filter ${fmtHz(120 * Math.pow(20000 / 120, ctl.filter))}`, `notes ${notes}`]
+          : [`filter ${fmtHz(120 * Math.pow(20000 / 120, ctl.filter))}`, ctl.grain < 0.05 ? 'grain off' : `grain ${Math.round(220 * Math.pow(0.07, ctl.grain))}ms`];
+      side === 'L' ? label(c.x - 26, c.y - 6, lines, true) : label(c.x + 26, c.y - 6, lines, false);
+    }
+    function drawWave(now) {
+      const s = SYNTHS[IDS[synthIdx]];
+      wg.setTransform(dpr, 0, 0, dpr, 0, 0); wg.clearRect(0, 0, WW, WH);
+      const n = s.peaks.length, bw = WW / n, mid = WH / 2;
+      const a = s.loopStart / s.dur, b = s.loopEnd / s.dur;
+      for (let i = 0; i < n; i++) {
+        const u = i / n, inLoop = u >= a && u <= b;
+        wg.fillStyle = inLoop ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.3)';
+        const h = Math.max(1, s.peaks[i] * (WH / 2 - 6));
+        wg.fillRect(i * bw, mid - h, Math.max(1, bw - 0.6), h * 2);
+      }
+      if (ac && voices && voices.id === IDS[synthIdx] && ctl.on > 0.01) {
+        const span = s.loopEnd - s.loopStart;
+        const head = ((ac.currentTime - t0) % loopLen + loopLen) % loopLen;
+        const x = (s.loopStart + head / loopLen * span) / s.dur * WW;
+        wg.fillStyle = '#fff'; wg.fillRect(x, 0, 1, WH);
+        grainFlashes = grainFlashes.filter(f => now - f.at < 350);
+        grainFlashes.forEach(f => {
+          const gx = (s.loopStart + f.pos / loopLen * span) / s.dur * WW;
+          wg.fillStyle = `rgba(255,255,255,${(1 - (now - f.at) / 350).toFixed(2)})`;
+          wg.fillRect(gx, mid - 14, 1, 28);
+        });
+      }
+    }
+    function frame(now) {
+      requestAnimationFrame(frame);
+      if (root.offsetParent === null) return;
+      if (mode === 'camera') { detect(); handsToControls(); }
+      applyControls();
+      g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
+      if (mode === 'camera') { if (hands.L) drawHand(hands.L, 'L'); if (hands.R) drawHand(hands.R, 'R'); }
+      if (mode === 'mouse' && pointerDown && hands.R) drawHand(hands.R, 'R');
+      drawWave(now);
+    }
+    requestAnimationFrame(frame);
+    setSynth(0);
+
+    // leaving Lab: camera off, sound off, back to the start screen
+    addEventListener('lab:reset', () => {
+      stopCamera(); landmarker && landmarker.close && landmarker.close(); landmarker = null;
+      if (ac) { ac.close(); ac = null; nodes = null; voices = null; buffers = {}; }
+      mode = null; pointerDown = false; hands = { L: null, R: null };
+      Object.assign(ctl, { reverb: 0.2, notes: 2, filter: 1, grain: 0, on: 0 });
+      stage.classList.remove('running', 'cam', 'mouse');
+      stage.querySelector('.hp-note').textContent = 'your camera never leaves your device';
+      ghostL.classList.remove('show'); ghostR.classList.remove('show');
+      setSynth(0);
+    });
+  })();
 </script>
 </body>
 </html>

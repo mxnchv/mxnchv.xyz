@@ -1,0 +1,3 @@
+MediaPipe Tasks Vision 1.1.0 (@mediapipe/tasks-vision), Apache-2.0, (c) Google LLC.
+Self-hosted so the hand-tracking game works without third-party CDNs.
+hand_landmarker.task model from storage.googleapis.com/mediapipe-models (Apache-2.0).
