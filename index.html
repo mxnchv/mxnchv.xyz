@@ -1158,9 +1158,19 @@
       touch-action: none;
     }
     #notfound[hidden] { display: none; }
+    /* behind it: the about video, slowed down through the same video feedback as the home cards,
+       in black & white negative. Everything on top is blended as "difference", so the 404 and
+       the text show the picture underneath in negative */
+    .nf-bg {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      filter: grayscale(100%) invert(100%) contrast(1.9) brightness(0.95);
+      pointer-events: none;
+    }
+    #notfound > :not(.nf-bg) { position: relative; mix-blend-mode: difference; }
+    #notfound:not([hidden]) ~ .snd { mix-blend-mode: difference; }   /* stays visible over the light picture */
     .nf-digits { margin: 0.12em 0 0.32em; display: flex; gap: 0.06em; font-family: var(--font-eva); font-weight: 800; font-size: clamp(7rem, 26vw, 20rem); line-height: 0.8; }
     .nf-digits span {
-      display: inline-block; cursor: pointer;
+      display: inline-block; cursor: pointer; color: #fff;
       scale: 0.72 1.25;
       transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.3), filter 0.3s;
     }
@@ -3227,6 +3237,28 @@ i &lt;3 to work with u</p>
     if (!document.documentElement.hasAttribute('data-notfound') || KNOWN.includes(here)) return;
     el.hidden = false;
     document.title = 'lost — mxnchv';
+
+    // background: about video at 0.35x, each frame melting into the last (slightly zoomed) one
+    const cv = document.createElement('canvas'), g = cv.getContext('2d');
+    cv.className = 'nf-bg'; cv.setAttribute('aria-hidden', 'true');
+    el.prepend(cv);
+    const vid = document.createElement('video');
+    Object.assign(vid, { src: 'media/about_me.mp4', muted: true, loop: true, playsInline: true, autoplay: true });
+    vid.defaultPlaybackRate = vid.playbackRate = 0.35;
+    vid.addEventListener('loadeddata', () => { vid.playbackRate = 0.35; vid.play().catch(() => {}); });
+    vid.play().catch(() => {});
+    let fresh = true;
+    const size = () => { const k = Math.min(1, 960 / innerWidth); cv.width = Math.round(innerWidth * k); cv.height = Math.round(innerHeight * k); fresh = true; };
+    size(); addEventListener('resize', size);
+    (function draw() {
+      requestAnimationFrame(draw);
+      if (vid.readyState < 2) return;
+      const w = cv.width, h = cv.height, vw = vid.videoWidth, vh = vid.videoHeight;
+      const sc = Math.max(w / vw, h / vh), sw = w / sc, sh = h / sc, sx = (vw - sw) / 2, sy = (vh - sh) / 2;
+      if (fresh) { g.globalAlpha = 1; g.drawImage(vid, sx, sy, sw, sh, 0, 0, w, h); fresh = false; return; }
+      g.globalAlpha = 0.9; g.drawImage(cv, -w * 0.004, -h * 0.004, w * 1.008, h * 1.008);
+      g.globalAlpha = 0.2; g.drawImage(vid, sx, sy, sw, sh, 0, 0, w, h);
+    })();
     if (matchMedia('(hover: none)').matches) el.querySelector('.nf-hint').textContent = 'touch the numbers · tap to drop them';
     const digits = [...el.querySelectorAll('.nf-digits span')];
     const NOTES = [57, 60, 64];                                          // A3 C4 E4
