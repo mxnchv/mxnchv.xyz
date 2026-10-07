@@ -440,6 +440,24 @@
       border: none;
     }
 
+    /* vertical videos (shorts): three side by side, sized to fit the screen height */
+    .shorts-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.5rem;
+      width: min(100% - 5rem, 3 * 78vh * 9 / 16 + 3rem);
+      margin: 0 auto;
+      padding: 3rem 0;
+    }
+    .short {
+      position: relative;
+      aspect-ratio: 9 / 16;
+      background: var(--grey-1);
+      border: 1px solid #141414;
+      overflow: hidden;
+    }
+    .short iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+
     /* video label */
     .video-label {
       position: absolute;
@@ -883,6 +901,19 @@
       /* videos keep their shape instead of filling the screen */
       .video-item { height: auto; min-height: 0; aspect-ratio: 16 / 9; }
       .video-label { padding: 0.8rem 1.25rem; }
+      .shorts-row {
+        width: 100%;
+        grid-template-columns: none;
+        grid-auto-flow: column;
+        grid-auto-columns: 72%;
+        gap: 0.9rem;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        padding: 1.5rem 1.25rem 2rem;
+        scrollbar-width: none;
+      }
+      .shorts-row::-webkit-scrollbar { display: none; }
+      .short { scroll-snap-align: center; }
 
       .lab-body { padding: 0 1.25rem 2.5rem; }
       .playground { margin-top: 1.5rem; }
@@ -1089,8 +1120,27 @@ i &lt;3 to work with u</p>
       <h1>Content</h1>
       <span class="section-label-sub">social media &amp; content creation.</span>
     </div>
-    <div class="lab-body">
-      <p class="lab-intro">coming soon.</p>
+    <div class="video-stack">
+      <div class="video-item">
+        <iframe src="https://www.youtube.com/embed/zK_j8Dra6TU?rel=0&modestbranding=1&color=white" allowfullscreen loading="lazy"></iframe>
+      </div>
+      <div class="video-item">
+        <iframe src="https://www.youtube.com/embed/5hcuWsop6O4?rel=0&modestbranding=1&color=white" allowfullscreen loading="lazy"></iframe>
+      </div>
+      <div class="video-item">
+        <iframe src="https://www.youtube.com/embed/cDzcvNzHdmg?rel=0&modestbranding=1&color=white" allowfullscreen loading="lazy"></iframe>
+      </div>
+    </div>
+    <div class="shorts-row">
+      <div class="short">
+        <iframe src="https://www.youtube.com/embed/UQtK746WP6I?rel=0&modestbranding=1&color=white" allowfullscreen loading="lazy"></iframe>
+      </div>
+      <div class="short">
+        <iframe src="https://www.youtube.com/embed/bmG6QrEczZ0?rel=0&modestbranding=1&color=white" allowfullscreen loading="lazy"></iframe>
+      </div>
+      <div class="short">
+        <iframe src="https://www.youtube.com/embed/LduYVIg1fhs?rel=0&modestbranding=1&color=white" allowfullscreen loading="lazy"></iframe>
+      </div>
     </div>
   </div>
 
