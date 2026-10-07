@@ -1453,6 +1453,42 @@ i &lt;3 to work with u</p>
     addEventListener('resize', measure);
     document.fonts && document.fonts.ready.then(measure);
 
+    // every kicked letter goes "blip": a sine one-shot on a random note of A minor, with a
+    // short amp envelope and a fast pitch drop from +16 semitones to the note.
+    // Browsers only allow sound after the visitor has clicked/tapped/typed once, so the
+    // audio unlocks on the first such gesture anywhere on the page.
+    const A_MINOR = [0, 2, 3, 5, 7, 8, 10];
+    let blipCtx = null, blipOut = null, lastBlip = 0;
+    function unlockBlips() {
+      if (!blipCtx) {
+        blipCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const comp = blipCtx.createDynamicsCompressor();
+        comp.threshold.value = -20; comp.ratio.value = 6;
+        blipOut = blipCtx.createGain(); blipOut.gain.value = 0.5;
+        blipOut.connect(comp); comp.connect(blipCtx.destination);
+      }
+      if (blipCtx.state === 'suspended') blipCtx.resume();
+    }
+    ['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, unlockBlips, { capture: true }));
+    function blip(xRatio) {
+      if (!blipCtx || blipCtx.state !== 'running') return;
+      const now = performance.now();
+      if (now - lastBlip < 40) return;                        // a blast of many letters → a flurry, not a wall
+      lastBlip = now;
+      const midi = 57 + 12 * Math.floor(Math.random() * 2) + A_MINOR[Math.floor(Math.random() * 7)]; // A3–G5
+      const f = 440 * Math.pow(2, (midi - 69) / 12), t = blipCtx.currentTime;
+      const osc = blipCtx.createOscillator(), amp = blipCtx.createGain(), pan = blipCtx.createStereoPanner();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(f * Math.pow(2, 16 / 12), t);          // +16 st…
+      osc.frequency.exponentialRampToValueAtTime(f, t + 0.05);              // …down to the note
+      amp.gain.setValueAtTime(0.0001, t);
+      amp.gain.exponentialRampToValueAtTime(0.18, t + 0.004);
+      amp.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+      pan.pan.value = Math.max(-1, Math.min(1, xRatio * 2 - 1)) * 0.7;      // left letters sound left
+      osc.connect(amp); amp.connect(pan); pan.connect(blipOut);
+      osc.start(t); osc.stop(t + 0.25);
+    }
+
     // each letter is a tiny body: the cursor blasts it out, then it drifts in slow motion,
     // wobbling a little, and a weak spring eases it back home
     const st = chars.map(() => ({
@@ -1484,6 +1520,7 @@ i &lt;3 to work with u</p>
             s.vr += ch._spin * rnd(150, 380) * k;
             s.heat = 1;
             s.cool = now + rnd(250, 650);
+            blip(c.x / innerWidth);
           }
         }
         // float: a slow wandering push that fades out a few seconds after the hit
