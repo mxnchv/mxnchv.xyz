@@ -791,15 +791,25 @@
       align-items: center;
       flex-shrink: 0;
     }
+    /* email: easy to spot; on hover it swaps to an invitation */
     .contact-link {
+      display: inline-grid;
       font-family: var(--font-ui);
-      font-size: 0.6rem;
-      color: rgba(255,255,255,0.28);
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.85);
       text-decoration: none;
       letter-spacing: 0.08em;
-      transition: color 0.2s;
+      overflow: hidden;
     }
-    .contact-link:hover { color: var(--white); }
+    .contact-link > span {
+      grid-area: 1 / 1;
+      white-space: nowrap;
+      transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1), opacity 0.35s ease;
+    }
+    .cl-mail { border-bottom: 1px solid rgba(255,255,255,0.35); justify-self: start; }
+    .cl-msg { color: var(--white); transform: translateY(110%); opacity: 0; }
+    .contact-link:hover .cl-mail, .contact-link:focus-visible .cl-mail { transform: translateY(-110%); opacity: 0; }
+    .contact-link:hover .cl-msg, .contact-link:focus-visible .cl-msg { transform: none; opacity: 1; }
 
     .social-links { display: flex; gap: 1.5rem; }
     .social-links a {
@@ -1068,7 +1078,7 @@ i &lt;3 to work with u</p>
   </div>
 
   <footer class="section-footer">
-    <a href="mailto:mxnchv@gmail.com" class="contact-link">mxnchv@gmail.com</a>
+    <a href="mailto:mxnchv@gmail.com" class="contact-link" aria-label="email mxnchv@gmail.com"><span class="cl-mail">mxnchv@gmail.com</span><span class="cl-msg" aria-hidden="true">get in touch &amp; tell me about you :)</span></a>
     <div class="social-links">
       <a href="https://www.linkedin.com/in/ramon-sirvent-d/" target="_blank">LinkedIn</a>
       <a href="https://www.instagram.com/mxnchv/" target="_blank">Instagram</a>
@@ -1109,7 +1119,7 @@ i &lt;3 to work with u</p>
   </div>
 
   <footer class="section-footer">
-    <a href="mailto:mxnchv@gmail.com" class="contact-link">mxnchv@gmail.com</a>
+    <a href="mailto:mxnchv@gmail.com" class="contact-link" aria-label="email mxnchv@gmail.com"><span class="cl-mail">mxnchv@gmail.com</span><span class="cl-msg" aria-hidden="true">get in touch &amp; tell me about you :)</span></a>
     <div class="social-links">
       <a href="https://www.linkedin.com/in/ramon-sirvent-d/" target="_blank">LinkedIn</a>
       <a href="https://www.instagram.com/mxnchv/" target="_blank">Instagram</a>
@@ -1162,7 +1172,7 @@ i &lt;3 to work with u</p>
   </div>
 
   <footer class="section-footer">
-    <a href="mailto:mxnchv@gmail.com" class="contact-link">mxnchv@gmail.com</a>
+    <a href="mailto:mxnchv@gmail.com" class="contact-link" aria-label="email mxnchv@gmail.com"><span class="cl-mail">mxnchv@gmail.com</span><span class="cl-msg" aria-hidden="true">get in touch &amp; tell me about you :)</span></a>
     <div class="social-links">
       <a href="https://www.linkedin.com/in/ramon-sirvent-d/" target="_blank">LinkedIn</a>
       <a href="https://www.instagram.com/mxnchv/" target="_blank">Instagram</a>
@@ -1207,7 +1217,7 @@ i &lt;3 to work with u</p>
   </div>
 
   <footer class="section-footer">
-    <a href="mailto:mxnchv@gmail.com" class="contact-link">mxnchv@gmail.com</a>
+    <a href="mailto:mxnchv@gmail.com" class="contact-link" aria-label="email mxnchv@gmail.com"><span class="cl-mail">mxnchv@gmail.com</span><span class="cl-msg" aria-hidden="true">get in touch &amp; tell me about you :)</span></a>
     <div class="social-links">
       <a href="https://www.linkedin.com/in/ramon-sirvent-d/" target="_blank">LinkedIn</a>
       <a href="https://www.instagram.com/mxnchv/" target="_blank">Instagram</a>
@@ -1313,7 +1323,7 @@ i &lt;3 to work with u</p>
   </div>
 
   <footer class="section-footer">
-    <a href="mailto:mxnchv@gmail.com" class="contact-link">mxnchv@gmail.com</a>
+    <a href="mailto:mxnchv@gmail.com" class="contact-link" aria-label="email mxnchv@gmail.com"><span class="cl-mail">mxnchv@gmail.com</span><span class="cl-msg" aria-hidden="true">get in touch &amp; tell me about you :)</span></a>
     <div class="social-links">
       <a href="https://www.linkedin.com/in/ramon-sirvent-d/" target="_blank">LinkedIn</a>
       <a href="https://www.instagram.com/mxnchv/" target="_blank">Instagram</a>
