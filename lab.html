@@ -2564,8 +2564,9 @@ i &lt;3 to work with u</p>
     }
 
     // ── sound: each grab picks a random chord of A minor (never the same twice in a row), voiced
-    // root · fifth · octave · third · fifth above; two slightly detuned saws per note,
-    // soft attack, long release
+    // root · fifth · octave · third · fifth above, played by synth 01 from the Lab (its seamless
+    // loop, re-pitched per note; sample root C3, an octave below the chord names), soft attack,
+    // long release
     const CHORDS = [
       { root: 45, minor: true },   // Am
       { root: 48, minor: false },  // C
@@ -2582,8 +2583,15 @@ i &lt;3 to work with u</p>
       lastChord = i;
       return voicing(CHORDS[i]);
     }
-    const hz = m => 440 * Math.pow(2, (m - 69) / 12);
-    let pad = null;
+    const SAMPLE_ROOT = 48 + 12, SAMPLE_CENTS = -2;                      // synth 01 is a C3, a hair flat
+    const rate = m => Math.pow(2, (m - SAMPLE_ROOT) / 12);
+    let pad = null, bytes = null, sample = null;
+    const fetchSample = () => bytes || (bytes = fetch('media/synths/loop_01.wav').then(r => r.arrayBuffer()));
+    function loadSample(ac) {
+      if (!sample) sample = fetchSample().then(b => ac.decodeAudioData(b.slice(0)));
+      return sample;
+    }
+    handle.addEventListener('pointerenter', fetchSample, { once: true });  // fetch early, so the first grab sounds at once
     function chordOn() {
       if (!pad) {
         const ac = new (window.AudioContext || window.webkitAudioContext)();
@@ -2595,20 +2603,26 @@ i &lt;3 to work with u</p>
         verb.buffer = ir;
         const comp = ac.createDynamicsCompressor(); comp.threshold.value = -18; comp.ratio.value = 4;
         filter.connect(amp); amp.connect(dry); dry.connect(comp); amp.connect(verb); verb.connect(wet); wet.connect(comp); comp.connect(ac.destination);
-        const oscs = [];
-        voicing(CHORDS[0]).forEach(m => [-6, 6].forEach(cents => {
-          const o = ac.createOscillator(); o.type = 'sawtooth';
-          o.frequency.value = hz(m); o.detune.value = cents;
-          const g = ac.createGain(); g.gain.value = 0.035;
-          o.connect(g); g.connect(filter); o.start();
-          oscs.push(o);
-        }));
-        pad = { ac, filter, amp, oscs, wet, dry };
+        pad = { ac, filter, amp, wet, dry, srcs: [], notes: voicing(CHORDS[0]) };
+        // five looping voices, started once the sample is in and left running (silent until held)
+        loadSample(ac).then(buf => {
+          pad.notes.forEach((m, k) => {
+            const src = ac.createBufferSource();
+            src.buffer = buf; src.loop = true;
+            src.playbackRate.value = rate(m);
+            src.detune.value = -SAMPLE_CENTS + (k - 2) * 3;                 // a little spread between voices
+            const g = ac.createGain(); g.gain.value = 0.3;
+            const pan = ac.createStereoPanner(); pan.pan.value = (k - 2) * 0.18;
+            src.connect(g); g.connect(pan); pan.connect(filter);
+            src.start(0, Math.random() * buf.duration);                    // random offsets: no phasing
+            pad.srcs.push(src);
+          });
+        });
       }
       if (pad.ac.state === 'suspended') pad.ac.resume();
       const t = pad.ac.currentTime;
-      const notes = pickChord();                                         // new chord on every grab
-      pad.oscs.forEach((o, k) => o.frequency.setTargetAtTime(hz(notes[k >> 1]), t, 0.015));
+      pad.notes = pickChord();                                           // new chord on every grab
+      pad.srcs.forEach((src, k) => src.playbackRate.setTargetAtTime(rate(pad.notes[k]), t, 0.015));
       pad.filter.frequency.setValueAtTime(cutoff(), t);
       pad.amp.gain.cancelScheduledValues(t);
       pad.amp.gain.setTargetAtTime(0.9, t, 0.12);                        // soft attack
