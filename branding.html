@@ -2298,12 +2298,12 @@ i &lt;3 to work with u</p>
     function handsToControls() {
       const L = hands.L, R = hands.R, ease = 0.25;
       // left hand x picks the chord (centre → outwards: C, Am, F, G); with no left hand it stays put.
-      // While the left fist is closed (arpeggio) chord and note count hold still.
-      if (L && !lFistClosed) ctl.chord = Math.min(CHORDS.length - 1, Math.floor(clamp01((0.45 - L.palm.x) / 0.35) * CHORDS.length));
+      // This keeps working with the fist closed, so the arpeggio can move through chords and sizes.
+      if (L) ctl.chord = Math.min(CHORDS.length - 1, Math.floor(clamp01((0.45 - L.palm.x) / 0.35) * CHORDS.length));
       // right hand height: bottom half adds reverb, top half (reverb stays full) breaks it into grains
       const up = R ? clamp01((0.9 - R.palm.y) / 0.8) : 0;
       const target = {
-        notes: lFistClosed ? ctl.notes : L ? 1 + 5 * clamp01((0.85 - L.palm.y) / 0.65) : 2,
+        notes: L ? 1 + 5 * clamp01((0.85 - L.palm.y) / 0.65) : 2,
         filter: R ? clamp01((R.palm.x - 0.55) / 0.25) : 1,          // fully open at 80% of the width; no right hand → wide open
         reverb: R ? clamp01(up / 0.5) : 0.2,
         grain: R ? clamp01((up - 0.5) / 0.45) : 0,
