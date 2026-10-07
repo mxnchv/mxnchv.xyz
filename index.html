@@ -3291,7 +3291,7 @@ i &lt;3 to work with u</p>
           g.globalAlpha = 0.2; g.drawImage(vid, sx, sy, sw, sh, 0, 0, w, h);
         }
       }
-      tg.globalCompositeOperation = 'destination-out'; tg.fillStyle = 'rgba(0,0,0,0.045)';
+      tg.globalCompositeOperation = 'destination-out'; tg.fillStyle = 'rgba(0,0,0,0.015)';   // trails last ~3× longer
       tg.fillRect(0, 0, tr.width, tr.height);
       tg.globalCompositeOperation = 'source-over';
       held.forEach(h => {
