@@ -1480,7 +1480,7 @@ i &lt;3 to work with u</p>
       const osc = blipCtx.createOscillator(), amp = blipCtx.createGain(), pan = blipCtx.createStereoPanner();
       osc.type = 'sine';
       osc.frequency.setValueAtTime(f * Math.pow(2, 16 / 12), t);          // +16 st…
-      osc.frequency.exponentialRampToValueAtTime(f, t + 0.05);              // …down to the note
+      osc.frequency.exponentialRampToValueAtTime(f, t + 0.015);             // …down to the note, fast (a click, not a zap)
       amp.gain.setValueAtTime(0.0001, t);
       amp.gain.exponentialRampToValueAtTime(0.18, t + 0.004);
       amp.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
