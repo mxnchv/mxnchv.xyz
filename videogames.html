@@ -2753,10 +2753,9 @@ i &lt;3 to work with u</p>
       const offset = buf.duration * (0.3 + 0.4 * Math.random());
       const src = ac.createBufferSource(), env = ac.createGain();
       src.buffer = buf;
-      env.gain.setValueAtTime(0, t);
-      env.gain.linearRampToValueAtTime(0.7, t + 0.03);                   // quick fade in
-      env.gain.setValueAtTime(0.7, t + LEN - 0.25);
-      env.gain.linearRampToValueAtTime(0, t + LEN);                      // and a short tail out
+      env.gain.setValueAtTime(0.0001, t);
+      env.gain.exponentialRampToValueAtTime(0.75, t + 0.012);            // in almost at once (no click)
+      env.gain.exponentialRampToValueAtTime(0.0001, t + LEN);            // and decays from that moment on
       src.connect(env); env.connect(out);
       src.start(t, offset, LEN + 0.05);
     }));
