@@ -2704,51 +2704,63 @@ i &lt;3 to work with u</p>
         const comp = ac.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 4;
         out = ac.createGain(); out.gain.value = 0.9; out.connect(comp); comp.connect(ac.destination);
         cardGain = cards.map(() => { const g = ac.createGain(); g.gain.value = 0; g.connect(out); return g; });
+        voices.forEach((v, i) => { if (v.until === Infinity) cardGain[i].gain.setTargetAtTime(1, ac.currentTime, ATTACK); });
         LOOPS.forEach((url, i) => fetch(url).then(r => r.arrayBuffer()).then(b => ac.decodeAudioData(b)).then(buf => { buffers[i] = buf; }).catch(() => {}));
       }
       if (ac.state === 'suspended') ac.resume();
     }
     ['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, unlock, { capture: true }));
 
-    // what the pointer is doing on which card
-    let active = -1, pos = 0.5, size = 0.3, next = 0;
+    // what the pointer is doing on which card. Each card is its own voice: it swells in slowly on
+    // enter and keeps making grains through a long release after the pointer leaves, so moving
+    // between cards crossfades them
+    const ATTACK = 0.18, RELEASE = 0.55;                                 // time constants (s): ~0.5 s in, ~2 s out
+    const voices = cards.map(() => ({ pos: 0.5, size: 0.3, next: 0, until: 0 }));
     cards.forEach((card, i) => {
+      const v = voices[i];
       function read(e) {
         const r = card.getBoundingClientRect();
-        pos = 0.1 + 0.8 * clamp01((e.clientX - r.left) / r.width);
-        size = Math.pow(0.075, clamp01((e.clientY - r.top) / r.height));   // 1 s at the top → 75 ms at the bottom
+        v.pos = 0.1 + 0.8 * clamp01((e.clientX - r.left) / r.width);
+        v.size = Math.pow(0.075, clamp01((e.clientY - r.top) / r.height));   // 1 s at the top → 75 ms at the bottom
       }
       card.addEventListener('mouseenter', e => {
-        read(e); active = i; next = 0;
-        if (ac) cardGain[i].gain.setTargetAtTime(1, ac.currentTime, 0.06);
+        read(e); v.until = Infinity;
+        if (ac) { cardGain[i].gain.cancelScheduledValues(ac.currentTime); cardGain[i].gain.setTargetAtTime(1, ac.currentTime, ATTACK); }
       });
       card.addEventListener('mousemove', read);
       card.addEventListener('mouseleave', () => {
-        if (active === i) active = -1;
-        if (ac) cardGain[i].gain.setTargetAtTime(0, ac.currentTime, 0.12);
+        if (!ac) { v.until = 0; return; }
+        v.until = ac.currentTime + RELEASE * 5;                          // keep grains coming while it fades
+        cardGain[i].gain.cancelScheduledValues(ac.currentTime);
+        cardGain[i].gain.setTargetAtTime(0, ac.currentTime, RELEASE);
       });
     });
 
-    // scheduler: overlapping Hann-windowed grains read around the chosen position
+    // scheduler: overlapping Hann-windowed grains read around each sounding card's position
     setInterval(() => {
-      if (!ac || ac.state !== 'running' || active < 0) return;
-      if (homeEl.style.display === 'none') { cardGain[active].gain.setTargetAtTime(0, ac.currentTime, 0.1); active = -1; return; }
-      const buf = buffers[active]; if (!buf) return;
+      if (!ac || ac.state !== 'running') return;
       const now = ac.currentTime, until = now + 0.12;
-      if (!next || next < now) next = now + 0.01;
-      while (next < until) {
-        const t = next, dur = Math.min(size, buf.duration * 0.5);
-        const centre = pos * buf.duration + (Math.random() * 2 - 1) * Math.min(0.15, dur * 0.25);
-        const start = Math.max(0, Math.min(buf.duration - dur, centre - dur / 2));
-        const src = ac.createBufferSource(); src.buffer = buf;
-        const env = ac.createGain(), pan = ac.createStereoPanner();
-        env.gain.value = 0;
-        env.gain.setValueCurveAtTime(HANN.map(v => v * 0.55), t, dur);
-        pan.pan.value = (Math.random() * 2 - 1) * 0.35;
-        src.connect(env); env.connect(pan); pan.connect(cardGain[active]);
-        src.start(t, start, dur); src.stop(t + dur + 0.02);
-        next += Math.max(0.02, dur / OVERLAP) * (0.85 + Math.random() * 0.3);
+      if (homeEl.style.display === 'none') {                             // left the home page: let everything go
+        voices.forEach((v, i) => { if (v.until > now) { v.until = Math.min(v.until, now + 1); cardGain[i].gain.setTargetAtTime(0, now, 0.15); } });
       }
+      voices.forEach((v, i) => {
+        const buf = buffers[i];
+        if (!buf || v.until <= now) { v.next = 0; return; }
+        if (!v.next || v.next < now) v.next = now + 0.01;
+        while (v.next < until) {
+          const t = v.next, dur = Math.min(v.size, buf.duration * 0.5);
+          const centre = v.pos * buf.duration + (Math.random() * 2 - 1) * Math.min(0.15, dur * 0.25);
+          const start = Math.max(0, Math.min(buf.duration - dur, centre - dur / 2));
+          const src = ac.createBufferSource(); src.buffer = buf;
+          const env = ac.createGain(), pan = ac.createStereoPanner();
+          env.gain.value = 0;
+          env.gain.setValueCurveAtTime(HANN.map(x => x * 0.55), t, dur);
+          pan.pan.value = (Math.random() * 2 - 1) * 0.35;
+          src.connect(env); env.connect(pan); pan.connect(cardGain[i]);
+          src.start(t, start, dur); src.stop(t + dur + 0.02);
+          v.next += Math.max(0.02, dur / OVERLAP) * (0.85 + Math.random() * 0.3);
+        }
+      });
     }, 25);
   })();
   // entry screen: one click (tap / key) lets every sound on the site play, then it fades away
