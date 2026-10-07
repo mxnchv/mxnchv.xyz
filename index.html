@@ -226,8 +226,10 @@
     .split-tip {
       position: absolute;
       left: 50%; top: 0;
-      translate: -50% calc(var(--tip-y, 0px) - 50%);
-      padding: 5px 9px;
+      translate: calc(-100% - 6px) calc(var(--tip-y, 0px) - 50%);   /* sits on the about side of the line */
+      writing-mode: vertical-rl;
+      rotate: 180deg;                                                 /* reads bottom → top */
+      padding: 9px 5px;
       font-family: var(--font-ui);
       font-size: 10px;
       letter-spacing: 0.18em;
@@ -1129,7 +1131,7 @@ i &lt;3 to work with u</p>
     </div>
   </div>
 
-  <div class="split-handle" role="separator" aria-orientation="vertical" aria-label="drag to resize · double-click to reset"><span class="split-tip" aria-hidden="true">&larr; drag me &rarr;</span></div>
+  <div class="split-handle" role="separator" aria-orientation="vertical" aria-label="drag to resize · double-click to reset"><span class="split-tip" aria-hidden="true">drag me</span></div>
 
   <div class="cards-panel">
 
@@ -2626,7 +2628,7 @@ i &lt;3 to work with u</p>
     function tipAt(clientY) {
       if (learned || dragging || stacked.matches) return;
       const r = handle.getBoundingClientRect();
-      tip.style.setProperty('--tip-y', (clientY - r.top - 26) + 'px');   // just above the pointer
+      tip.style.setProperty('--tip-y', (clientY - r.top) + 'px');        // level with the pointer
       tip.classList.add('on');
       clearTimeout(tipTimer);
     }
