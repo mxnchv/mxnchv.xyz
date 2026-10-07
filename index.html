@@ -1470,7 +1470,8 @@ i &lt;3 to work with u</p>
       if (blipCtx.state === 'suspended') blipCtx.resume();
     }
     ['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, unlockBlips, { capture: true }));
-    function blip(xRatio) {
+    // far: 0 when the letter is at home … 1 when it's ~120px away; farther letters ring a bit longer
+    function blip(xRatio, far = 0) {
       if (!blipCtx || blipCtx.state !== 'running') return;
       const now = performance.now();
       if (now - lastBlip < 40) return;                        // a blast of many letters → a flurry, not a wall
@@ -1483,10 +1484,11 @@ i &lt;3 to work with u</p>
       osc.frequency.exponentialRampToValueAtTime(f, t + 0.015);             // …down to the note, fast (a click, not a zap)
       amp.gain.setValueAtTime(0.0001, t);
       amp.gain.exponentialRampToValueAtTime(0.18, t + 0.004);
-      amp.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+      const decay = 0.22 + 0.3 * far;                                       // 220 ms → 520 ms
+      amp.gain.exponentialRampToValueAtTime(0.0001, t + decay);
       pan.pan.value = Math.max(-1, Math.min(1, xRatio * 2 - 1)) * 0.7;      // left letters sound left
       osc.connect(amp); amp.connect(pan); pan.connect(blipOut);
-      osc.start(t); osc.stop(t + 0.25);
+      osc.start(t); osc.stop(t + decay + 0.03);
     }
 
     // each letter is a tiny body: the cursor blasts it out, then it drifts in slow motion,
@@ -1513,6 +1515,7 @@ i &lt;3 to work with u</p>
         if (mouse && speed > 25 && now > s.cool) {
           const dx = c.x + s.x - mouse.x, dy = c.y + s.y - mouse.y, d = Math.hypot(dx, dy);
           if (d < RADIUS) {
+            const far = Math.min(1, Math.hypot(s.x, s.y) / 120);     // how far it already is from home
             const k = (1 - d / RADIUS) * ch._jit * (0.45 + Math.min(1, speed / 900)) * rnd(0.5, 1.3);
             const ang = (d ? Math.atan2(dy, dx) : rnd(0, 6.28)) + rnd(-1.1, 1.1);
             s.vx += Math.cos(ang) * FORCE * k * 3.2;
@@ -1520,7 +1523,7 @@ i &lt;3 to work with u</p>
             s.vr += ch._spin * rnd(150, 380) * k;
             s.heat = 1;
             s.cool = now + rnd(250, 650);
-            blip(c.x / innerWidth);
+            blip(c.x / innerWidth, far);
           }
         }
         // float: a slow wandering push that fades out a few seconds after the hit
