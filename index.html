@@ -2155,7 +2155,7 @@ i &lt;3 to work with u</p>
       const target = {
         reverb: L ? clamp01((0.45 - L.palm.x) / 0.4) : 0.2,
         notes: L ? 1 + 5 * clamp01((0.85 - L.palm.y) / 0.65) : 2,
-        filter: R ? clamp01((R.palm.x - 0.55) / 0.4) : 1,           // no right hand → filter wide open
+        filter: R ? clamp01((R.palm.x - 0.55) / 0.35) : 1,          // fully open at 90% of the width; no right hand → wide open
         grain: R ? clamp01((0.85 - R.palm.y) / 0.65) : 0,
         on: performance.now() - lastSeen < 400 ? 1 : 0,
       };
