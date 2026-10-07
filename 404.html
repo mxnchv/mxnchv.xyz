@@ -2462,7 +2462,8 @@ i &lt;3 to work with u</p>
     cards.addEventListener('mouseleave', () => { homeEl.classList.remove('calm'); go(1); });
   })();
   // home: drag the line between the about panel and the cards. While held it plays a sustained
-  // A minor chord; further left closes a low-pass filter, further right opens it. Double-click resets.
+  // A minor chord; further left closes a low-pass filter, further right opens it, and the pointer's
+  // height sets the reverb (bottom 20% → top 85%). Double-click resets.
   (() => {
     const homeEl = document.getElementById('home');
     const handle = homeEl.querySelector('.split-handle');
@@ -2472,6 +2473,15 @@ i &lt;3 to work with u</p>
 
     const amount = () => (split - MIN) / (MAX - MIN);                 // 0 = far left … 1 = far right
     const cutoff = () => 150 * Math.pow(12000 / 150, amount());          // closed → open
+    // pointer height → reverb: bottom of the screen 20%, top 85%; the direct sound dips a little as it grows
+    let verbAmt = 0.35;
+    function setVerb(clientY) {
+      verbAmt = 0.2 + 0.65 * (1 - Math.max(0, Math.min(1, clientY / innerHeight)));
+      if (!pad) return;
+      const t = pad.ac.currentTime;
+      pad.wet.gain.setTargetAtTime(verbAmt * 1.4, t, 0.05);
+      pad.dry.gain.setTargetAtTime(1 - verbAmt * 0.45, t, 0.05);
+    }
     function setSplit(v) {
       split = Math.max(MIN, Math.min(MAX, v));
       homeEl.style.setProperty('--split', split.toFixed(2) + '%');
@@ -2504,12 +2514,12 @@ i &lt;3 to work with u</p>
         const ac = new (window.AudioContext || window.webkitAudioContext)();
         const filter = ac.createBiquadFilter(); filter.type = 'lowpass'; filter.Q.value = 3;
         const amp = ac.createGain(); amp.gain.value = 0;
-        const verb = ac.createConvolver(), wet = ac.createGain(); wet.gain.value = 0.35;
+        const verb = ac.createConvolver(), wet = ac.createGain(), dry = ac.createGain(); wet.gain.value = 0.35;
         const len = ac.sampleRate * 3, ir = ac.createBuffer(2, len, ac.sampleRate);
         for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3); }
         verb.buffer = ir;
         const comp = ac.createDynamicsCompressor(); comp.threshold.value = -18; comp.ratio.value = 4;
-        filter.connect(amp); amp.connect(comp); amp.connect(verb); verb.connect(wet); wet.connect(comp); comp.connect(ac.destination);
+        filter.connect(amp); amp.connect(dry); dry.connect(comp); amp.connect(verb); verb.connect(wet); wet.connect(comp); comp.connect(ac.destination);
         const oscs = [];
         voicing(CHORDS[0]).forEach(m => [-6, 6].forEach(cents => {
           const o = ac.createOscillator(); o.type = 'sawtooth';
@@ -2518,7 +2528,7 @@ i &lt;3 to work with u</p>
           o.connect(g); g.connect(filter); o.start();
           oscs.push(o);
         }));
-        pad = { ac, filter, amp, oscs };
+        pad = { ac, filter, amp, oscs, wet, dry };
       }
       if (pad.ac.state === 'suspended') pad.ac.resume();
       const t = pad.ac.currentTime;
@@ -2541,10 +2551,12 @@ i &lt;3 to work with u</p>
       e.preventDefault();
       dragging = true; handle.setPointerCapture(e.pointerId); handle.classList.add('dragging');
       chordOn();
+      setVerb(e.clientY);
     });
     handle.addEventListener('pointermove', e => {
       if (!dragging) return;
       setSplit(e.clientX / innerWidth * 100);
+      setVerb(e.clientY);
     });
     function release() {
       if (!dragging) return;
