@@ -2571,6 +2571,73 @@ i &lt;3 to work with u</p>
     handle.addEventListener('pointercancel', release);
     handle.addEventListener('dblclick', () => { setSplit(DEFAULT); dispatchEvent(new Event('resize')); });
   })();
+  // home cards: hovering a card plays its own loop as a granular synth (mouse/trackpad only).
+  //   x → position in the loop: left edge 10% … right edge 90%
+  //   y → grain size: top 1 s … bottom 75 ms
+  // Sound starts after the visitor's first click/tap/key on the page (browser rule).
+  (() => {
+    if (!matchMedia('(pointer: fine)').matches) return;
+    const homeEl = document.getElementById('home');
+    const cards = [...homeEl.querySelectorAll('.card')];
+    const LOOPS = cards.map((_, i) => `media/grains/loop_${i + 1}.mp3`);
+    const OVERLAP = 3;                                                   // grains sounding at once
+    const clamp01 = v => Math.max(0, Math.min(1, v));
+
+    let ac = null, out = null, buffers = [], cardGain = [];
+    const HANN = new Float32Array(64).map((_, i) => Math.sin(Math.PI * i / 63) ** 2);
+    function unlock() {
+      if (!ac) {
+        ac = new (window.AudioContext || window.webkitAudioContext)();
+        const comp = ac.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 4;
+        out = ac.createGain(); out.gain.value = 0.9; out.connect(comp); comp.connect(ac.destination);
+        cardGain = cards.map(() => { const g = ac.createGain(); g.gain.value = 0; g.connect(out); return g; });
+        LOOPS.forEach((url, i) => fetch(url).then(r => r.arrayBuffer()).then(b => ac.decodeAudioData(b)).then(buf => { buffers[i] = buf; }).catch(() => {}));
+      }
+      if (ac.state === 'suspended') ac.resume();
+    }
+    ['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, unlock, { capture: true }));
+
+    // what the pointer is doing on which card
+    let active = -1, pos = 0.5, size = 0.3, next = 0;
+    cards.forEach((card, i) => {
+      function read(e) {
+        const r = card.getBoundingClientRect();
+        pos = 0.1 + 0.8 * clamp01((e.clientX - r.left) / r.width);
+        size = Math.pow(0.075, clamp01((e.clientY - r.top) / r.height));   // 1 s at the top → 75 ms at the bottom
+      }
+      card.addEventListener('mouseenter', e => {
+        read(e); active = i; next = 0;
+        if (ac) cardGain[i].gain.setTargetAtTime(1, ac.currentTime, 0.06);
+      });
+      card.addEventListener('mousemove', read);
+      card.addEventListener('mouseleave', () => {
+        if (active === i) active = -1;
+        if (ac) cardGain[i].gain.setTargetAtTime(0, ac.currentTime, 0.12);
+      });
+    });
+
+    // scheduler: overlapping Hann-windowed grains read around the chosen position
+    setInterval(() => {
+      if (!ac || ac.state !== 'running' || active < 0) return;
+      if (homeEl.style.display === 'none') { cardGain[active].gain.setTargetAtTime(0, ac.currentTime, 0.1); active = -1; return; }
+      const buf = buffers[active]; if (!buf) return;
+      const now = ac.currentTime, until = now + 0.12;
+      if (!next || next < now) next = now + 0.01;
+      while (next < until) {
+        const t = next, dur = Math.min(size, buf.duration * 0.5);
+        const centre = pos * buf.duration + (Math.random() * 2 - 1) * Math.min(0.15, dur * 0.25);
+        const start = Math.max(0, Math.min(buf.duration - dur, centre - dur / 2));
+        const src = ac.createBufferSource(); src.buffer = buf;
+        const env = ac.createGain(), pan = ac.createStereoPanner();
+        env.gain.value = 0;
+        env.gain.setValueCurveAtTime(HANN.map(v => v * 0.55), t, dur);
+        pan.pan.value = (Math.random() * 2 - 1) * 0.35;
+        src.connect(env); env.connect(pan); pan.connect(cardGain[active]);
+        src.start(t, start, dur); src.stop(t + dur + 0.02);
+        next += Math.max(0.02, dur / OVERLAP) * (0.85 + Math.random() * 0.3);
+      }
+    }, 25);
+  })();
 </script>
 </body>
 </html>
