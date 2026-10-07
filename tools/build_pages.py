@@ -5,7 +5,7 @@
 
 GitHub Pages serves mxnchv.xyz/lab from lab.html, mxnchv.xyz/branding from branding.html, etc.
 Each copy is index.html with the section preselected (data-start) and its own title / share tags,
-so it opens straight on that section. Also writes 404.html (unknown addresses show the home page).
+so it opens straight on that section. Also writes 404.html (unknown addresses get a little 404 sound toy).
 Always edit index.html, then run this script: the generated files are overwritten.
 """
 from pathlib import Path
@@ -42,6 +42,7 @@ def page(src, name=None, base=False):
         out = re.sub(r'(<meta name="description" content=")[^"]*"', rf'\g<1>{DESC[name]}"', out, count=1)
     if base:  # 404 can be served at any depth: resolve the site's files from the root
         out = out.replace('<head>', '<head>\n  <base href="/">', 1)
+        out = out.replace('<html lang="en">', '<html lang="en" data-notfound>', 1)   # shows the 404 toy
     return out.replace('<!DOCTYPE html>', '<!DOCTYPE html>\n' + NOTE, 1)
 
 

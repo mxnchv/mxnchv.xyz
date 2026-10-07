@@ -1168,6 +1168,34 @@
     }
     /* the home's entrance animations wait behind the entry screen */
     html.pre-enter .card-content, html.pre-enter .about-text { animation-play-state: paused; }
+    /* ── 404: a little sound toy instead of a dead end ── */
+    #notfound {
+      position: fixed; inset: 0; z-index: 7900;
+      background: #000;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 1.4rem;
+      text-align: center;
+      user-select: none; -webkit-user-select: none;
+      touch-action: none;
+    }
+    #notfound[hidden] { display: none; }
+    .nf-digits { margin: 0.12em 0 0.32em; display: flex; gap: 0.06em; font-family: var(--font-eva); font-weight: 800; font-size: clamp(7rem, 26vw, 20rem); line-height: 0.8; }
+    .nf-digits span {
+      display: inline-block; cursor: pointer;
+      scale: 0.72 1.25;
+      transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.3), filter 0.3s;
+    }
+    .nf-digits span.hit { transform: translateY(-0.06em) skewX(-6deg); filter: blur(0.6px); }
+    .nf-digits span.down { transition: transform 1.3s cubic-bezier(0.55, 0, 0.9, 0.4); }
+    .nf-msg { font-family: var(--font-ui); font-size: 0.9rem; letter-spacing: 0.12em; color: rgba(255,255,255,0.85); }
+    .nf-hint { font-family: var(--font-ui); font-size: 0.72rem; letter-spacing: 0.12em; color: rgba(255,255,255,0.5); }
+    .nf-home {
+      font-family: var(--font-ui); font-size: 0.8rem; letter-spacing: 0.12em; color: #fff; text-decoration: none;
+      padding: 0.7rem 1.3rem; border: 1px solid rgba(255,255,255,0.5); margin-top: 0.6rem;
+      transition: background 0.25s, color 0.25s;
+    }
+    .nf-home:hover { background: #fff; color: #000; }
+
     /* ── sound control: one master volume / mute for every sound on the site ── */
     .snd {
       position: fixed;
@@ -1256,6 +1284,14 @@
 <body>
 
 <div id="cursor" aria-hidden="true"></div>
+
+<!-- only on addresses that don't exist (404.html) -->
+<div id="notfound" hidden>
+  <div class="nf-digits" aria-label="404"><span>4</span><span>0</span><span>4</span></div>
+  <p class="nf-msg">this page got lost in the mix</p>
+  <p class="nf-hint">hover the numbers · click to drop them</p>
+  <a class="nf-home" href="/">← back home</a>
+</div>
 
 <div class="snd" id="snd">
   <button type="button" class="snd-btn" aria-label="mute sound"><span class="snd-off">off</span><span class="snd-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>
@@ -3188,6 +3224,88 @@ i &lt;3 to work with u</p>
     f.title = b.parentElement.querySelector('.video-label')?.textContent || 'video';
     b.replaceWith(f);
   });
+
+  // 404: the numbers are a tiny instrument. Hovering one plays its note bending flat (lost,
+  // out of tune); a click anywhere drops them all with a tape-stop, and they spring back.
+  (() => {
+    const el = document.getElementById('notfound');
+    const KNOWN = ['', 'branding', 'videogames', 'content', 'collabs', 'lab', 'index'];
+    const here = location.pathname.replace(/^\/+|\/+$|\.html$/g, '');
+    if (!document.documentElement.hasAttribute('data-notfound') || KNOWN.includes(here)) return;
+    el.hidden = false;
+    document.title = 'lost — mxnchv';
+    if (matchMedia('(hover: none)').matches) el.querySelector('.nf-hint').textContent = 'touch the numbers · tap to drop them';
+    const digits = [...el.querySelectorAll('.nf-digits span')];
+    const NOTES = [57, 60, 64];                                          // A3 C4 E4
+    let ac = null, out = null;
+    function audio() {
+      if (!ac) {
+        ac = new (window.AudioContext || window.webkitAudioContext)();
+        out = ac.createGain(); out.gain.value = 0.5;
+        const verb = ac.createConvolver(), wet = ac.createGain(); wet.gain.value = 0.4;
+        const len = ac.sampleRate * 2.5, ir = ac.createBuffer(2, len, ac.sampleRate);
+        for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3); }
+        verb.buffer = ir;
+        out.connect(ac.destination); out.connect(verb); verb.connect(wet); wet.connect(ac.destination);
+      }
+      if (ac.state === 'suspended') ac.resume();
+      return ac.state === 'running';
+    }
+    ['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, audio, { capture: true }));
+    const hz = m => 440 * Math.pow(2, (m - 69) / 12);
+    function note(i, bend = -0.6, len = 1.4) {                            // bend in semitones
+      if (!ac || ac.state !== 'running') return;
+      const t = ac.currentTime, f = hz(NOTES[i] + (Math.random() - 0.5) * 0.3);
+      const o = ac.createOscillator(), o2 = ac.createOscillator(), g = ac.createGain(), pan = ac.createStereoPanner();
+      o.type = 'triangle'; o2.type = 'sine';
+      o.frequency.setValueAtTime(f, t); o.frequency.exponentialRampToValueAtTime(f * Math.pow(2, bend / 12), t + len);
+      o2.frequency.setValueAtTime(f * 2, t); o2.frequency.exponentialRampToValueAtTime(f * 2 * Math.pow(2, bend / 12), t + len);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.35, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+      pan.pan.value = (i - 1) * 0.5;
+      o.connect(g); o2.connect(g); g.connect(pan); pan.connect(out);
+      o.start(t); o2.start(t); o.stop(t + len + 0.05); o2.stop(t + len + 0.05);
+    }
+    function tapeStop() {                                                // all three notes slow to a halt
+      if (!ac || ac.state !== 'running') return;
+      const t = ac.currentTime;
+      const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 0;
+      lp.frequency.setValueAtTime(5000, t); lp.frequency.exponentialRampToValueAtTime(200, t + 1.3);
+      lp.connect(out);
+      NOTES.forEach((m, i) => {
+        const o = ac.createOscillator(), g = ac.createGain();
+        o.type = 'sawtooth';
+        o.frequency.setValueAtTime(hz(m), t); o.frequency.exponentialRampToValueAtTime(hz(m) / 8, t + 1.3);
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.12, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.4);
+        o.connect(g); g.connect(lp); o.start(t); o.stop(t + 1.5);
+      });
+    }
+    function springBack() {                                              // ...and wind back up
+      if (!ac || ac.state !== 'running') return;
+      NOTES.forEach((_, i) => setTimeout(() => note(i, 0, 0.9), i * 70));
+    }
+    digits.forEach((d, i) => {
+      d.addEventListener('pointerenter', () => {
+        if (d.classList.contains('down')) return;
+        d.classList.add('hit'); note(i);
+        setTimeout(() => d.classList.remove('hit'), 260);
+      });
+    });
+    let dropped = false;
+    el.addEventListener('click', e => {
+      if (e.target.closest('.nf-home') || dropped) return;
+      dropped = true;
+      tapeStop();
+      digits.forEach((d, i) => {
+        d.classList.add('down');
+        d.style.transform = `translateY(${110 + i * 15}vh) rotate(${(i - 1) * 25 + (Math.random() - 0.5) * 30}deg)`;
+      });
+      setTimeout(() => {
+        digits.forEach(d => { d.classList.remove('down'); d.style.transform = ''; });
+        springBack();
+        setTimeout(() => { dropped = false; }, 600);
+      }, 1700);
+    });
+  })();
 </script>
 </body>
 </html>
