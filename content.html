@@ -1098,6 +1098,7 @@
       .oc-group button { padding: 0.45rem 0.6rem; }
       .samples-list { max-width: none; }
       .handplay { --ar: 0.75; width: min(100%, 72svh * var(--ar)); }
+      .vacio { height: 70svh; }
       .hp-ghost { height: 34%; }
       .hp-synth > button { font-size: 1.8rem; padding: 0.2rem 0.3rem; }
       .hp-wave { height: 48px; }
@@ -1108,6 +1109,24 @@
       .section-footer { padding: 0 1.25rem; }
       .social-links { gap: 1.1rem; }
     }
+
+    /* ── LAB: endless drift (vacio.js) — nothing on it but the world itself ── */
+    .vacio {
+      position: relative;
+      margin-top: 1.5rem;
+      height: min(82vh, 780px);
+      min-height: 340px;
+      border: 1px solid #161616;
+      background: var(--black);
+      overflow: hidden;
+      cursor: crosshair;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      outline: none;
+    }
+    .vacio:focus-visible { border-color: rgba(255,255,255,0.35); }
+    .vacio canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 
     /* ── entry screen ── */
     #enter {
@@ -1627,6 +1646,8 @@ i &lt;3 to work with u</p>
         </div>
         <a class="hp-download" href="media/synths/mxnchv_sxvnds_vol_1_one_shot_synth_01.wav" download>yeah you can download this sound if u want :)</a>
       </div>
+
+      <div class="vacio" id="vacio" tabindex="0" role="img" aria-label="an endless drift through a dark space full of forms; point or drag where you want to go (arrow keys work too)"><canvas></canvas></div>
 
       <h2 class="lab-heading">Samples</h2>
       <p class="lab-intro">Free sample packs. Use them, mangle them, don't ask permission.</p>
@@ -3352,5 +3373,6 @@ i &lt;3 to work with u</p>
     addEventListener('pointerdown', () => { if (!ac) { chordOff(chordOn()); } }, { capture: true, once: true });
   })();
 </script>
+<script src="vacio.js?v=1" defer></script>
 </body>
 </html>
