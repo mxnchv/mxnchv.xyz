@@ -14,6 +14,8 @@ import re
 ROOT = Path(__file__).resolve().parent.parent
 SITE = 'https://mxnchv.xyz'
 SECTIONS = ['branding', 'videogames', 'content', 'collabs', 'lab']
+# addresses that open a section on one of its parts (see SPOTS in index.html): mxnchv.xyz/midirain is Lab
+SPOTS = ['midirain']
 # what a shared link to each section says (and its preview image: media/og_<name>.jpg)
 DESC = {
     'branding': 'Sound for brands &amp; motion, by mxnchv — sound designer in Madrid.',
@@ -21,6 +23,7 @@ DESC = {
     'content': 'Sound for social media &amp; content creation, by mxnchv — sound designer in Madrid.',
     'collabs': 'Audio-visual work with other artists, by mxnchv — sound designer in Madrid.',
     'lab': 'Sound toys to play in the browser and free sample packs, by mxnchv.',
+    'midirain': 'midirain: a Max for Live MIDI effect where rain plays your notes. Try it in the browser, by mxnchv.',
 }
 NOTE = '<!-- generated from index.html by tools/build_pages.py — do not edit by hand -->\n'
 
@@ -49,10 +52,10 @@ def page(src, name=None, base=False):
 def main():
     src = (ROOT / 'index.html').read_text()
     assert '<html lang="en">' in src and '<!DOCTYPE html>' in src
-    for name in SECTIONS:
+    for name in SECTIONS + SPOTS:
         (ROOT / f'{name}.html').write_text(page(src, name))
     (ROOT / '404.html').write_text(page(src, base=True))
-    print('wrote', ', '.join(f'{n}.html' for n in SECTIONS), 'and 404.html')
+    print('wrote', ', '.join(f'{n}.html' for n in SECTIONS + SPOTS), 'and 404.html')
 
 
 if __name__ == '__main__':
