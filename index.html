@@ -379,7 +379,7 @@
     html[data-start] #home { display: none; }
     html[data-start="branding"] #page-branding, html[data-start="videogames"] #page-videogames,
     html[data-start="content"] #page-content, html[data-start="collabs"] #page-collabs,
-    html[data-start="lab"] #page-lab { display: flex; }
+    html[data-start="lab"] #page-lab, html[data-start="midirain"] #page-lab { display: flex; }
 
     /* header */
     .section-header {
@@ -606,6 +606,37 @@
       margin: 3.5rem 0 0;
     }
     .lab-heading + .lab-intro { margin-top: 1.25rem; }
+
+    /* ── LAB: devices (midirain.js) — the rain of the Max for Live device, playable, then the buy row ── */
+    .devices .lab-heading { margin-top: 2.5rem; }
+    .devices .lab-intro { margin-bottom: 2.5rem; }
+    .mr-stage {
+      position: relative;
+      height: min(42vh, 380px);
+      min-height: 240px;
+      border: 1px solid #161616;
+      background: var(--black);
+      overflow: hidden;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .mr-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+    .mr-stage:focus-visible { outline: 1px solid var(--white); outline-offset: 3px; }
+    .mr-hint, .mr-controls {
+      position: absolute;
+      bottom: 1rem;
+      font-family: var(--font-ui);
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      color: rgba(255,255,255,0.7);
+    }
+    .mr-hint { left: 1rem; pointer-events: none; }
+    .mr-controls { right: 1rem; display: flex; gap: 1.2rem; }
+    .mr-controls label { display: flex; gap: 0.5rem; cursor: ns-resize; touch-action: none; }
+    .mr-controls label:focus-visible { outline: 1px solid var(--white); outline-offset: 3px; }
+    .mr-controls output { color: var(--white); font-variant-numeric: tabular-nums; }
+    .devices .samples-list { margin-top: 1.5rem; }
 
     .playground { margin-top: 2.5rem; }
     .orbits { margin-top: 1.5rem; }
@@ -1088,6 +1119,8 @@
       .short { scroll-snap-align: center; }
 
       .lab-body { padding: 0 1.25rem 2.5rem; }
+      .mr-hint { top: 1rem; bottom: auto; }
+      .mr-controls { left: 1rem; right: auto; }
       .playground { margin-top: 1.5rem; }
       .pad { height: 52vh; height: 52svh; min-height: 260px; }
       .orbits { height: auto; aspect-ratio: 1; min-height: 0; max-height: 75vh; max-height: 75svh; }
@@ -1605,6 +1638,29 @@ i &lt;3 to work with u</p>
     </div>
 
     <div class="lab-body">
+      <div class="devices" id="devices">
+        <h2 class="lab-heading">Devices</h2>
+        <p class="lab-intro">Tools for making music.</p>
+        <div class="mr-stage" id="midirain" tabindex="0" role="button" aria-label="midirain: rain that plays notes. Click to turn the sound on or off">
+          <canvas></canvas>
+          <div class="mr-hint">click to hear it rain</div>
+          <div class="mr-controls">
+            <label tabindex="0" data-k="density" data-v="45" data-min="0" data-max="100" data-unit="%">density <output>45%</output></label>
+            <label tabindex="0" data-k="wind" data-v="10" data-min="-100" data-max="100">wind <output>10</output></label>
+            <label tabindex="0" data-k="distance" data-v="50" data-min="0" data-max="100" data-unit="%">distance <output>50%</output></label>
+          </div>
+        </div>
+        <div class="samples-list">
+          <a class="sample-row" href="https://mxnchv.gumroad.com/l/midirain" target="_blank">
+            <div>
+              <div class="sample-name">midirain</div>
+              <div class="sample-by">max for live midi effect · rain that plays your notes</div>
+            </div>
+            <div class="sample-dl">from 5€ · get it →</div>
+          </a>
+        </div>
+      </div>
+
       <div class="playground">
       <div class="pad" id="pad">
         <canvas></canvas>
@@ -1760,20 +1816,35 @@ i &lt;3 to work with u</p>
     });
   }
 
+  // addresses that open a section on one of its parts: mxnchv.xyz/midirain is Lab, on the device
+  const SPOTS = { midirain: ['lab', 'devices'] };
+  function spot(name) {
+    const [section, id] = SPOTS[name];
+    requestAnimationFrame(() => {
+      const body = pages[section].querySelector('.section-body'), el = document.getElementById(id);
+      const label = body.querySelector('.section-label');               // sticky: land just below it,
+      const clear = (label ? label.offsetHeight : 0) + 48;                 // with room for the stretched heading
+      body.scrollTop += el.getBoundingClientRect().top - body.getBoundingClientRect().top - clear;
+    });
+    return section;
+  }
+
   // back / forward buttons
   const pageFromPath = () => location.pathname.replace(/^\/+|\/+$|\.html$/g, '') || 'home';
   addEventListener('popstate', () => {
     const name = pageFromPath();
+    if (SPOTS[name]) { showSection(SPOTS[name][0], false); spot(name); return; }
     name === 'home' ? showHome(false) : showSection(name, false);
   });
   // opened directly on a section (mxnchv.xyz/lab): start there
   {
-    const start = document.documentElement.dataset.start || (ROUTED ? pageFromPath() : 'home');
+    const asked = document.documentElement.dataset.start || (ROUTED ? pageFromPath() : 'home');
+    const start = SPOTS[asked] ? spot(asked) : asked;
     if (pages[start]) {
       current = start;
       home.style.display = 'none';
       pages[start].classList.add('active');
-      document.title = TITLES[start];
+      document.title = SPOTS[asked] ? `${asked} — mxnchv` : TITLES[start];
     }
   }
 
@@ -3255,7 +3326,7 @@ i &lt;3 to work with u</p>
   // it's held, sustains a random chord played by Lab synth 03 (the sound of the entry screen).
   (() => {
     const el = document.getElementById('notfound');
-    const KNOWN = ['', 'branding', 'videogames', 'content', 'collabs', 'lab', 'index'];
+    const KNOWN = ['', 'branding', 'videogames', 'content', 'collabs', 'lab', 'midirain', 'index'];
     const here = location.pathname.replace(/^\/+|\/+$|\.html$/g, '');
     if (!document.documentElement.hasAttribute('data-notfound') || KNOWN.includes(here)) return;
     el.hidden = false;
@@ -3372,5 +3443,6 @@ i &lt;3 to work with u</p>
   })();
 </script>
 <script src="vacio.js?v=1" defer></script>
+<script src="midirain.js?v=1" defer></script>
 </body>
 </html>
