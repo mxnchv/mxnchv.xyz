@@ -13,9 +13,9 @@ import re
 
 ROOT = Path(__file__).resolve().parent.parent
 SITE = 'https://mxnchv.xyz'
-SECTIONS = ['branding', 'videogames', 'content', 'collabs', 'lab']
-# addresses that open a section on one of its parts (see SPOTS in index.html): mxnchv.xyz/midirain is Lab
-SPOTS = ['midirain']
+SECTIONS = ['branding', 'videogames', 'content', 'collabs', 'lab', 'midirain']
+# addresses that open a section on one of its parts (see SPOTS in index.html)
+SPOTS = []
 # what a shared link to each section says (and its preview image: media/og_<name>.jpg)
 DESC = {
     'branding': 'Sound for brands &amp; motion, by mxnchv — sound designer in Madrid.',
@@ -23,7 +23,7 @@ DESC = {
     'content': 'Sound for social media &amp; content creation, by mxnchv — sound designer in Madrid.',
     'collabs': 'Audio-visual work with other artists, by mxnchv — sound designer in Madrid.',
     'lab': 'Sound toys to play in the browser and free sample packs, by mxnchv.',
-    'midirain': 'midirain: a Max for Live MIDI effect where rain plays your notes. Try it in the browser, by mxnchv.',
+    'midirain': 'midirain: rain that plays your notes. A plugin for any DAW (VST3, AU, CLAP, app) and a Max for Live device, by mxnchv.',
 }
 NOTE = '<!-- generated from index.html by tools/build_pages.py — do not edit by hand -->\n'
 

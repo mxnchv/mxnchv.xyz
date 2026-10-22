@@ -6,7 +6,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>midirain — mxnchv</title>
-  <meta name="description" content="midirain: a Max for Live MIDI effect where rain plays your notes. Try it in the browser, by mxnchv.">
+  <meta name="description" content="midirain: rain that plays your notes. A plugin for any DAW (VST3, AU, CLAP, app) and a Max for Live device, by mxnchv.">
   <meta name="theme-color" content="#000000">
   <link rel="canonical" href="https://mxnchv.xyz/midirain">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -17,7 +17,7 @@
   <meta property="og:site_name" content="mxnchv">
   <meta property="og:url" content="https://mxnchv.xyz/midirain">
   <meta property="og:title" content="midirain — mxnchv">
-  <meta property="og:description" content="midirain: a Max for Live MIDI effect where rain plays your notes. Try it in the browser, by mxnchv.">
+  <meta property="og:description" content="midirain: rain that plays your notes. A plugin for any DAW (VST3, AU, CLAP, app) and a Max for Live device, by mxnchv.">
   <meta property="og:image" content="https://mxnchv.xyz/media/og_midirain.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -381,7 +381,7 @@
     html[data-start] #home { display: none; }
     html[data-start="branding"] #page-branding, html[data-start="videogames"] #page-videogames,
     html[data-start="content"] #page-content, html[data-start="collabs"] #page-collabs,
-    html[data-start="lab"] #page-lab, html[data-start="midirain"] #page-lab { display: flex; }
+    html[data-start="lab"] #page-lab, html[data-start="midirain"] #page-midirain { display: flex; }
 
     /* header */
     .section-header {
@@ -639,6 +639,67 @@
     .mr-controls label:focus-visible { outline: 1px solid var(--white); outline-offset: 3px; }
     .mr-controls output { color: var(--white); font-variant-numeric: tabular-nums; }
     .devices .samples-list { margin-top: 1.5rem; }
+
+    /* ── MIDIRAIN: the product page (mxnchv.xyz/midirain) ── */
+    .mr-body { padding: 0 2.5rem 3rem; }
+    .mr-eyebrow {
+      font-family: var(--font-ui); font-size: 0.68rem; letter-spacing: 0.14em;
+      color: rgba(255,255,255,0.55); margin-top: 2.5rem;
+    }
+    .mr-title {
+      font-family: var(--font-eva); font-weight: 800;
+      font-size: clamp(3.2rem, 9vw, 7rem); line-height: 0.9; letter-spacing: -0.01em;
+      text-transform: uppercase; scale: 1 1.25; transform-origin: left bottom;
+      margin: 2.2rem 0 0;
+    }
+    .mr-body .lab-intro { margin: 1.6rem 0 2rem; max-width: 520px; }
+    /* the video plays by itself, muted (browsers only allow that); "sound on" unmutes it */
+    .mr-video { position: relative; width: 100%; max-width: 1280px; aspect-ratio: 16 / 9; background: #000; overflow: hidden; }
+    .mr-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #000; }
+    .mr-sound {
+      position: absolute; right: 1rem; bottom: 1rem;
+      font-family: var(--font-ui); font-size: 0.72rem; letter-spacing: 0.12em; color: #fff;
+      background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.5);
+      padding: 0.55rem 0.9rem; cursor: pointer; transition: background 0.25s, color 0.25s;
+    }
+    .mr-sound:hover, .mr-sound:focus-visible, .mr-sound[aria-pressed="true"] { background: #fff; color: #000; }
+    .mr-buy { margin-top: 1.8rem; max-width: 760px; }
+    .mr-buy .sample-row.main .sample-dl { color: var(--white); border: 1px solid rgba(255,255,255,0.5); padding: 0.55rem 0.9rem; }
+    .mr-feat { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.8rem 2.4rem; margin-top: 2.6rem; max-width: 1280px; }
+    .mr-feat h3 {
+      font-family: var(--font-eva); font-weight: 800; font-size: 1.15rem; line-height: 1;
+      text-transform: uppercase; scale: 0.8 1.2; transform-origin: left bottom; margin: 0 0 0.8rem;
+    }
+    .mr-feat p { font-family: var(--font-ui); font-size: 0.74rem; line-height: 1.85; color: rgba(255,255,255,0.7); margin: 0; }
+    .mr-shot { display: block; width: 100%; max-width: 1280px; height: auto; border: 1px solid #161616; margin-top: 2.6rem; }
+    .mr-small { font-family: var(--font-ui); font-size: 0.7rem; line-height: 1.9; color: rgba(255,255,255,0.55); margin-top: 2rem; max-width: 760px; }
+
+    /* ── HOME: a card in the corner announcing midirain; closed once, it stays closed ── */
+    .mr-card {
+      position: fixed; right: 2rem; bottom: 3.6rem; z-index: 20;
+      width: 300px; background: #000; border: 1px solid rgba(255,255,255,0.35);
+      box-shadow: 0 18px 50px rgba(0,0,0,0.6);
+      opacity: 0; transform: translateY(12px); pointer-events: none;
+      transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+    .mr-card.show { opacity: 1; transform: none; pointer-events: auto; }
+    .mr-card a { display: grid; color: #fff; text-decoration: none; }
+    .mr-card video { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; filter: grayscale(100%) brightness(0.85); transition: filter 0.5s; }
+    .mr-card a:hover video, .mr-card a:focus-visible video { filter: none; }
+    .mr-card-text { display: grid; gap: 0.35rem; padding: 0.75rem 0.9rem 0.9rem; font-family: var(--font-ui); }
+    .mr-card-new { font-size: 0.6rem; letter-spacing: 0.16em; color: rgba(255,255,255,0.55); }
+    .mr-card-name {
+      font-family: var(--font-eva); font-weight: 800; font-size: 1.35rem; line-height: 1;
+      text-transform: uppercase; scale: 0.8 1.2; transform-origin: left bottom; margin-top: 0.2rem;
+    }
+    .mr-card-by { font-size: 0.68rem; color: rgba(255,255,255,0.7); letter-spacing: 0.04em; }
+    .mr-card-go { font-size: 0.68rem; letter-spacing: 0.1em; margin-top: 0.2rem; }
+    .mr-card-x {
+      position: absolute; top: 0.35rem; right: 0.35rem; width: 1.8rem; height: 1.8rem;
+      font-family: var(--font-ui); font-size: 0.9rem; color: #fff; background: rgba(0,0,0,0.55);
+      border: 0; cursor: pointer;
+    }
+    .mr-card-x:hover, .mr-card-x:focus-visible { background: #fff; color: #000; }
 
     .playground { margin-top: 2.5rem; }
     .orbits { margin-top: 1.5rem; }
@@ -1121,6 +1182,10 @@
       .short { scroll-snap-align: center; }
 
       .lab-body { padding: 0 1.25rem 2.5rem; }
+      .mr-body { padding: 0 1.25rem 2.5rem; }
+      .mr-card { left: 0.75rem; right: 0.75rem; bottom: 0.75rem; width: auto; }
+      .mr-card a { grid-template-columns: 42% 1fr; }
+      .mr-card video { height: 100%; aspect-ratio: auto; }
       .mr-hint { top: 1rem; bottom: auto; }
       .mr-controls { left: 1rem; right: auto; }
       .playground { margin-top: 1.5rem; }
@@ -1432,6 +1497,19 @@ i &lt;3 to work with u</p>
   </div>
 
   <div class="home-tagline">sound for interactive &amp; visual worlds</div>
+
+  <aside class="mr-card" id="mr-card" aria-label="new: midirain">
+    <a href="/midirain" onclick="showSection('midirain');return false;">
+      <video src="media/card_midirain.mp4" poster="media/card_midirain.jpg" muted loop playsinline preload="none"></video>
+      <span class="mr-card-text">
+        <span class="mr-card-new">new · plugin</span>
+        <span class="mr-card-name">midirain</span>
+        <span class="mr-card-by">rain that plays your notes</span>
+        <span class="mr-card-go">see it →</span>
+      </span>
+    </a>
+    <button type="button" class="mr-card-x" aria-label="close">×</button>
+  </aside>
 </div>
 
 
@@ -1643,22 +1721,13 @@ i &lt;3 to work with u</p>
       <div class="devices" id="devices">
         <h2 class="lab-heading">Devices</h2>
         <p class="lab-intro">Tools for making music.</p>
-        <div class="mr-stage" id="midirain" tabindex="0" role="button" aria-label="midirain: rain that plays notes. Click to turn the sound on or off">
-          <canvas></canvas>
-          <div class="mr-hint">click to hear it rain</div>
-          <div class="mr-controls">
-            <label tabindex="0" data-k="density" data-v="45" data-min="0" data-max="100" data-unit="%">density <output>45%</output></label>
-            <label tabindex="0" data-k="wind" data-v="10" data-min="-100" data-max="100">wind <output>10</output></label>
-            <label tabindex="0" data-k="distance" data-v="50" data-min="0" data-max="100" data-unit="%">distance <output>50%</output></label>
-          </div>
-        </div>
         <div class="samples-list">
-          <a class="sample-row" href="https://mxnchv.gumroad.com/l/midirain" target="_blank">
+          <a class="sample-row" href="/midirain" onclick="showSection('midirain');return false;">
             <div>
               <div class="sample-name">midirain</div>
-              <div class="sample-by">max for live midi effect · rain that plays your notes</div>
+              <div class="sample-by">plugin + max for live · rain that plays your notes</div>
             </div>
-            <div class="sample-dl">from 5€ · get it →</div>
+            <div class="sample-dl">see it →</div>
           </a>
         </div>
       </div>
@@ -1753,6 +1822,82 @@ i &lt;3 to work with u</p>
 </div>
 
 
+<!-- ══════════════════ MIDIRAIN ══════════════════ -->
+<div class="section-page" id="page-midirain">
+  <header class="section-header">
+    <a href="/" class="section-logo" onclick="showHome();return false;" aria-label="mxnchv">m <span class="lg" data-a="x" data-b="o">x</span> n c h <span class="lg" data-a="v" data-b="u">v</span></a>
+    <nav class="section-nav">
+      <a href="/branding" onclick="showSection('branding');return false;">Branding</a>
+      <a href="/videogames" onclick="showSection('videogames');return false;">Videogames</a>
+      <a href="/content" onclick="showSection('content');return false;">Content</a>
+      <a href="/collabs" onclick="showSection('collabs');return false;">Collabs</a>
+      <a class="active" href="/lab" onclick="showSection('lab');return false;">Lab</a>
+    </nav>
+  </header>
+
+  <div class="section-body">
+    <div class="mr-body">
+      <div class="mr-eyebrow">lab · devices</div>
+      <h1 class="mr-title">midirain</h1>
+      <p class="lab-intro">Rain falls on invisible columns. Each column is a note. Each drop that hits the ground plays it.</p>
+
+      <div class="mr-video" id="mr-video" data-yt="-pOqqUQ1MQQ">
+        <button type="button" class="mr-sound" aria-pressed="false">sound on</button>
+      </div>
+
+      <div class="samples-list mr-buy">
+        <a class="sample-row main" href="https://mxnchv.gumroad.com/l/midirain" target="_blank">
+          <div>
+            <div class="sample-name">midirain</div>
+            <div class="sample-by">plugin + max for live · vst3 · au · clap · app · mac &amp; windows</div>
+          </div>
+          <div class="sample-dl">9€ · get it →</div>
+        </a>
+        <a class="sample-row" href="https://mxnchv.gumroad.com/l/m4lmidirain" target="_blank">
+          <div>
+            <div class="sample-name">midirain (max4live version)</div>
+            <div class="sample-by">only for ableton live · a midi effect, no built-in sounds</div>
+          </div>
+          <div class="sample-dl">5€ · get it →</div>
+        </a>
+      </div>
+
+      <div class="mr-feat">
+        <div><h3>Shape the rain</h3><p>Density, Fall, Wind and Distance: how much it rains, how fast, at what angle, and how close. Close drops play louder.</p></div>
+        <div><h3>Choose the notes</h3><p>11 scales in any key, or Chords: hold a chord and it rains on it. Free, or in time with your project.</p></div>
+        <div><h3>Hear it</h3><p>Six sounds, Reverb and Delay, six presets. And MIDI out, so the rain can play your own synths.</p></div>
+      </div>
+
+      <img class="mr-shot" src="media/midirain_plugin.jpg" width="1640" height="940" alt="The midirain plugin: the rain above, and the knobs for the rain, the notes and the effects below" loading="lazy" decoding="async">
+
+      <div class="devices" id="try">
+        <h2 class="lab-heading">Try it</h2>
+        <p class="lab-intro">The rain of the Max for Live device, here in the browser.</p>
+        <div class="mr-stage" id="midirain" tabindex="0" role="button" aria-label="midirain: rain that plays notes. Click to turn the sound on or off">
+          <canvas></canvas>
+          <div class="mr-hint">click to hear it rain</div>
+          <div class="mr-controls">
+            <label tabindex="0" data-k="density" data-v="45" data-min="0" data-max="100" data-unit="%">density <output>45%</output></label>
+            <label tabindex="0" data-k="wind" data-v="10" data-min="-100" data-max="100">wind <output>10</output></label>
+            <label tabindex="0" data-k="distance" data-v="50" data-min="0" data-max="100" data-unit="%">distance <output>50%</output></label>
+          </div>
+        </div>
+      </div>
+
+      <p class="mr-small">One license key, up to 5 computers, activated once and offline after that. All 1.x updates free. macOS 10.13 or later (Apple Silicon and Intel) or Windows, 64-bit. Max for Live: Live 12 Suite, or Standard with Max for Live.</p>
+    </div>
+  </div>
+
+  <footer class="section-footer">
+    <a href="mailto:mxnchv@gmail.com" class="contact-link" aria-label="email mxnchv@gmail.com"><span class="cl-mail">mxnchv@gmail.com</span><span class="cl-msg" aria-hidden="true">get in touch &amp; tell me about you :)</span></a>
+    <div class="social-links">
+      <a href="https://www.linkedin.com/in/ramon-sirvent-d/" target="_blank">LinkedIn</a>
+      <a href="https://www.instagram.com/mxnchv/" target="_blank">Instagram</a>
+    </div>
+  </footer>
+</div>
+
+
 <script>
   const home = document.getElementById('home');
   const pages = {
@@ -1761,12 +1906,16 @@ i &lt;3 to work with u</p>
     content:    document.getElementById('page-content'),
     collabs:    document.getElementById('page-collabs'),
     lab:        document.getElementById('page-lab'),
+    midirain:   document.getElementById('page-midirain'),
   };
 
-  // leaving Lab resets its instruments completely (they listen for 'lab:reset')
+  // leaving Lab (or midirain, whose demo is a Lab instrument) resets its instruments completely
+  // (they listen for 'lab:reset'); the pages listen for 'page:shown' to start what plays on them
   function leaving(next) {
-    if (pages.lab.classList.contains('active') && next !== 'lab') dispatchEvent(new Event('lab:reset'));
+    for (const n of ['lab', 'midirain'])
+      if (pages[n].classList.contains('active') && next !== n) dispatchEvent(new CustomEvent('lab:reset', { detail: n }));
   }
+  const shown = name => dispatchEvent(new CustomEvent('page:shown', { detail: name }));
 
   // page changes cross-fade through the View Transitions API where the browser has it;
   // the entrance animations in CSS (cards, section titles) run either way
@@ -1802,6 +1951,7 @@ i &lt;3 to work with u</p>
       document.documentElement.removeAttribute('data-start');
       home.style.display = 'grid';
       Object.values(pages).forEach(p => p.classList.remove('active'));
+      shown('home');
     });
   }
 
@@ -1815,11 +1965,12 @@ i &lt;3 to work with u</p>
       Object.values(pages).forEach(p => p.classList.remove('active'));
       pages[name].classList.add('active');
       pages[name].querySelector('.section-body').scrollTop = 0;
+      shown(name);
     });
   }
 
-  // addresses that open a section on one of its parts: mxnchv.xyz/midirain is Lab, on the device
-  const SPOTS = { midirain: ['lab', 'devices'] };
+  // addresses that open a section on one of its parts (mxnchv.xyz/<spot> → a section, scrolled to an id)
+  const SPOTS = {};
   function spot(name) {
     const [section, id] = SPOTS[name];
     requestAnimationFrame(() => {
@@ -1848,6 +1999,7 @@ i &lt;3 to work with u</p>
       pages[start].classList.add('active');
       document.title = SPOTS[asked] ? `${asked} — mxnchv` : TITLES[start];
     }
+    addEventListener('DOMContentLoaded', () => shown(pages[start] ? start : 'home'));
   }
 
   document.addEventListener('keydown', e => {
@@ -3322,6 +3474,69 @@ i &lt;3 to work with u</p>
     f.title = (lab && (lab.querySelector('.vl-title') || lab).textContent) || 'video';
     b.replaceWith(f);
   });
+
+  // midirain: the video plays by itself on its page, muted (browsers don't allow sound before a
+  // click); "sound on" unmutes it. The player is only loaded while the page is open.
+  (() => {
+    const box = document.getElementById('mr-video');
+    if (!box) return;
+    const id = box.dataset.yt, btn = box.querySelector('.mr-sound');
+    let frame = null;
+    const send = (func, args = []) => frame && frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func, args }), '*');
+    addEventListener('page:shown', e => {
+      if (e.detail !== 'midirain' || frame) return;
+      frame = document.createElement('iframe');
+      frame.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&controls=0&modestbranding=1&rel=0&playsinline=1&enablejsapi=1`;
+      frame.title = 'midirain — the video';
+      frame.allow = 'autoplay; encrypted-media; picture-in-picture';
+      frame.allowFullscreen = true;
+      box.prepend(frame);
+      btn.setAttribute('aria-pressed', 'false'); btn.textContent = 'sound on';
+    });
+    addEventListener('lab:reset', e => {
+      if (e.detail !== 'midirain' || !frame) return;
+      frame.remove(); frame = null;
+    });
+    btn.addEventListener('click', () => {
+      const on = btn.getAttribute('aria-pressed') !== 'true';
+      btn.setAttribute('aria-pressed', String(on));
+      btn.textContent = on ? 'sound off' : 'sound on';
+      if (on) { send('unMute'); send('setVolume', [100]); } else send('mute');
+    });
+  })();
+
+  // home: a card in the corner announces midirain a moment after the home appears. Closed once,
+  // it stays closed (on this browser).
+  (() => {
+    const card = document.getElementById('mr-card');
+    if (!card) return;
+    const KEY = 'mxnchv-midirain-card';
+    let closed = false, timer = null;
+    try { closed = localStorage.getItem(KEY) === 'closed'; } catch (_) {}
+    const video = card.querySelector('video');
+    function hide() {
+      clearTimeout(timer);
+      card.classList.remove('show');
+      video.pause();
+    }
+    addEventListener('page:shown', e => {
+      if (e.detail !== 'home') { hide(); return; }
+      if (closed) return;
+      clearTimeout(timer);
+      // after the entry screen, if it's still there
+      const wait = () => document.documentElement.classList.contains('pre-enter') ? (timer = setTimeout(wait, 400)) : (timer = setTimeout(show, 1800));
+      wait();
+    });
+    function show() {
+      card.classList.add('show');
+      const p = video.play(); if (p && p.catch) p.catch(() => {});
+    }
+    card.querySelector('.mr-card-x').addEventListener('click', () => {
+      closed = true;
+      try { localStorage.setItem(KEY, 'closed'); } catch (_) {}
+      hide();
+    });
+  })();
 
   // 404: the about video (B&W negative, through the cards' video feedback) behind a 404 whose
   // digits can be dragged anywhere, one by one. A dragged digit leaves fading trails and, while
