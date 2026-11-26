@@ -3282,7 +3282,7 @@ i &lt;3 to work with u</p>
   (() => {
     const homeEl = document.getElementById('home');
     const cards = [...homeEl.querySelectorAll('.card')];
-    const LOOPS = cards.map((_, i) => `media/grains/loop_${i + 1}.mp3?v=2`);   // bump v when a loop file changes
+    const LOOPS = cards.map((_, i) => `media/grains/loop_${i + 1}.mp3?v=3`);   // bump v when a loop file changes
     const OVERLAP = 3;                                                   // grains sounding at once
     const clamp01 = v => Math.max(0, Math.min(1, v));
 
