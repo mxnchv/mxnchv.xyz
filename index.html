@@ -1303,6 +1303,41 @@
     }
     .nf-home:hover { background: #fff; color: #000; }
 
+    /* ── TOOLS: things to take home, one row each: what it looks like, what it does, where to get it ── */
+    .tools-body .lab-intro { margin-bottom: 2rem; }
+    .tool-list { border-top: 1px solid #141414; }
+    .tool {
+      display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+      gap: 2.5rem; align-items: center;
+      padding: 2.5rem 0; border-bottom: 1px solid #141414;
+    }
+    .tool-viz { position: relative; display: block; aspect-ratio: 16 / 9; max-width: 100%; background: #040404; border: 1px solid #161616; overflow: hidden; }
+    .tool-viz video, .tool-viz canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+    .tool-viz video { filter: grayscale(100%) brightness(0.7); transition: filter 0.6s ease, transform 0.7s ease; }
+    .tool:hover .tool-viz video { filter: grayscale(0%) brightness(0.9); transform: scale(1.03); }
+    .tool-name {
+      font-family: var(--font-eva); font-weight: 800; text-transform: uppercase;
+      font-size: clamp(2.8rem, 5.5vw, 4.6rem); line-height: 0.85; letter-spacing: -0.01em;
+      scale: 0.72 1.25; transform-origin: left bottom; margin: 0 0 1.5rem;
+    }
+    .tool-what { font-family: var(--font-ui); font-size: 0.85rem; line-height: 1.8; color: rgba(255,255,255,0.8); max-width: 30rem; margin: 0 0 1.2rem; }
+    .tool-tags { list-style: none; padding: 0; margin: 0 0 1.6rem; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .tool-tags li { font-family: var(--font-ui); font-size: 0.68rem; letter-spacing: 0.08em; padding: 0.3rem 0.6rem; border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.75); }
+    .tool-tags li.soon { border-color: var(--white); color: var(--white); }
+    .tool-go {
+      display: inline-block; font-family: var(--font-ui); font-size: 0.8rem; letter-spacing: 0.12em;
+      color: var(--white); text-decoration: none; padding: 0.7rem 1.3rem; border: 1px solid rgba(255,255,255,0.5);
+      transition: background 0.25s, color 0.25s;
+    }
+    .tool-go:hover { background: var(--white); color: var(--black); }
+    .tool-go.off { opacity: 0.45; pointer-events: none; }
+    .tools-body .lab-heading { margin-top: 4.5rem; }
+    .lab-moved a { color: var(--white); }
+    @media (max-width: 760px) {
+      .tool { grid-template-columns: minmax(0, 1fr); gap: 1.4rem; padding: 2rem 0; }
+      .tool-name { margin-bottom: 1.1rem; }
+    }
+
     /* ── sound control: one master volume / mute for every sound on the site ── */
     .snd {
       position: fixed;
@@ -1492,6 +1527,15 @@ i &lt;3 to work with u</p>
       <span class="card-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
     </a>
 
+    <a class="card" href="/tools" onclick="showSection('tools');return false;">
+      <video class="card-bg" src="media/card_tools.mp4" poster="media/card_tools.jpg" autoplay muted loop playsinline preload="auto"></video>
+      <div class="card-content">
+        <h2 class="card-title">Tools</h2>
+        <p class="card-desc">plugins, devices &amp; apps.</p>
+      </div>
+      <span class="card-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
+    </a>
+
   </div>
 
   <div class="home-tagline">sound for interactive &amp; visual worlds</div>
@@ -1521,6 +1565,7 @@ i &lt;3 to work with u</p>
       <a href="/content" onclick="showSection('content');return false;">Content</a>
       <a href="/collabs" onclick="showSection('collabs');return false;">Collabs</a>
       <a href="/lab" onclick="showSection('lab');return false;">Lab</a>
+      <a href="/tools" onclick="showSection('tools');return false;">Tools</a>
     </nav>
   </header>
 
@@ -1566,6 +1611,7 @@ i &lt;3 to work with u</p>
       <a href="/content" onclick="showSection('content');return false;">Content</a>
       <a href="/collabs" onclick="showSection('collabs');return false;">Collabs</a>
       <a href="/lab" onclick="showSection('lab');return false;">Lab</a>
+      <a href="/tools" onclick="showSection('tools');return false;">Tools</a>
     </nav>
   </header>
 
@@ -1607,6 +1653,7 @@ i &lt;3 to work with u</p>
       <a class="active" href="/content" onclick="showSection('content');return false;">Content</a>
       <a href="/collabs" onclick="showSection('collabs');return false;">Collabs</a>
       <a href="/lab" onclick="showSection('lab');return false;">Lab</a>
+      <a href="/tools" onclick="showSection('tools');return false;">Tools</a>
     </nav>
   </header>
 
@@ -1660,6 +1707,7 @@ i &lt;3 to work with u</p>
       <a href="/content" onclick="showSection('content');return false;">Content</a>
       <a class="active" href="/collabs" onclick="showSection('collabs');return false;">Collabs</a>
       <a href="/lab" onclick="showSection('lab');return false;">Lab</a>
+      <a href="/tools" onclick="showSection('tools');return false;">Tools</a>
     </nav>
   </header>
 
@@ -1705,6 +1753,7 @@ i &lt;3 to work with u</p>
       <a href="/content" onclick="showSection('content');return false;">Content</a>
       <a href="/collabs" onclick="showSection('collabs');return false;">Collabs</a>
       <a class="active" href="/lab" onclick="showSection('lab');return false;">Lab</a>
+      <a href="/tools" onclick="showSection('tools');return false;">Tools</a>
     </nav>
   </header>
 
@@ -1716,20 +1765,6 @@ i &lt;3 to work with u</p>
     </div>
 
     <div class="lab-body">
-      <div class="devices" id="devices">
-        <h2 class="lab-heading">Devices</h2>
-        <p class="lab-intro">Tools for making music.</p>
-        <div class="samples-list">
-          <a class="sample-row" href="/midirain" onclick="showSection('midirain');return false;">
-            <div>
-              <div class="sample-name">midirain</div>
-              <div class="sample-by">plugin + max for live · rain that plays your notes</div>
-            </div>
-            <div class="sample-dl">see it →</div>
-          </a>
-        </div>
-      </div>
-
       <div class="playground">
       <div class="pad" id="pad">
         <canvas></canvas>
@@ -1772,7 +1807,78 @@ i &lt;3 to work with u</p>
 
       <div class="vacio" id="vacio" tabindex="0" role="img" aria-label="an endless drift through a dark space full of forms; point or drag where you want to go (arrow keys work too)"><canvas></canvas></div>
 
-      <h2 class="lab-heading">Samples</h2>
+      <p class="lab-more lab-moved">looking for midirain, splitshot or the sample packs? they live in <a href="/tools" onclick="showSection('tools');return false;">Tools →</a></p>
+      <p class="lab-more">more coming — this section is always changing.</p>
+    </div>
+  </div>
+
+  <footer class="section-footer">
+    <a href="mailto:mxnchv@gmail.com" class="contact-link" aria-label="email mxnchv@gmail.com"><span class="cl-mail">mxnchv@gmail.com</span><span class="cl-msg" aria-hidden="true">get in touch &amp; tell me about you :)</span></a>
+    <div class="social-links">
+      <a href="https://www.linkedin.com/in/ramon-sirvent-d/" target="_blank">LinkedIn</a>
+      <a href="https://www.instagram.com/mxnchv/" target="_blank">Instagram</a>
+    </div>
+  </footer>
+</div>
+
+
+<!-- ══════════════════ TOOLS ══════════════════ -->
+<div class="section-page" id="page-tools">
+  <header class="section-header">
+    <a href="/" class="section-logo" onclick="showHome();return false;" aria-label="mxnchv">m <span class="lg" data-a="x" data-b="o">x</span> n c h <span class="lg" data-a="v" data-b="u">v</span></a>
+    <nav class="section-nav">
+      <a href="/branding" onclick="showSection('branding');return false;">Branding</a>
+      <a href="/videogames" onclick="showSection('videogames');return false;">Videogames</a>
+      <a href="/content" onclick="showSection('content');return false;">Content</a>
+      <a href="/collabs" onclick="showSection('collabs');return false;">Collabs</a>
+      <a href="/lab" onclick="showSection('lab');return false;">Lab</a>
+      <a class="active" href="/tools" onclick="showSection('tools');return false;">Tools</a>
+    </nav>
+  </header>
+
+  <div class="section-body">
+    <div class="section-label">
+      <video class="label-bg" src="media/card_tools.mp4" poster="media/card_tools.jpg" autoplay muted loop playsinline preload="metadata"></video>
+      <h1>Tools</h1>
+      <span class="section-label-sub">plugins, devices &amp; apps for people who work with sound.</span>
+    </div>
+
+    <div class="lab-body tools-body">
+      <p class="lab-intro">Things I built because I needed them while working. Take them home.</p>
+
+      <div class="tool-list">
+        <article class="tool">
+          <a class="tool-viz" href="/midirain" onclick="showSection('midirain');return false;" aria-label="midirain"><video src="media/card_midirain.mp4" poster="media/card_midirain.jpg" autoplay muted loop playsinline preload="metadata"></video></a>
+          <div class="tool-info">
+            <h2 class="tool-name">midirain</h2>
+            <p class="tool-what">Rain that plays your notes. Draw where the drops fall, pick a scale, and it sends MIDI to anything.</p>
+            <ul class="tool-tags"><li>VST3 · AU · CLAP · app</li><li>Max for Live</li><li>free / pay what you want</li></ul>
+            <a class="tool-go" href="/midirain" onclick="showSection('midirain');return false;">see it →</a>
+          </div>
+        </article>
+
+        <article class="tool">
+          <div class="tool-viz"><canvas class="viz-split" aria-label="a long recording cut into one-shots wherever it rises over a threshold"></canvas></div>
+          <div class="tool-info">
+            <h2 class="tool-name">splitshot</h2>
+            <p class="tool-what">Drop in five minutes of recording, get back every hit as its own one-shot. It cuts wherever the sound rises above the threshold you set.</p>
+            <ul class="tool-tags"><li>Ableton Live extension</li><li>on Gumroad</li></ul>
+            <a class="tool-go" href="https://mxnchv.gumroad.com/" target="_blank" rel="noopener">get it ↗</a>
+          </div>
+        </article>
+
+        <article class="tool">
+          <div class="tool-viz"><canvas class="viz-duck" aria-label="music volume dipping while another app is in use"></canvas></div>
+          <div class="tool-info">
+            <h2 class="tool-name">Duck</h2>
+            <p class="tool-what">Turns your music down while you work in another app, and back up when you stop. Spotify dips while DaVinci plays, by itself.</p>
+            <ul class="tool-tags"><li>desktop app</li><li class="soon">coming soon</li></ul>
+            <span class="tool-go off">coming soon</span>
+          </div>
+        </article>
+      </div>
+
+      <h2 class="lab-heading">Sample packs</h2>
       <p class="lab-intro">Free sample packs. Use them, mangle them, don't ask permission.</p>
 
       <div class="samples-list">
@@ -1806,7 +1912,6 @@ i &lt;3 to work with u</p>
         </a>
       </div>
 
-      <p class="lab-more">more coming — this section is always changing.</p>
     </div>
   </div>
 
@@ -1830,6 +1935,7 @@ i &lt;3 to work with u</p>
       <a href="/content" onclick="showSection('content');return false;">Content</a>
       <a href="/collabs" onclick="showSection('collabs');return false;">Collabs</a>
       <a class="active" href="/lab" onclick="showSection('lab');return false;">Lab</a>
+      <a href="/tools" onclick="showSection('tools');return false;">Tools</a>
     </nav>
   </header>
 
@@ -1905,6 +2011,7 @@ i &lt;3 to work with u</p>
     collabs:    document.getElementById('page-collabs'),
     lab:        document.getElementById('page-lab'),
     midirain:   document.getElementById('page-midirain'),
+    tools:      document.getElementById('page-tools'),
   };
 
   // leaving Lab (or midirain, whose demo is a Lab instrument) resets its instruments completely
@@ -3656,8 +3763,71 @@ i &lt;3 to work with u</p>
     // the sample is decoded on the first touch, so warm it up on any first gesture
     addEventListener('pointerdown', () => { if (!ac) { chordOff(chordOn()); } }, { capture: true, once: true });
   })();
+  // Tools: two small drawings that show what the tools do, until there's footage of them.
+  //   splitshot: a long take scrolls by; wherever it rises above the threshold, a slice is cut out
+  //   Duck: the music's level dips whenever the other app makes sound, and comes back after
+  (() => {
+    const split = document.querySelector('.viz-split'), duck = document.querySelector('.viz-duck');
+    if (!split && !duck) return;
+    const fit = cv => { const r = cv.getBoundingClientRect(), k = Math.min(2, devicePixelRatio); cv.width = Math.max(2, r.width * k); cv.height = Math.max(2, r.height * k); };
+    const ro = new ResizeObserver(es => es.forEach(e => fit(e.target)));
+    [split, duck].forEach(c => c && ro.observe(c));
+    // a fake recording: quiet room tone with hits every so often (fixed seed, so it loops the same)
+    let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const N = 2400, env = new Float32Array(N);
+    for (let i = 0, next = 40; i < N; i++) {
+      if (i === next) { const len = 25 + rnd() * 90, amp = 0.45 + rnd() * 0.55; for (let j = 0; j < len && i + j < N; j++) env[i + j] = Math.max(env[i + j], amp * Math.exp(-j / (len * 0.35))); next = i + Math.round(70 + rnd() * 160); }
+      env[i] = Math.max(env[i], 0.04 + rnd() * 0.05);
+    }
+    const TH = 0.3;
+    const page = document.getElementById('page-tools');
+    function drawSplit(t) {
+      const g = split.getContext('2d'), w = split.width, h = split.height, mid = h * 0.55;
+      g.fillStyle = '#040404'; g.fillRect(0, 0, w, h);
+      const view = 600, off = (t * 0.06) % N;                  // samples on screen, scroll position
+      const ty = mid - TH * h * 0.4;
+      let inSlice = -1, n = 0;
+      for (let x = 0; x < w; x++) {
+        const k = Math.floor((off + x / w * view) % N), a = env[k];
+        if (a > TH && inSlice < 0) inSlice = x;
+        if ((a <= TH * 0.6 || x === w - 1) && inSlice >= 0) {
+          g.fillStyle = 'rgba(255,255,255,0.09)'; g.fillRect(inSlice, h * 0.12, x - inSlice, h * 0.76);
+          g.fillStyle = '#fff'; g.fillRect(inSlice, h * 0.12, Math.max(1, w * 0.002), h * 0.76);
+          g.font = `${Math.round(h * 0.05)}px Space Mono, monospace`; g.fillText(String(++n).padStart(2, '0'), inSlice + 6, h * 0.18);
+          inSlice = -1;
+        }
+        const y = a * h * 0.4 * (0.75 + 0.25 * Math.sin(k * 1.7));
+        g.fillStyle = a > TH ? '#fff' : 'rgba(255,255,255,0.45)';
+        g.fillRect(x, mid - y, 1, y * 2);
+      }
+      g.setLineDash([6, 6]); g.strokeStyle = 'rgba(255,255,255,0.7)'; g.beginPath(); g.moveTo(0, ty); g.lineTo(w, ty); g.stroke(); g.setLineDash([]);
+      g.fillStyle = 'rgba(255,255,255,0.7)'; g.font = `${Math.round(h * 0.045)}px Space Mono, monospace`; g.fillText('threshold', w - h * 0.32, ty - 8);
+    }
+    function drawDuck(t) {
+      const g = duck.getContext('2d'), w = duck.width, h = duck.height;
+      g.fillStyle = '#040404'; g.fillRect(0, 0, w, h);
+      const sec = t / 1000, editing = (sec % 6) > 2.2 && (sec % 6) < 4.8;   // the other app plays for a while, then stops
+      drawDuck.lvl = drawDuck.lvl ?? 1; drawDuck.lvl += ((editing ? 0.25 : 1) - drawDuck.lvl) * 0.06;
+      const rows = [['spotify', drawDuck.lvl * (0.75 + 0.25 * Math.abs(Math.sin(sec * 5.3)))], ['davinci resolve', editing ? 0.55 + 0.35 * Math.abs(Math.sin(sec * 7.1)) : 0.02]];
+      const fs = Math.round(h * 0.06); g.font = `${fs}px Space Mono, monospace`;
+      rows.forEach(([name, v], i) => {
+        const y = h * (0.3 + i * 0.32), x0 = w * 0.08, bw = w * 0.84, bh = h * 0.1;
+        g.fillStyle = 'rgba(255,255,255,0.7)'; g.fillText(name, x0, y - bh * 0.4);
+        g.fillStyle = 'rgba(255,255,255,0.1)'; g.fillRect(x0, y, bw, bh);
+        g.fillStyle = '#fff'; g.fillRect(x0, y, bw * v, bh);
+      });
+      g.fillStyle = 'rgba(255,255,255,0.55)'; g.fillText(editing ? '↓ ducking' : '— full volume', w * 0.08, h * 0.9);
+    }
+    (function loop(t) {
+      requestAnimationFrame(loop);
+      if (!page || !page.classList.contains('active')) return;
+      if (split && split.width > 2) drawSplit(t);
+      if (duck && duck.width > 2) drawDuck(t);
+    })(performance.now());
+  })();
 </script>
 <script src="vacio.js?v=1" defer></script>
-<script src="midirain.js?v=1" defer></script>
+<script src="midirain.js?v=1" defer>
+</script>
 </body>
 </html>
