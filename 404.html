@@ -1334,6 +1334,10 @@
     }
     .tool-go:hover { background: var(--white); color: var(--black); }
     .tool-go.off { opacity: 0.45; pointer-events: none; }
+    .tool-req { font-family: var(--font-ui); font-size: 0.68rem; line-height: 1.7; color: rgba(255,255,255,0.5); max-width: 30rem; margin: -0.6rem 0 1.6rem; }
+    /* app screen recordings: keep the colour and the whole frame (the UI is the point) */
+    .tool-viz-ui video { object-fit: contain; filter: none; }
+    .tool:hover .tool-viz-ui video { filter: none; transform: none; }
     .tools-body .lab-heading { margin-top: 4.5rem; }
     .lab-moved a { color: var(--white); }
     @media (max-width: 760px) {
@@ -1871,12 +1875,13 @@ i &lt;3 to work with u</p>
         </article>
 
         <article class="tool">
-          <div class="tool-viz"><canvas class="viz-duck" aria-label="music volume dipping while another app is in use"></canvas></div>
+          <div class="tool-viz tool-viz-ui"><video src="media/tool_duck.mp4" poster="media/tool_duck.jpg" autoplay muted loop playsinline preload="metadata" aria-label="duck turning spotify down while davinci resolve plays"></video></div>
           <div class="tool-info">
             <h2 class="tool-name">Duck</h2>
-            <p class="tool-what">Turns your music down while you work in another app, and back up when you stop. Spotify dips while DaVinci plays, by itself.</p>
-            <ul class="tool-tags"><li>desktop app</li><li class="soon">coming soon</li></ul>
-            <span class="tool-go off">coming soon</span>
+            <p class="tool-what">turns your music down when another app starts making sound, and back up when it stops. spotify dips while davinci plays, by itself.</p>
+            <ul class="tool-tags"><li>macOS</li><li>menu bar app</li><li class="soon">coming soon</li></ul>
+            <p class="tool-req">macOS 14.2 or later · apple silicon &amp; intel · needs audio recording permission (it only measures levels, nothing is recorded)</p>
+            <a class="tool-go" href="mailto:mxnchv@gmail.com?subject=duck%20waitlist">tell me when it's out →</a>
           </div>
         </article>
       </div>
