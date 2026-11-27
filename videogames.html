@@ -680,6 +680,13 @@
     }
     .mr-feat p { font-family: var(--font-ui); font-size: 0.74rem; line-height: 1.85; color: rgba(255,255,255,0.7); margin: 0; }
     .mr-shot { display: block; width: 100%; max-width: 1280px; height: auto; border: 1px solid #161616; margin-top: 2.6rem; }
+    /* splitshot page */
+    .ss-hero { margin-top: 0; }
+    .ss-story { font-size: 0.8rem; color: rgba(255,255,255,0.75); max-width: 640px; }
+    .ss-feat, .ss-more { grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+    .ss-shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 1.2rem; max-width: 1280px; margin-top: 2.6rem; }
+    .ss-shots .mr-shot { margin-top: 0; }
+    .tool-viz-ui img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
     .mr-small { font-family: var(--font-ui); font-size: 0.7rem; line-height: 1.9; color: rgba(255,255,255,0.55); margin-top: 2rem; max-width: 760px; }
 
     /* ── HOME: a card in the corner announcing midirain; closed once, it stays closed ── */
@@ -1872,12 +1879,12 @@ i &lt;3 to work with u</p>
         </article>
 
         <article class="tool">
-          <div class="tool-viz"><canvas class="viz-split" aria-label="a long recording cut into one-shots wherever it rises over a threshold"></canvas></div>
+          <a class="tool-viz tool-viz-ui" href="/splitshot" onclick="showSection('splitshot');return false;" aria-label="splitshot"><img src="media/tool_splitshot.jpg" width="1280" height="720" alt="splitshot's window in Ableton Live, a recording cut into numbered slices" loading="lazy" decoding="async"></a>
           <div class="tool-info">
             <h2 class="tool-name">splitshot</h2>
-            <p class="tool-what">Drop in five minutes of recording, get back every hit as its own one-shot. It cuts wherever the sound rises above the threshold you set.</p>
-            <ul class="tool-tags"><li>Ableton Live extension</li><li>on Gumroad</li></ul>
-            <a class="tool-go" href="https://mxnchv.gumroad.com/l/splitshot" target="_blank" rel="noopener">get it ↗</a>
+            <p class="tool-what">Slice long recordings into one-shots. Named, tagged and exported in a minute, right inside Ableton Live.</p>
+            <ul class="tool-tags"><li>Ableton Live 12 Suite</li><li>extension</li><li>free / pay what you want</li></ul>
+            <a class="tool-go" href="/splitshot" onclick="showSection('splitshot');return false;">see it →</a>
           </div>
         </article>
 
@@ -2073,6 +2080,73 @@ i &lt;3 to work with u</p>
   </footer>
 </div>
 
+<!-- ══════════════════ SPLITSHOT ══════════════════ -->
+<div class="section-page" id="page-splitshot">
+  <header class="section-header">
+    <a href="/" class="section-logo" onclick="showHome();return false;" aria-label="mxnchv">m <span class="lg" data-a="x" data-b="o">x</span> n c h <span class="lg" data-a="v" data-b="u">v</span></a>
+    <nav class="section-nav">
+      <a href="/branding" onclick="showSection('branding');return false;">Branding</a>
+      <a href="/videogames" onclick="showSection('videogames');return false;">Videogames</a>
+      <a href="/content" onclick="showSection('content');return false;">Content</a>
+      <a href="/collabs" onclick="showSection('collabs');return false;">Collabs</a>
+      <a href="/lab" onclick="showSection('lab');return false;">Lab</a>
+      <a class="parent" href="/tools" onclick="showSection('tools');return false;">Tools</a>
+    </nav>
+  </header>
+
+  <div class="section-body">
+    <div class="mr-body">
+      <div class="mr-eyebrow"><a href="/tools" onclick="showSection('tools');return false;">← tools</a> · ableton extension</div>
+      <h1 class="mr-title">splitshot</h1>
+      <p class="lab-intro">Slice long recordings into one-shots. Named, tagged and exported in a minute, right inside Ableton Live.</p>
+
+      <img class="mr-shot ss-hero" src="media/splitshot_many-slices.jpg" width="1600" height="829" alt="splitshot in Ableton Live: a long recording of metal hits, cut into 40 slices found automatically" decoding="async">
+
+      <div class="samples-list mr-buy">
+        <a class="sample-row main" href="https://mxnchv.gumroad.com/l/splitshot" target="_blank" rel="noopener">
+          <div>
+            <div class="sample-name">splitshot</div>
+            <div class="sample-by">ableton live 12 suite · pay what you want</div>
+          </div>
+          <div class="sample-dl">free · get it →</div>
+        </a>
+      </div>
+
+      <p class="mr-small ss-story">In Reaper, turning a long recording into one-shots takes a minute. In Ableton Live it used to take an hour. splitshot is the tool I was missing as a sound designer, built with Ableton's new Extensions SDK.</p>
+
+      <div class="mr-feat ss-feat">
+        <div><h3>Finds every sound</h3><p>Open it and the slices are already there: levels are worked out for each recording.</p></div>
+        <div><h3>Fix anything by hand</h3><p>Split, join or drag a slice edge. Every edit can be undone or removed on its own.</p></div>
+        <div><h3>Export, named your way</h3><p>Each sound becomes its own WAV with your naming pattern (UCS-ready) and metadata (iXML, BWF, RIFF INFO), plus an optional CSV report. Numbered by time, length or pitch.</p></div>
+        <div><h3>Or split in place</h3><p>Trimmed or consolidated clips, right on your timeline, in one undo step.</p></div>
+        <div><h3>Multi-mic takes</h3><p>Slice several tracks at once and they stay aligned.</p></div>
+        <div><h3>Clean results</h3><p>Zero-crossing snap, fades, high-pass, peak or LUFS normalise, sample rate and bit depth.</p></div>
+      </div>
+
+      <div class="ss-shots">
+        <img class="mr-shot" src="media/splitshot_editing.jpg" width="1600" height="829" alt="Editing a slice by hand: zoomed in on the waveform, double-click to remove a cut" loading="lazy" decoding="async">
+        <img class="mr-shot" src="media/splitshot_name.jpg" width="1600" height="829" alt="The Name &amp; metadata tab: a file name pattern, UCS category and iXML / BWF / RIFF metadata" loading="lazy" decoding="async">
+      </div>
+
+      <div class="mr-feat ss-more">
+        <div><h3>Install</h3><p>1. Download the .ablx file.<br>2. In Live: Settings → Extensions → drag it in. Restart Live if it doesn't show up.<br>3. Right-click an audio clip, a track or an Arrangement selection → Extensions → splitshot.</p></div>
+        <div><h3>Does it change my audio?</h3><p>No. Exports are new files, and split in place is one undo step.</p></div>
+        <div><h3>Ringing tails?</h3><p>Sounds whose tails overlap stay together in one slice; split them with a double-click. Automatic splitting of overlapping hits is planned.</p></div>
+      </div>
+
+      <p class="mr-small">Free: pay what you want if it saves you time. Needs Ableton Live 12 Suite, Live 12.4.5 beta or later (Extensions are Suite-only and still in beta). Tested on macOS. Questions or bugs: mxnchv@gmail.com.</p>
+    </div>
+  </div>
+
+  <footer class="section-footer">
+    <a href="mailto:mxnchv@gmail.com" class="contact-link" aria-label="email mxnchv@gmail.com"><span class="cl-mail">mxnchv@gmail.com</span><span class="cl-msg" aria-hidden="true">get in touch &amp; tell me about you :)</span></a>
+    <div class="social-links">
+      <a href="https://www.linkedin.com/in/ramon-sirvent-d/" target="_blank">LinkedIn</a>
+      <a href="https://www.instagram.com/mxnchv/" target="_blank">Instagram</a>
+    </div>
+  </footer>
+</div>
+
 
 <script>
   const home = document.getElementById('home');
@@ -2084,6 +2158,7 @@ i &lt;3 to work with u</p>
     lab:        document.getElementById('page-lab'),
     midirain:   document.getElementById('page-midirain'),
     duck:       document.getElementById('page-duck'),
+    splitshot:  document.getElementById('page-splitshot'),
     tools:      document.getElementById('page-tools'),
   };
 
@@ -3721,7 +3796,7 @@ i &lt;3 to work with u</p>
   // it's held, sustains a random chord played by Lab synth 03 (the sound of the entry screen).
   (() => {
     const el = document.getElementById('notfound');
-    const KNOWN = ['', 'branding', 'videogames', 'content', 'collabs', 'lab', 'midirain', 'duck', 'index'];
+    const KNOWN = ['', 'branding', 'videogames', 'content', 'collabs', 'lab', 'midirain', 'tools', 'duck', 'splitshot', 'index'];
     const here = location.pathname.replace(/^\/+|\/+$|\.html$/g, '');
     if (!document.documentElement.hasAttribute('data-notfound') || KNOWN.includes(here)) return;
     el.hidden = false;
