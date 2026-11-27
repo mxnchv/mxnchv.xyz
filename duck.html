@@ -658,8 +658,25 @@
     .mr-video { position: relative; width: 100%; max-width: 1280px; aspect-ratio: 16 / 9; background: #000; overflow: hidden; }
     .mr-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #000; }
     /* Duck: its own looping videos instead of a YouTube embed */
-    .mr-video video, .dk-loop video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: #000; }
-    .dk-loop { position: relative; width: 100%; max-width: 1280px; aspect-ratio: 16 / 9; border: 1px solid #161616; margin-top: 2.6rem; overflow: hidden; }
+    /* Duck: one column, the button before the demo, the demo framed as a picture */
+    .dk-col { max-width: calc(760px + 5rem); }
+    .dk-col .lab-intro { margin-bottom: 1.6rem; }
+    .dk-buy { margin-top: 0; max-width: none !important; width: 100%; }
+    .dk-demo { margin: 2.2rem 0 0; }
+    .dk-frame { position: relative; aspect-ratio: 16 / 9; border: 1px solid #1c1c1c; border-radius: 10px; overflow: hidden; background: #000; pointer-events: none; }
+    .dk-frame video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .dk-progress { position: absolute; left: 0; bottom: 0; height: 2px; width: 0; background: rgba(255,255,255,0.55); }
+    .dk-demo figcaption, .dk-label, .dk-details dt { font-family: var(--font-ui); font-size: 0.68rem; letter-spacing: 0.08em; color: rgba(255,255,255,0.45); }
+    .dk-demo figcaption { margin-top: 0.7rem; letter-spacing: 0.02em; }
+    .dk-label { margin-top: 2.6rem; letter-spacing: 0.14em; }
+    .dk-feat { margin-top: 1rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+    .dk-details { margin: 2.6rem 0 0; border-top: 1px solid #1c1c1c; }
+    .dk-details > div { display: grid; grid-template-columns: 9rem 1fr; gap: 1rem; padding: 0.85rem 0; border-bottom: 1px solid #1c1c1c; }
+    .dk-details dt { letter-spacing: 0.14em; padding-top: 0.1rem; }
+    .dk-details dd { margin: 0; font-family: var(--font-ui); font-size: 0.74rem; line-height: 1.8; color: rgba(255,255,255,0.7); }
+    .dk-details dd a { color: inherit; }
+    .dk-who { color: var(--white); }
+    @media (max-width: 640px) { .dk-details > div { grid-template-columns: 1fr; gap: 0.2rem; } }
     .mr-sound {
       position: absolute; right: 1rem; bottom: 1rem;
       font-family: var(--font-ui); font-size: 0.72rem; letter-spacing: 0.12em; color: #fff;
@@ -2027,42 +2044,45 @@ i &lt;3 to work with u</p>
   </header>
 
   <div class="section-body">
-    <div class="mr-body">
+    <div class="mr-body dk-col">
       <div class="mr-eyebrow">tools · app</div>
       <h1 class="mr-title">Duck</h1>
-      <p class="lab-intro">Turns your music down when another app starts making sound, and brings it back up when it stops. Spotify dips while DaVinci Resolve plays, by itself.</p>
+      <p class="lab-intro">Turns your music down when another app starts making sound, and brings it back up when it stops.</p>
 
-      <div class="mr-video">
-        <video poster="media/duck_menubar.jpg" autoplay muted loop playsinline preload="metadata" aria-label="Duck in the menu bar: DaVinci Resolve starts playing, Duck turns Spotify down, and brings it back when DaVinci stops">
-          <source src="media/duck_menubar.webm" type="video/webm">
-          <source src="media/duck_menubar.mp4" type="video/mp4">
-        </video>
-      </div>
-
-      <div class="samples-list mr-buy">
+      <div class="samples-list mr-buy dk-buy">
         <a class="sample-row main" href="https://mxnchv.gumroad.com/l/duck" target="_blank">
           <div>
-            <div class="sample-name">Duck</div>
-            <div class="sample-by">menu bar app · mac · windows · linux · english &amp; español</div>
+            <div class="sample-name">mac · windows · linux</div>
+            <div class="sample-by">free, or pay what you want · english &amp; español</div>
           </div>
-          <div class="sample-dl">pay what you want · get it →</div>
+          <div class="sample-dl">get duck →</div>
         </a>
       </div>
 
-      <div class="mr-feat">
-        <div><h3>Auto</h3><p>Nothing to set up. Whatever starts playing last is in charge, and everything else goes down. Switch back to a video that's still playing and it takes the lead again.</p></div>
-        <div><h3>Groups</h3><p>Your own rules, like a sidechain compressor: these apps go down while those play. Amount, attack, release, hold and sensitivity.</p></div>
-        <div><h3>Calls win</h3><p>A call always comes first. Pro audio and video apps (DaVinci Resolve, Logic Pro, Ableton Live…) are never turned down.</p></div>
+      <figure class="dk-demo">
+        <div class="dk-frame">
+          <video poster="media/duck_menubar.jpg" autoplay muted loop playsinline preload="metadata" aria-label="Duck in the menu bar: DaVinci Resolve starts playing, Duck turns Spotify down, and brings it back when DaVinci stops">
+            <source src="media/duck_menubar.webm" type="video/webm">
+            <source src="media/duck_menubar.mp4" type="video/mp4">
+          </video>
+          <span class="dk-progress" aria-hidden="true"></span>
+        </div>
+        <figcaption>↑ demo · davinci starts playing, duck turns spotify down, then brings it back.</figcaption>
+      </figure>
+
+      <div class="dk-label">how it works</div>
+      <div class="mr-feat dk-feat">
+        <div><h3>Auto</h3><p>Nothing to set up. Whatever starts playing last is in charge, and everything else goes down. Calls always come first.</p></div>
+        <div><h3>Groups</h3><p>Your own rules, like a sidechain compressor: these apps go down while those play.</p></div>
+        <div><h3>Out of the way</h3><p>It lives in your menu bar, or folded to a tiny bubble. Set it once and forget it.</p></div>
       </div>
 
-      <div class="dk-loop">
-        <video poster="media/duck_loop.jpg" autoplay muted loop playsinline preload="metadata" aria-label="Duck's panel: Spotify goes down to -24 dB while DaVinci Resolve plays">
-          <source src="media/duck_loop.webm" type="video/webm">
-          <source src="media/duck_loop.mp4" type="video/mp4">
-        </video>
-      </div>
-
-      <p class="mr-small">Duck only measures how loud each app is: nothing is recorded, saved or sent anywhere. On Mac it asks for the Audio Recording permission, because that's how macOS lets it hear each app's level. Mac: macOS 14.2 or later, Apple silicon and Intel. Windows 10 (version 2004) or later. Linux with PipeWire or PulseAudio. In English and Spanish. A beta: found a bug or have an idea? Use "Send feedback" in the app, or write to <a href="mailto:mxnchv@gmail.com">mxnchv@gmail.com</a>.</p>
+      <dl class="dk-details">
+        <div><dt>privacy</dt><dd>It only measures how loud each app is. Nothing is recorded, saved or sent.</dd></div>
+        <div><dt>requirements</dt><dd>Mac: macOS 14.2 or later · Windows 10 (2004) or later · Linux: PipeWire or PulseAudio</dd></div>
+        <div><dt>beta</dt><dd>Found a bug or have an idea? Use "Send feedback" in the app, or write to <a href="mailto:mxnchv@gmail.com">mxnchv@gmail.com</a>.</dd></div>
+        <div><dt>credits</dt><dd><span class="dk-who">mxnchv</span> · design and the mac app<br><span class="dk-who">Diego Jurado García</span> · windows and linux</dd></div>
+      </dl>
     </div>
   </div>
 
@@ -3716,6 +3736,21 @@ i &lt;3 to work with u</p>
       try { localStorage.setItem(KEY, 'closed'); } catch (_) {}
       hide();
     });
+  })();
+
+  // Duck: the thin line under the demo follows the video, so it reads as a playing demo
+  // and not as something to click. Runs only while the Duck page is on screen.
+  (() => {
+    const vid = document.querySelector('#page-duck .dk-frame video');
+    const bar = document.querySelector('#page-duck .dk-progress');
+    if (!vid || !bar) return;
+    let raf = 0;
+    const tick = () => {
+      if (vid.duration) bar.style.width = (100 * vid.currentTime / vid.duration) + '%';
+      raf = pages.duck.classList.contains('active') || document.documentElement.dataset.start === 'duck' ? requestAnimationFrame(tick) : 0;
+    };
+    addEventListener('page:shown', (e) => { if (e.detail === 'duck' && !raf) raf = requestAnimationFrame(tick); });
+    if (document.documentElement.dataset.start === 'duck') raf = requestAnimationFrame(tick);
   })();
 
   // 404: the about video (B&W negative, through the cards' video feedback) behind a 404 whose
