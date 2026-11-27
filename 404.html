@@ -432,6 +432,8 @@
     .section-nav a:hover { color: rgba(255,255,255,0.75); }
     /* the big section title already says where you are */
     .section-nav a.active { display: none; }
+    /* on a tool's own page (midirain, Duck) Tools stays in the menu, lit, as the way back */
+    .section-nav a.parent { color: rgba(255,255,255,0.9); }
 
     /* body — scroll container */
     .section-body {
@@ -648,6 +650,8 @@
       font-family: var(--font-ui); font-size: 0.68rem; letter-spacing: 0.14em;
       color: rgba(255,255,255,0.55); margin-top: 2.5rem;
     }
+    .mr-eyebrow a { color: var(--white); text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.4); padding-bottom: 1px; transition: border-color 0.2s; }
+    .mr-eyebrow a:hover { border-color: var(--white); }
     .mr-title {
       font-family: var(--font-eva); font-weight: 800;
       font-size: clamp(3.2rem, 9vw, 7rem); line-height: 0.9; letter-spacing: -0.01em;
@@ -1946,13 +1950,13 @@ i &lt;3 to work with u</p>
       <a href="/content" onclick="showSection('content');return false;">Content</a>
       <a href="/collabs" onclick="showSection('collabs');return false;">Collabs</a>
       <a href="/lab" onclick="showSection('lab');return false;">Lab</a>
-      <a class="active" href="/tools" onclick="showSection('tools');return false;">Tools</a>
+      <a class="parent" href="/tools" onclick="showSection('tools');return false;">Tools</a>
     </nav>
   </header>
 
   <div class="section-body">
     <div class="mr-body">
-      <div class="mr-eyebrow">tools · plugin</div>
+      <div class="mr-eyebrow"><a href="/tools" onclick="showSection('tools');return false;">← tools</a> · plugin</div>
       <h1 class="mr-title">midirain</h1>
       <p class="lab-intro">Rain falls on invisible columns. Each column is a note. Each drop that hits the ground plays it.</p>
 
@@ -2023,13 +2027,13 @@ i &lt;3 to work with u</p>
       <a href="/content" onclick="showSection('content');return false;">Content</a>
       <a href="/collabs" onclick="showSection('collabs');return false;">Collabs</a>
       <a href="/lab" onclick="showSection('lab');return false;">Lab</a>
-      <a class="active" href="/tools" onclick="showSection('tools');return false;">Tools</a>
+      <a class="parent" href="/tools" onclick="showSection('tools');return false;">Tools</a>
     </nav>
   </header>
 
   <div class="section-body">
     <div class="mr-body">
-      <div class="mr-eyebrow">tools · app</div>
+      <div class="mr-eyebrow"><a href="/tools" onclick="showSection('tools');return false;">← tools</a> · app</div>
       <h1 class="mr-title">Duck</h1>
       <p class="lab-intro">Turns your music down when another app starts making sound, and brings it back up when it stops.</p>
 
