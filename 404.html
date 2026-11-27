@@ -382,7 +382,8 @@
     html[data-start] #home { display: none; }
     html[data-start="branding"] #page-branding, html[data-start="videogames"] #page-videogames,
     html[data-start="content"] #page-content, html[data-start="collabs"] #page-collabs,
-    html[data-start="lab"] #page-lab, html[data-start="midirain"] #page-midirain { display: flex; }
+    html[data-start="lab"] #page-lab, html[data-start="midirain"] #page-midirain,
+    html[data-start="duck"] #page-duck { display: flex; }
 
     /* header */
     .section-header {
@@ -657,6 +658,9 @@
     /* the video plays by itself, muted (browsers only allow that); "sound on" unmutes it */
     .mr-video { position: relative; width: 100%; max-width: 1280px; aspect-ratio: 16 / 9; background: #000; overflow: hidden; }
     .mr-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #000; }
+    /* Duck: its own looping videos instead of a YouTube embed */
+    .mr-video video, .dk-loop video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: #000; }
+    .dk-loop { position: relative; width: 100%; max-width: 1280px; aspect-ratio: 16 / 9; border: 1px solid #161616; margin-top: 2.6rem; overflow: hidden; }
     .mr-sound {
       position: absolute; right: 1rem; bottom: 1rem;
       font-family: var(--font-ui); font-size: 0.72rem; letter-spacing: 0.12em; color: #fff;
@@ -1875,13 +1879,12 @@ i &lt;3 to work with u</p>
         </article>
 
         <article class="tool">
-          <div class="tool-viz tool-viz-ui"><video src="media/tool_duck.mp4" poster="media/tool_duck.jpg" autoplay muted loop playsinline preload="metadata" aria-label="duck turning spotify down while davinci resolve plays"></video></div>
+          <a class="tool-viz tool-viz-ui" href="/duck" onclick="showSection('duck');return false;" aria-label="Duck"><video src="media/tool_duck.mp4" poster="media/tool_duck.jpg" autoplay muted loop playsinline preload="metadata" aria-label="duck turning spotify down while davinci resolve plays"></video></a>
           <div class="tool-info">
             <h2 class="tool-name">Duck</h2>
-            <p class="tool-what">turns your music down when another app starts making sound, and back up when it stops. spotify dips while davinci plays, by itself.</p>
-            <ul class="tool-tags"><li>macOS</li><li>menu bar app</li><li class="soon">coming soon</li></ul>
-            <p class="tool-req">macOS 14.2 or later · apple silicon &amp; intel · needs audio recording permission (it only measures levels, nothing is recorded)</p>
-            <a class="tool-go" href="mailto:mxnchv@gmail.com?subject=duck%20waitlist">tell me when it's out →</a>
+            <p class="tool-what">Turns your music down when another app starts making sound, and back up when it stops. Spotify dips while DaVinci plays, by itself.</p>
+            <ul class="tool-tags"><li>mac · windows · linux</li><li>menu bar app</li><li>free / pay what you want</li></ul>
+            <a class="tool-go" href="/duck" onclick="showSection('duck');return false;">see it →</a>
           </div>
         </article>
       </div>
@@ -2010,6 +2013,70 @@ i &lt;3 to work with u</p>
 </div>
 
 
+<!-- ══════════════════ DUCK ══════════════════ -->
+<div class="section-page" id="page-duck">
+  <header class="section-header">
+    <a href="/" class="section-logo" onclick="showHome();return false;" aria-label="mxnchv">m <span class="lg" data-a="x" data-b="o">x</span> n c h <span class="lg" data-a="v" data-b="u">v</span></a>
+    <nav class="section-nav">
+      <a href="/branding" onclick="showSection('branding');return false;">Branding</a>
+      <a href="/videogames" onclick="showSection('videogames');return false;">Videogames</a>
+      <a href="/content" onclick="showSection('content');return false;">Content</a>
+      <a href="/collabs" onclick="showSection('collabs');return false;">Collabs</a>
+      <a href="/lab" onclick="showSection('lab');return false;">Lab</a>
+      <a class="active" href="/tools" onclick="showSection('tools');return false;">Tools</a>
+    </nav>
+  </header>
+
+  <div class="section-body">
+    <div class="mr-body">
+      <div class="mr-eyebrow">tools · app</div>
+      <h1 class="mr-title">Duck</h1>
+      <p class="lab-intro">Turns your music down when another app starts making sound, and brings it back up when it stops. Spotify dips while DaVinci Resolve plays, by itself.</p>
+
+      <div class="mr-video">
+        <video poster="media/duck_menubar.jpg" autoplay muted loop playsinline preload="metadata" aria-label="Duck in the menu bar: DaVinci Resolve starts playing, Duck turns Spotify down, and brings it back when DaVinci stops">
+          <source src="media/duck_menubar.webm" type="video/webm">
+          <source src="media/duck_menubar.mp4" type="video/mp4">
+        </video>
+      </div>
+
+      <div class="samples-list mr-buy">
+        <a class="sample-row main" href="https://mxnchv.gumroad.com/l/duck" target="_blank">
+          <div>
+            <div class="sample-name">Duck</div>
+            <div class="sample-by">menu bar app · mac · windows · linux · english &amp; español</div>
+          </div>
+          <div class="sample-dl">pay what you want · get it →</div>
+        </a>
+      </div>
+
+      <div class="mr-feat">
+        <div><h3>Auto</h3><p>Nothing to set up. Whatever starts playing last is in charge, and everything else goes down. Switch back to a video that's still playing and it takes the lead again.</p></div>
+        <div><h3>Groups</h3><p>Your own rules, like a sidechain compressor: these apps go down while those play. Amount, attack, release, hold and sensitivity.</p></div>
+        <div><h3>Calls win</h3><p>A call always comes first. Pro audio and video apps (DaVinci Resolve, Logic Pro, Ableton Live…) are never turned down.</p></div>
+      </div>
+
+      <div class="dk-loop">
+        <video poster="media/duck_loop.jpg" autoplay muted loop playsinline preload="metadata" aria-label="Duck's panel: Spotify goes down to -24 dB while DaVinci Resolve plays">
+          <source src="media/duck_loop.webm" type="video/webm">
+          <source src="media/duck_loop.mp4" type="video/mp4">
+        </video>
+      </div>
+
+      <p class="mr-small">Duck only measures how loud each app is: nothing is recorded, saved or sent anywhere. On Mac it asks for the Audio Recording permission, because that's how macOS lets it hear each app's level. Mac: macOS 14.2 or later, Apple silicon and Intel. Windows 10 (version 2004) or later. Linux with PipeWire or PulseAudio. In English and Spanish. A beta: found a bug or have an idea? Use "Send feedback" in the app, or write to <a href="mailto:mxnchv@gmail.com">mxnchv@gmail.com</a>.</p>
+    </div>
+  </div>
+
+  <footer class="section-footer">
+    <a href="mailto:mxnchv@gmail.com" class="contact-link" aria-label="email mxnchv@gmail.com"><span class="cl-mail">mxnchv@gmail.com</span><span class="cl-msg" aria-hidden="true">get in touch &amp; tell me about you :)</span></a>
+    <div class="social-links">
+      <a href="https://www.linkedin.com/in/ramon-sirvent-d/" target="_blank">LinkedIn</a>
+      <a href="https://www.instagram.com/mxnchv/" target="_blank">Instagram</a>
+    </div>
+  </footer>
+</div>
+
+
 <script>
   const home = document.getElementById('home');
   const pages = {
@@ -2019,6 +2086,7 @@ i &lt;3 to work with u</p>
     collabs:    document.getElementById('page-collabs'),
     lab:        document.getElementById('page-lab'),
     midirain:   document.getElementById('page-midirain'),
+    duck:       document.getElementById('page-duck'),
     tools:      document.getElementById('page-tools'),
   };
 
@@ -3656,7 +3724,7 @@ i &lt;3 to work with u</p>
   // it's held, sustains a random chord played by Lab synth 03 (the sound of the entry screen).
   (() => {
     const el = document.getElementById('notfound');
-    const KNOWN = ['', 'branding', 'videogames', 'content', 'collabs', 'lab', 'midirain', 'index'];
+    const KNOWN = ['', 'branding', 'videogames', 'content', 'collabs', 'lab', 'midirain', 'duck', 'index'];
     const here = location.pathname.replace(/^\/+|\/+$|\.html$/g, '');
     if (!document.documentElement.hasAttribute('data-notfound') || KNOWN.includes(here)) return;
     el.hidden = false;
