@@ -682,6 +682,11 @@
     }
     .mr-feat p { font-family: var(--font-ui); font-size: 0.74rem; line-height: 1.85; color: rgba(255,255,255,0.7); margin: 0; }
     .mr-shot { display: block; width: 100%; max-width: 1280px; height: auto; border: 1px solid #161616; margin-top: 2.6rem; }
+    /* digits: the grid that plays itself */
+    .dg-hero { max-width: 960px; margin-top: 0.5rem; }
+    .dg-hero .dg-grid { display: block; width: 100%; aspect-ratio: 154 / 94; background: #000; border: 1px solid #161616; }
+    .dg-cap { display: flex; justify-content: space-between; margin-top: 0.7rem; font-family: var(--font-ui); font-size: 0.68rem; letter-spacing: 0.06em; color: rgba(255,255,255,0.55); }
+    .dg-viz .dg-grid { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
     /* splitshot page */
     .ss-hero { margin-top: 0; }
     .ss-story { font-size: 0.8rem; color: rgba(255,255,255,0.75); max-width: 640px; }
@@ -1899,6 +1904,16 @@ i &lt;3 to work with u</p>
             <a class="tool-go" href="/duck" onclick="showSection('duck');return false;">see it →</a>
           </div>
         </article>
+
+        <article class="tool">
+          <a class="tool-viz dg-viz" href="/digits" onclick="showSection('digits');return false;" aria-label="digits"><canvas class="dg-grid" aria-label="the digits grid playing by itself"></canvas></a>
+          <div class="tool-info">
+            <h2 class="tool-name">digits</h2>
+            <p class="tool-what">Play your trackpad. Every finger is a note, and how hard you press shapes it.</p>
+            <ul class="tool-tags"><li>mac app</li><li>midi · mpe</li><li>pay what you want</li></ul>
+            <a class="tool-go" href="/digits" onclick="showSection('digits');return false;">see it →</a>
+          </div>
+        </article>
       </div>
 
       <h2 class="lab-heading">Sample packs</h2>
@@ -2082,6 +2097,63 @@ i &lt;3 to work with u</p>
   </footer>
 </div>
 
+<!-- ══════════════════ DIGITS ══════════════════ -->
+<div class="section-page" id="page-digits">
+  <header class="section-header">
+    <a href="/" class="section-logo" onclick="showHome();return false;" aria-label="mxnchv">m <span class="lg" data-a="x" data-b="o">x</span> n c h <span class="lg" data-a="v" data-b="u">v</span></a>
+    <nav class="section-nav">
+      <a href="/branding" onclick="showSection('branding');return false;">Branding</a>
+      <a href="/videogames" onclick="showSection('videogames');return false;">Videogames</a>
+      <a href="/content" onclick="showSection('content');return false;">Content</a>
+      <a href="/collabs" onclick="showSection('collabs');return false;">Collabs</a>
+      <a href="/lab" onclick="showSection('lab');return false;">Lab</a>
+      <a class="parent" href="/tools" onclick="showSection('tools');return false;">Tools</a>
+    </nav>
+  </header>
+
+  <div class="section-body">
+    <div class="mr-body">
+      <div class="mr-eyebrow"><a href="/tools" onclick="showSection('tools');return false;">← tools</a> · app</div>
+      <h1 class="mr-title">digits</h1>
+      <p class="lab-intro">Play your trackpad. Every finger is a note, and how hard you press shapes it.</p>
+
+      <div class="dg-hero">
+        <canvas class="dg-grid" aria-label="The digits grid playing by itself: fingers press notes, an arpeggio steps, a finger slides across a row."></canvas>
+        <div class="dg-cap"><span class="dg-what">chords</span><span>C major · 8 × 5</span></div>
+      </div>
+
+      <div class="samples-list mr-buy">
+        <a class="sample-row main" href="https://mxnchv.gumroad.com/l/digits" target="_blank" rel="noopener">
+          <div>
+            <div class="sample-name">digits</div>
+            <div class="sample-by">mac app · midi · mpe</div>
+          </div>
+          <div class="sample-dl">pay what you want · get it →</div>
+        </a>
+      </div>
+
+      <div class="mr-feat ss-feat">
+        <div><h3>Every finger, its own note</h3><p>Up to ten notes at once on a Push-style grid. Press harder to swell a note, slide to shape it. Out as MPE, or with poly or mono aftertouch.</p></div>
+        <div><h3>Always in key</h3><p>Pick a key and a scale and every cell fits. Or go chromatic, or play Chords: a whole chord under each finger, strummed if you like.</p></div>
+        <div><h3>An arpeggiator in your hand</h3><p>Caps Lock turns the notes you hold into an arpeggio. Thirteen patterns, its own tempo or in time with Ableton. Press harder to make it louder, or faster.</p></div>
+        <div><h3>Play it live</h3><p>Arrows change the octave, numbers the scale, ⇧ is a sustain pedal. Drag a finger across the grid like a hand along a piano. All from the keyboard, without stopping.</p></div>
+        <div><h3>To anything that speaks MIDI</h3><p>Ableton Live, Logic or any other app, or straight to a hardware synth.</p></div>
+        <div><h3>Made for your touch</h3><p>Calibrate it once and it learns how softly and how hard you play.</p></div>
+      </div>
+
+      <p class="mr-small">Needs a MacBook with a Force Touch trackpad (2015 or later) and macOS 14.2 or later, Apple silicon and Intel. While you play, digits keeps the cursor still and turns off three- and four-finger swipes; they come back when you stop. It only reads the trackpad and the keyboard while you play: nothing is recorded, saved or sent anywhere. It's version 0.9: found a bug or have an idea? Use "Send Feedback" in the app, or write to mxnchv@gmail.com.</p>
+    </div>
+  </div>
+
+  <footer class="section-footer">
+    <a href="mailto:mxnchv@gmail.com" class="contact-link" aria-label="email mxnchv@gmail.com"><span class="cl-mail">mxnchv@gmail.com</span><span class="cl-msg" aria-hidden="true">get in touch &amp; tell me about you :)</span></a>
+    <div class="social-links">
+      <a href="https://www.linkedin.com/in/ramon-sirvent-d/" target="_blank">LinkedIn</a>
+      <a href="https://www.instagram.com/mxnchv/" target="_blank">Instagram</a>
+    </div>
+  </footer>
+</div>
+
 <!-- ══════════════════ SPLITSHOT ══════════════════ -->
 <div class="section-page" id="page-splitshot">
   <header class="section-header">
@@ -2159,6 +2231,7 @@ i &lt;3 to work with u</p>
     lab:        document.getElementById('page-lab'),
     midirain:   document.getElementById('page-midirain'),
     duck:       document.getElementById('page-duck'),
+    digits:     document.getElementById('page-digits'),
     splitshot:  document.getElementById('page-splitshot'),
     tools:      document.getElementById('page-tools'),
   };
@@ -3797,7 +3870,7 @@ i &lt;3 to work with u</p>
   // it's held, sustains a random chord played by Lab synth 03 (the sound of the entry screen).
   (() => {
     const el = document.getElementById('notfound');
-    const KNOWN = ['', 'branding', 'videogames', 'content', 'collabs', 'lab', 'midirain', 'tools', 'duck', 'splitshot', 'index'];
+    const KNOWN = ['', 'branding', 'videogames', 'content', 'collabs', 'lab', 'midirain', 'tools', 'duck', 'splitshot', 'digits', 'index'];
     const here = location.pathname.replace(/^\/+|\/+$|\.html$/g, '');
     if (!document.documentElement.hasAttribute('data-notfound') || KNOWN.includes(here)) return;
     el.hidden = false;
@@ -3972,6 +4045,107 @@ i &lt;3 to work with u</p>
       if (!page || !page.classList.contains('active')) return;
       if (split && split.width > 2) drawSplit(t);
       if (duck && duck.width > 2) drawDuck(t);
+    })(performance.now());
+  })();
+  // digits: the grid plays itself — chords pressed and released, an arpeggio stepping through
+  // held notes, a finger dragged along a row, then pressure. Same score on every .dg-grid
+  // (the page's hero and the Tools row); each only draws while its page is showing.
+  (() => {
+    const grids = [...document.querySelectorAll('.dg-grid')];
+    if (!grids.length) return;
+    const COLS = 8, ROWS = 5, NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+    const MAJOR = [0, 2, 4, 5, 7, 9, 11];
+    const degree = (c, r) => c + 3 * r;                       // in key, rows a fourth apart
+    const note = (c, r) => { const d = degree(c, r); return 48 + MAJOR[d % 7] + 12 * Math.floor(d / 7); };
+    const label = n => NAMES[n % 12] + (Math.floor(n / 12) - 2);
+    const isRoot = (c, r) => degree(c, r) % 7 === 0;
+    const font = getComputedStyle(document.documentElement).getPropertyValue('--font-ui') || 'monospace';
+    const whatEls = [...document.querySelectorAll('.dg-what')];
+    const say = w => whatEls.forEach(e => { e.textContent = w; });
+    let fingers = [], t = 0, last = performance.now(), sceneEnd = 0, scene = 0;
+    const press = (c, r, peak, hold, dx = 0) => fingers.push({ c, r, p: 0, peak, born: t, hold, dx });
+    const scenes = [
+      () => { say('chords');
+              [[0,0],[2,1],[1,2]].forEach(([c,r],i) => setTimeout(() => press(c, r, .6 + .15*i, 1.6), i * 90));
+              setTimeout(() => [[3,0],[5,1],[4,2]].forEach(([c,r],i) => setTimeout(() => press(c, r, .8 - .1*i, 1.5), i * 70)), 1900);
+              return 4; },
+      () => { say('arpeggio');
+              const held = [[1,1],[3,1],[5,1],[2,2]];
+              held.forEach(([c,r]) => press(c, r, .25, 3.6));
+              let i = 0;
+              const step = setInterval(() => {
+                const [c, r] = held[[0,1,2,3,2,1][i % 6]];
+                fingers.filter(f => f.arp).forEach(f => { f.hold = 0; });
+                fingers.push({ c, r, p: .9, peak: .9, born: t, hold: .12, arp: true });
+                if (++i >= 18) clearInterval(step);
+              }, 190);
+              return 4.2; },
+      () => { say('slide: notes');
+              const f = { c: 0, r: 3, p: 0, peak: .75, born: t, hold: 2.3 };
+              fingers.push(f);
+              let c = 0;
+              const move = setInterval(() => { if (++c < COLS) f.c = c; else clearInterval(move); }, 230);
+              return 3; },
+      () => { say('pressure');
+              press(2, 1, 1, 2.6); setTimeout(() => press(6, 3, .45, 2.0), 500); setTimeout(() => press(4, 0, .7, 1.6), 1000);
+              return 3.2; },
+    ];
+    function fit(cv) {
+      const w = cv.clientWidth, h = cv.clientHeight, k = Math.min(2, devicePixelRatio || 1);
+      if (cv.width !== Math.round(w * k) || cv.height !== Math.round(h * k)) { cv.width = Math.round(w * k); cv.height = Math.round(h * k); }
+      cv.getContext('2d').setTransform(k, 0, 0, k, 0, 0);
+    }
+    function draw(cv) {
+      fit(cv);
+      const g = cv.getContext('2d'), w = cv.clientWidth, h = cv.clientHeight, cw = w / COLS, rh = h / ROWS;
+      const cell = (c, r) => [c * cw, h - (r + 1) * rh];
+      g.clearRect(0, 0, w, h);
+      g.fillStyle = 'rgba(255,255,255,.18)';
+      for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) if (isRoot(c, r)) { const [x, y] = cell(c, r); g.fillRect(x, y, cw, rh); }
+      const sounding = new Map();                             // copies of a sounding note light softly
+      fingers.forEach(f => { const n = note(f.c, f.r); sounding.set(n, Math.max(sounding.get(n) || 0, f.p)); });
+      for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+        const p = sounding.get(note(c, r));
+        if (p !== undefined && !fingers.some(f => f.c === c && f.r === r)) { const [x, y] = cell(c, r); g.fillStyle = `rgba(255,255,255,${.06 + .14 * p})`; g.fillRect(x, y, cw, rh); }
+      }
+      fingers.forEach(f => { const [x, y] = cell(f.c, f.r); g.fillStyle = `rgba(255,255,255,${.18 + .82 * f.p})`; g.fillRect(x, y, cw, rh); });
+      g.strokeStyle = 'rgba(255,255,255,.12)'; g.lineWidth = 1; g.beginPath();
+      for (let c = 0; c <= COLS; c++) { const x = Math.round(c * cw) + .5; g.moveTo(x, 0); g.lineTo(x, h); }
+      for (let r = 0; r <= ROWS; r++) { const y = Math.round(r * rh) + .5; g.moveTo(0, y); g.lineTo(w, y); }
+      g.stroke();
+      g.font = `400 ${Math.max(9, Math.round(cw / 11))}px ${font}`;
+      for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+        const [x, y] = cell(c, r), lit = fingers.find(f => f.c === c && f.r === r);
+        g.fillStyle = lit && lit.p > .55 ? 'rgba(0,0,0,.55)' : 'rgba(255,255,255,.28)';
+        g.fillText(label(note(c, r)), x + 8, y + rh - 8);
+      }
+      fingers.forEach(f => {
+        const [x, y] = cell(f.c, f.r);
+        g.fillStyle = f.p > .6 ? '#000' : '#fff';
+        g.beginPath(); g.arc(x + cw / 2 + f.dx, y + rh / 2, 2.5, 0, 2 * Math.PI); g.fill();
+      });
+    }
+    const visible = cv => cv.closest('.section-page')?.classList.contains('active');
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      press(0,0,.8,1e9); press(2,1,.6,1e9); press(1,2,.7,1e9); fingers.forEach(f => { f.p = f.peak; });
+      const still = () => grids.forEach(cv => visible(cv) && draw(cv));
+      addEventListener('page:shown', still); addEventListener('resize', still); still();
+      return;
+    }
+    (function tick(now) {
+      requestAnimationFrame(tick);
+      const dt = Math.min(.05, Math.max(0, (now - last) / 1000)); last = now;
+      const on = grids.filter(visible);
+      if (!on.length) return;                                 // nothing on screen: the score waits
+      t += dt;
+      if (t >= sceneEnd) { sceneEnd = t + scenes[scene % scenes.length]() + .6; scene++; }
+      fingers.forEach(f => {
+        const age = t - f.born, target = age < f.hold ? f.peak * (f.arp ? 1 : Math.min(1, .6 + .4 * Math.sin(Math.min(age * 2.2, Math.PI / 2)))) : 0;
+        f.p += (target - f.p) * Math.min(1, dt * (target > f.p ? 14 : 9));
+        if (age > f.hold && f.p < .02) f.dead = true;
+      });
+      fingers = fingers.filter(f => !f.dead);
+      on.forEach(draw);
     })(performance.now());
   })();
 </script>
