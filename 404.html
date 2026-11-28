@@ -189,13 +189,14 @@
     /* ── RIGHT: CARDS ── */
     .cards-panel {
       display: grid;
-      grid-template-rows: repeat(5, 1fr);
+      grid-auto-rows: 1fr;            /* every card gets the same height, however many there are */
       height: 100vh;
       container-type: inline-size;   /* card titles scale with this column, not the window */
     }
 
     .card {
       position: relative;
+      container-type: size;           /* the title scales with the card's width and height */
       overflow: hidden;
       cursor: pointer;
       border-bottom: 1px solid #181818;
@@ -305,7 +306,7 @@
 
     .card-title {
       font-family: var(--font-eva);
-      font-size: clamp(2.4rem, 11.2cqi, 5.6rem);
+      font-size: clamp(2.4rem, min(11.2cqi, 46cqh), 5.6rem);
       font-weight: 800;
       line-height: 1;
       letter-spacing: -0.01em;
