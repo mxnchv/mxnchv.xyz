@@ -13,7 +13,7 @@ import re
 
 ROOT = Path(__file__).resolve().parent.parent
 SITE = 'https://mxnchv.xyz'
-SECTIONS = ['branding', 'videogames', 'content', 'collabs', 'lab', 'midirain', 'tools', 'duck', 'splitshot', 'digits']
+SECTIONS = ['branding', 'videogames', 'content', 'collabs', 'lab', 'midirain', 'tools', 'duck', 'splitshot', 'digits', 'digits-guide']
 # addresses that open a section on one of its parts (see SPOTS in index.html)
 SPOTS = []
 # what a shared link to each section says (and its preview image: media/og_<name>.jpg)
@@ -27,6 +27,7 @@ DESC = {
     'midirain': 'midirain: rain that plays your notes. A plugin for any DAW (VST3, AU, CLAP, app) and a Max for Live device, by mxnchv.',
     'splitshot': 'splitshot slices long recordings into one-shots, named, tagged and exported in a minute, inside Ableton Live. Free, by mxnchv.',
     'digits': 'digits turns your MacBook trackpad into an expressive MIDI controller: every finger is a note, and how hard you press shapes it. By mxnchv.',
+    'digits-guide': 'How to connect digits to Ableton Live, other apps and hardware synths: MPE, Poly or Mono, sync and what to check when nothing sounds. By mxnchv.',
     'duck': 'Duck turns your music down when another app starts making sound, and back up when it stops. For Mac, Windows and Linux, by mxnchv.',
 }
 NOTE = '<!-- generated from index.html by tools/build_pages.py — do not edit by hand -->\n'

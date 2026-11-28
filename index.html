@@ -2128,6 +2128,7 @@ i &lt;3 to work with u</p>
           <div class="sample-dl">pay what you want · get it →</div>
         </a>
       </div>
+      <p class="mr-small dg-guide-link"><a href="/digits-guide" onclick="showSection('digits-guide');return false;">Setup guide: Ableton Live and hardware synths →</a></p>
 
       <div class="mr-feat ss-feat">
         <div><h3>Every finger, its own note</h3><p>Up to ten notes at once on a Push-style grid. Press harder to swell a note, slide to shape it. Out as MPE, or with poly or mono aftertouch.</p></div>
@@ -2151,6 +2152,52 @@ i &lt;3 to work with u</p>
   </footer>
 </div>
 
+<div class="section-page" id="page-digits-guide">
+  <header class="section-header">
+    <a href="/" class="section-logo" onclick="showHome();return false;" aria-label="mxnchv">m <span class="lg" data-a="x" data-b="o">x</span> n c h <span class="lg" data-a="v" data-b="u">v</span></a>
+    <nav class="section-nav">
+      <a href="/branding" onclick="showSection('branding');return false;">Branding</a>
+      <a href="/videogames" onclick="showSection('videogames');return false;">Videogames</a>
+      <a href="/content" onclick="showSection('content');return false;">Content</a>
+      <a href="/collabs" onclick="showSection('collabs');return false;">Collabs</a>
+      <a href="/lab" onclick="showSection('lab');return false;">Lab</a>
+      <a class="parent" href="/tools" onclick="showSection('tools');return false;">Tools</a>
+    </nav>
+  </header>
+
+  <div class="section-body">
+    <div class="mr-body">
+      <div class="mr-eyebrow"><a href="/digits" onclick="showSection('digits');return false;">← digits</a> · guide</div>
+      <h1 class="mr-title">setup</h1>
+      <p class="lab-intro">How to make digits sound: a synth inside Ableton Live, a hardware synth on its own, or a hardware synth through Live.</p>
+
+      <div class="mr-feat ss-feat">
+        <div><h3>A synth in Ableton Live</h3><p>1. In Live: Settings → Link, Tempo &amp; MIDI. On the <b>digits</b> input, turn on Track (and MPE, see below).<br>2. Make a MIDI track with your synth. Set MIDI From to digits, and Monitor to In (or arm the track).<br>3. In digits, press ⌃⌥Space and play. Esc stops.</p></div>
+        <div><h3>MPE synths</h3><p>With MPE, every finger bends and swells its own note. Drift, Wavetable and Sampler do MPE; for a plugin, right-click its title bar → Enable MPE Mode. Turn on MPE on the digits input in Live, choose MPE in digits → Settings, and set Bend to your synth's pitch bend range (±48 for most MPE synths).</p></div>
+        <div><h3>A hardware synth, no computer DAW</h3><p>1. Connect the synth by USB or through a MIDI interface.<br>2. digits → Settings → Out → your synth.<br>3. Pick MPE if the synth does MPE; otherwise Poly (poly aftertouch) or Mono (channel aftertouch), on the channel the synth listens to.</p></div>
+        <div><h3>A hardware synth through Live</h3><p>To record or process its sound: keep Out on digits, make a MIDI track as above and put Live's External Instrument on it. MIDI To: your synth's port and channel. Audio From: the input where the synth comes back. For an MPE synth, turn on MPE for that output port in Live's MIDI settings too.</p></div>
+        <div><h3>MPE, Poly or Mono?</h3><p>MPE: each finger its own pressure, slide and bend. Poly: pressure per note, one shared slide. Mono: one pressure for everything, for synths that only know channel aftertouch. If unsure, MPE for modern synths, Mono for older ones.</p></div>
+        <div><h3>The arpeggio in time with Live</h3><p>In Live's MIDI settings, turn on Sync on the digits <i>output</i>. In digits → Settings, turn on Sync. While Live plays, the arpeggio follows its tempo; when it stops, digits keeps its own.</p></div>
+        <div><h3>Pressure as a controller</h3><p>digits → Settings → Pressure CC sends the strongest finger's pressure as a CC. In Live, turn on Remote on the digits input, press ⌘M, click any parameter (an Auto Pan rate, a filter) and press the trackpad.</p></div>
+        <div><h3>No sound?</h3><p>· Are you playing? ⌃⌥Space, and the grid lights up under your fingers.<br>· Out says digits (not a hardware synth) when playing into Live.<br>· The track's MIDI From is digits and Monitor is In, or the track is armed.<br>· MPE is on in Live and digits is in Poly or Mono on channel 1: Live ignores channel 1 then. Pick channel 2 or more in digits → Settings.<br>· The cursor moves or clicks: allow digits in System Settings → Privacy &amp; Security → Accessibility.</p></div>
+        <div><h3>Other apps</h3><p>Logic, Bitwig, Reaper and any app that takes MIDI see digits as an input called digits. For MPE, turn on the instrument's MPE mode in that app, and match the bend range.</p></div>
+      </div>
+
+      <p class="mr-small">Something else? Use "Send Feedback" in the app (digits → Send Feedback), or write to mxnchv@gmail.com. digits → Show Log shows what the app did, which helps.</p>
+    </div>
+  </div>
+
+  <footer class="section-footer">
+    <a href="mailto:mxnchv@gmail.com" class="contact-link" aria-label="email mxnchv@gmail.com"><span class="cl-mail">mxnchv@gmail.com</span><span class="cl-msg" aria-hidden="true">get in touch &amp; tell me about you :)</span></a>
+    <div class="social-links">
+      <a href="https://www.linkedin.com/in/ramon-sirvent-d/" target="_blank">LinkedIn</a>
+      <a href="https://www.instagram.com/mxnchv/" target="_blank">Instagram</a>
+    </div>
+  </footer>
+</div>
+
+
+<!-- ══════════════════ DIGITS GUIDE (above) ══════════════════ -->
 <!-- ══════════════════ SPLITSHOT ══════════════════ -->
 <div class="section-page" id="page-splitshot">
   <header class="section-header">
@@ -2226,6 +2273,7 @@ i &lt;3 to work with u</p>
     content:    document.getElementById('page-content'),
     collabs:    document.getElementById('page-collabs'),
     lab:        document.getElementById('page-lab'),
+    'digits-guide': document.getElementById('page-digits-guide'),
     midirain:   document.getElementById('page-midirain'),
     duck:       document.getElementById('page-duck'),
     digits:     document.getElementById('page-digits'),
@@ -3867,7 +3915,7 @@ i &lt;3 to work with u</p>
   // it's held, sustains a random chord played by Lab synth 03 (the sound of the entry screen).
   (() => {
     const el = document.getElementById('notfound');
-    const KNOWN = ['', 'branding', 'videogames', 'content', 'collabs', 'lab', 'midirain', 'tools', 'duck', 'splitshot', 'digits', 'index'];
+    const KNOWN = ['', 'branding', 'videogames', 'content', 'collabs', 'lab', 'midirain', 'tools', 'duck', 'splitshot', 'digits', 'digits-guide', 'index'];
     const here = location.pathname.replace(/^\/+|\/+$|\.html$/g, '');
     if (!document.documentElement.hasAttribute('data-notfound') || KNOWN.includes(here)) return;
     el.hidden = false;
